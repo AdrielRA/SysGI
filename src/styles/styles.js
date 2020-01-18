@@ -12,12 +12,13 @@ const Styles = StyleSheet.create({
     fontFamily:"CenturyGothic",
     backgroundColor:"transparent",
     color:Colors.Primary.White,
-    width:300,
+    alignSelf:"stretch",
     paddingHorizontal:15,
     borderRadius:25,
     borderWidth:1,
     borderColor:Colors.Secondary.White,
     marginVertical:7.5,
+    marginHorizontal:30,
     paddingVertical:5,
   },
   picker:{
@@ -31,13 +32,16 @@ const Styles = StyleSheet.create({
     borderWidth:1,
     borderColor:Colors.Secondary.White,
     marginVertical:7.5,
+    marginHorizontal:30,
   },
   btnPrimary:{
     backgroundColor:Colors.Secondary.Normal,
     borderRadius:25,
     paddingVertical:10,
     marginVertical:7.5,
-    alignItems:"center"
+    marginHorizontal:30,
+    alignItems:"center",
+    alignSelf:"stretch",
   },
   btnTextPrimary:{
     fontFamily:"CenturyGothicBold",
@@ -51,9 +55,10 @@ const Styles = StyleSheet.create({
     borderRadius:25,
     paddingVertical:10,
     marginVertical:7.5,
+    marginHorizontal:30,
     paddingHorizontal:35,
-    marginHorizontal:7.5,
-    alignItems:"center"
+    alignSelf:"stretch",
+
   },
   btnTextSecundary:{
     fontFamily:"CenturyGothicBold",
@@ -67,13 +72,13 @@ const Styles = StyleSheet.create({
     marginVertical:7.5,
     paddingHorizontal:35,
     marginHorizontal:7.5,
-    alignItems:"center"
+    alignItems:"stretch",
   },
   btnTextTransparent:{
     fontFamily:"CenturyGothicBold",
     color:Colors.Primary.White,
     fontSize:15,
-    textAlign:"center",        
+    textAlign:"center",   
   },
   checkbox:{
     backgroundColor:"transparent",
@@ -96,6 +101,23 @@ const Styles = StyleSheet.create({
     textAlign:"center",
     textAlignVertical:"center"
   },
+  lblMENU:{
+    fontFamily:"CenturyGothicBold",
+    flex:1,
+    paddingTop:60,
+    fontSize:40,
+    color:Colors.Primary.White,
+    textAlign:"center",
+    textAlignVertical:"center"
+  },
+  lblMsg:{
+    fontFamily:"CenturyGothic",
+    flex:0.5,
+    fontSize:20,
+    color:Colors.Primary.White,
+    textAlign:"center",
+    textAlignVertical:"center"
+  },
   lblRodape:{
     fontFamily:"CenturyGothic",
     flex:0.5,
@@ -111,6 +133,89 @@ const Styles = StyleSheet.create({
     textAlign:"right",
     color:Colors.Primary.White,
     textAlignVertical:"center"
+  },
+  popup:{
+    backgroundColor:Colors.Terciary.White,
+    flex:3,
+    borderRadius:15,
+    alignSelf:"stretch",
+    marginHorizontal:30,
+    alignItems:"center",
+    paddingVertical:20,
+    paddingHorizontal:20,
+  },
+  popTitle:{
+    color:Colors.Secondary.Normal,
+    fontFamily:"CenturyGothicBold",
+    textAlign:"center",
+    fontSize:28,
+  },
+  popText:{
+    flex:1,
+    color:Colors.Primary.Normal,
+    fontFamily:"CenturyGothic",
+    textAlign:"center",
+    textAlignVertical:"center",
+    fontSize:20,
+  },
+  popSoluction:{
+    flex:1,
+    color:Colors.Primary.Normal,
+    fontFamily:"CenturyGothic",
+    textAlign:"center",
+    textAlignVertical:"center",
+    fontSize:15,
+  },
+  searchContent:{
+    position:"absolute",
+    top:108,
+    left:55,
+    right:0,
+    alignSelf:"stretch",
+    marginHorizontal:15,
+    backgroundColor:Colors.Secondary.White,
+    borderRadius:30,
+    borderTopLeftRadius:0,
+    borderBottomLeftRadius:0,
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent',
+    padding:0,
+    paddingBottom:1,
+  },
+  searchInput:{
+    color:Colors.Primary.Normal,
+    backgroundColor:Colors.Secondary.White
+  },
+  searchRG:{
+    position:"absolute",
+    backgroundColor:Colors.Secondary.Normal,
+    color:Colors.Primary.White,
+    fontFamily:"CenturyGothicBold",
+    textAlign:"center",
+    fontSize:28,
+    top:109,
+    left:0,
+    paddingHorizontal:10,
+    borderTopLeftRadius:30,
+    borderBottomLeftRadius:30,
+    marginLeft:15,
+
+  },
+  txtBold:{
+    color:Colors.Secondary.Black,
+    fontFamily:"CenturyGothicBold",
+  },
+  txtRegular:{
+    color:Colors.Secondary.Black,
+    fontFamily:"CenturyGothic",
+  },
+  txtBoldWhite:{
+    color:Colors.Primary.White,
+    fontFamily:"CenturyGothicBold",
+  },
+  txtRegularWhite:{
+    color:Colors.Primary.White,
+    fontFamily:"CenturyGothic",
   },
 });
 

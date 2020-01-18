@@ -15,7 +15,7 @@ function Signup({navigation}) {
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
         style={Styles.page}>
       <Text style={Styles.lblSubtitle}>CADASTRO</Text>
-      <KeyboardAvoidingView style={{flex:5, width:300}} behavior="padding" enabled   keyboardVerticalOffset={200}>
+      <KeyboardAvoidingView style={{flex:5, alignSelf:"stretch"}} behavior="padding" enabled   keyboardVerticalOffset={200}>
         <View style={Styles.pickerDiv}>
           <Picker
             style={Styles.picker}
