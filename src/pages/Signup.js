@@ -82,5 +82,4 @@ function Signup({navigation}) {
     </LinearGradient>
   );
 }
-
 export default Signup;

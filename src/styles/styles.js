@@ -20,6 +20,20 @@ const Styles = StyleSheet.create({
     marginVertical:7.5,
     paddingVertical:5,
   },
+ 
+  campoCadastro:{
+    fontFamily:"CenturyGothic",
+    backgroundColor:"transparent",
+    color:Colors.Secondary.Normal,
+    width:300,
+    paddingHorizontal:15,
+    borderRadius:25,
+    borderWidth:1,
+    borderColor:Colors.Secondary.Normal,
+    marginVertical:5,
+    paddingVertical:5,
+  },
+  
   picker:{
     fontFamily:"CenturyGothic",
     color:Colors.Primary.White,

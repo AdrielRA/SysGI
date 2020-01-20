@@ -5,7 +5,8 @@ const Colors = {
   },
   Secondary:{
     Normal:"#800000",
-    White:"#fafafa"
+    White:"#fafafa",
+    Black:"#000"
   },
   Terciary:{
     Normal:"#2A0000",
