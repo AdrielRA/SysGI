@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import { View } from 'react-native';
 import { Stitch, AnonymousCredential } from 'mongodb-stitch-react-native-sdk';
 
@@ -13,10 +13,14 @@ export default class Mongo extends React.Component{
     this._onPressLogin = this._onPressLogin.bind(this);
     this._onPressLogout = this._onPressLogout.bind(this);
   }
+
+  componentDidMount() {
+    this._loadClient();
+    this._onPressLogin();
+  }
   
   render(){
-    this.LoginClient();
-    return(<View></View>);
+    return ( <View style={{flex:0}}></View> );
   }
 
   _loadClient() {
@@ -48,4 +52,4 @@ export default class Mongo extends React.Component{
         this.setState({ currentUserId: undefined })
     });
   }
-}
+}*/

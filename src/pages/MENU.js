@@ -1,10 +1,16 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import { View, Text, TouchableHighlight, Image, Switch } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function MENU({navigation}) {
+  const userLogged = navigation.getParam("userLogged");
+
+  useEffect(() => {
+    console.log(userLogged);
+  }, []);
+
   const [allowNotify, setAllowNotify] = useState(false);
   const NotifyChanged = () => { setAllowNotify(!allowNotify) }
   return (
@@ -13,8 +19,9 @@ function MENU({navigation}) {
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
         style={Styles.page}>
-      <Text style={Styles.lblSubtitle}>MENU</Text>
-      <View style={{flex:6, width:300, alignItems:"center"}}>
+      <Text style={Styles.lblMENU}>MENU</Text>
+      <Text style={Styles.lblMsg}>Bem-vindo, {userLogged.NomeUsuario}</Text>
+      <View style={{flex:6, width:300, alignItems:"center", justifyContent:"center"}}>
         <Image style={{width: 200, height: 200}}
           source={require('../assets/images/balança.png')}></Image>
         <TouchableHighlight style={Styles.btnSecundary}

@@ -1,7 +1,8 @@
 const Colors = {
   Primary:{
     Normal:"#DC143C",
-    White:"#fff"
+    White:"#fff",
+    Black:"#000"
   },
   Secondary:{
     Normal:"#800000",
@@ -10,7 +11,9 @@ const Colors = {
   },
   Terciary:{
     Normal:"#2A0000",
-    White:"#eaeaea"
+    White:"#eaeaea",
+    Black:"#000"
+    
   }
 }
 
