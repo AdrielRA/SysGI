@@ -34,6 +34,11 @@ function MENU({navigation}) {
           onPress={() =>  navigation.navigate('Consulta')}>
           <Text style={Styles.btnTextSecundary}>CONSULTAR</Text>
         </TouchableHighlight>
+        <TouchableHighlight style={Styles.btnSecundary}
+          underlayColor={Colors.Primary.White}
+          onPress={() =>  navigation.navigate('Anexo')}>
+          <Text style={Styles.btnTextSecundary}>Anexo</Text>
+        </TouchableHighlight>
       </View>
       <View style={{flex:1, flexDirection:"row", justifyContent:"center", alignItems:"center", width:210}}>
         <Text style={Styles.lblSmallR}>Notificações:</Text>

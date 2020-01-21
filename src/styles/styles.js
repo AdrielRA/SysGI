@@ -4,9 +4,9 @@ import Colors from './colors';
 
 const Styles = StyleSheet.create({
   page:{
+    justifyContent:"center",
+    alignItems:"center",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   campo:{
     fontFamily:"CenturyGothic",
@@ -229,6 +229,7 @@ const Styles = StyleSheet.create({
     color:Colors.Primary.White,
     fontFamily:"CenturyGothic",
   },
+ 
 });
 
 export default Styles;

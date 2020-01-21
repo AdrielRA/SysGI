@@ -137,14 +137,14 @@ export default class App extends React.Component
                 </View>
 
                 <View style={{flexDirection:'row',justifyContent:"center"}}>
-                  <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:Colors.Secondary.Normal,width:145,marginStart:0}]}
+                  <TouchableHighlight style={[Styles.btnPrimary,{width:150,marginHorizontal:0,marginEnd:5}]}
                     underlayColor={Colors.Primary.White}
                     onPress={() => {
                       navigation.navigate('')
                     }}>
                     <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
                   </TouchableHighlight>
-                  <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:Colors.Secondary.Normal,width:145,marginStart:0}]}
+                  <TouchableHighlight style={[Styles.btnPrimary,{width:150,marginHorizontal:0}]}
                     underlayColor={Colors.Primary.White}
                     onPress={() => {
                       navigation.navigate('')
@@ -157,10 +157,10 @@ export default class App extends React.Component
                     textAlignVertical='top'
                 />
             </View>
-            <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800"}]}
+            <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
                     underlayColor={Colors.Primary.White}
                     onPress={() => {
-                      navigation.navigate('')
+                      navigation.navigate("Usuario Salvo")
                     }}>
               <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
             </TouchableHighlight>
