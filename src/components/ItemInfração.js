@@ -1,9 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Image, Text } from 'react-native';
+import moment from 'moment';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function ItemInfração({infração}){
+  
   return(
     <View style={{flexDirection:"row", alignSelf:"stretch", borderBottomWidth:2, borderBottomColor: Colors.Secondary.White, padding:5, paddingHorizontal:10}}>
       <View style={{flex:1, alignItems:"center"}}>
@@ -13,7 +15,7 @@ function ItemInfração({infração}){
         </View>
         <View style={{alignSelf:"stretch", flexDirection:"row"}}>
           <Text style={Styles.txtBold}>Data: </Text>
-          <Text style={Styles.txtRegular}>{infração.Data_ocorrência}</Text>
+          <Text style={Styles.txtRegular}>{moment(new Date(infração.Data_ocorrência)).format('DD/MM/YYYY')}</Text>
         </View>
       </View>
       <Image style={{width:40, height:40, borderRadius:5}} source={require('../assets/images/icon-mais.png')}></Image>

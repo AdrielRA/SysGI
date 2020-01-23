@@ -9,9 +9,21 @@ export default class App extends React.Component
 {
   constructor(props){
     super(props);
-    this.state={date:''};
-    this.state={date1:''};
+    this.state={
+      date:'',
+      date1:'',
+      Infrator:this.props.navigation.getParam("Infrator")
+    };
   }
+  
+componentDidMount(){
+  const _show = () => {
+    
+    console.log(this.state.Infrator.Nome);
+  }
+  _show();
+}
+
   selectDate = (date)=>{
     this.setState({date: date});
   }
@@ -19,6 +31,15 @@ export default class App extends React.Component
     this.setState({date1: date});
   }
   render(){
+    if(this.state.Infrator === undefined){
+      this.state.Infrator = {
+        Nome:"", Cpf:"", Rg:"", Mãe:"", Logradouro:"",
+        Num_residência:"", Bairro:"", Cidade:"",
+        Uf:"", Sexo:undefined, Data_nascimento:undefined,
+        Data_registro:undefined, Infrações:[]
+      }
+    }
+
     return (
        <SafeAreaView style={[Styles.page,{backgroundColor:'#dcdcdc'}]}>
         <ScrollView style={{alignSelf:"stretch"}}>
@@ -37,15 +58,18 @@ export default class App extends React.Component
               <TextInput placeholder="Nome"
                   placeholderTextColor={Colors.Secondary.Normal}
                   style={[Styles.campoCadastro] }
+                  value={this.state.Infrator.Nome}
               />
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="RG"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
+                    value={this.state.Infrator.Rg}
                 />
                 <TextInput placeholder="CPF"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1}] }
+                    value={this.state.Infrator.Cpf}
                 />
               </View>
               <View style={{width:300,flexDirection:'row',marginTop:2}}>
@@ -72,36 +96,43 @@ export default class App extends React.Component
                   <TextInput placeholder="Sexo"
                       placeholderTextColor={Colors.Secondary.Normal}
                       style={[Styles.campoCadastro,{flex:0.5,marginTop:0,marginStart:5}] }
+                      value={this.state.Infrator.Sexo}
                   />
                 </View>
     
                 <TextInput placeholder="Nome da Mãe"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{marginTop:0}]}
+                    value={this.state.Infrator.Mãe}
                 />
     
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="Logradouro"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
+                    value={this.state.Infrator.Logradouro}
                 />
                 <TextInput placeholder="Bairro"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1}] }
+                    value={this.state.Infrator.Bairro}
                 />
               </View>
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="Cidade"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
+                    value={this.state.Infrator.Cidade}
                 />
                 <TextInput placeholder="UF"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5,marginEnd:5}] }
+                    value={this.state.Infrator.Uf}
                 />
                 <TextInput placeholder="N°"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5}] }
+                    value={this.state.Infrator.Num_residência}
                 />
               </View>
             </View>
