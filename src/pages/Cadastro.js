@@ -1,26 +1,61 @@
-import React,{useState} from 'react';
-import { View,Text, Button,SafeAreaView,TextInput,TouchableHighlight,ScrollView} from 'react-native';
+import React,{useState,useEffect} from 'react';
+import { View,Text,SafeAreaView,TextInput,TouchableHighlight,FlatList,ScrollView} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import DatePicker from 'react-native-datepicker'
-
-export default class App extends React.Component 
+import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
+import moment from 'moment'
+import styled from 'styled-components/native'
+import {SwipeListView} from 'react-native-swipe-list-view'
+import ListaItem from '../components/ListaItem'
+import ListaItemSwipe from '../components/ListaItemSwipe'
+function Cadastro({navigation})
 {
-  constructor(props){
-    super(props);
-    this.state={date:''};
-    this.state={date1:''};
+  const mongoClient = Stitch.defaultAppClient;
+  const[dateNasc,setDateNas]=useState(new Date());
+  const[dateInfra,setDateInfra]=useState(moment(new Date()).format("DD/MM/YYYY"));
+  const[nome,setNome] = useState('');
+  const[rg,setRg] = useState('');
+  const[cpf,setCpf] = useState('');
+  const[sexo,setSexo] = useState('');
+  const[nomeMãe,setNomeMae] = useState('');
+  const[logradouro,setLogradouro] = useState('');
+  const[bairro,setBairro] = useState('');
+  const[cidade,setCidade] = useState('');
+  const[uf,setUf] = useState('');
+  const[numero,setNumero] = useState('');
+  const[descricao,setDescricao] = useState('');
+  const[infracoes,setInfracoes] = useState([]);
+ 
+  const saveInfrator = (infrator)=>{
+    console.log(dateNasc);
+    if(!mongoClient.auth.isLoggedIn){
+      mongoClient.auth.loginWithCredential(new AnonymousCredential())
+      .then(infrator_ => {
+        console.log(`Successfully logged in as user ${infrator_.id}`);
+        this.setState({ currentUserId: user_.id });
+      })
+      .catch(err => {
+        console.log(`Failed to log in anonymously: ${err}`);
+        this.setState({ currentUserId: undefined });
+      });
+    }
+
+    if(mongoClient.auth.isLoggedIn){
+      mongoClient.callFunction("add_infrator", [infrator]).then(salvar =>{
+        console.log(`Resultado: ${salvar.msg}`);
+        if(salvar.res){ navigation.goBack(); }
+      });
+    }
   }
-  selectDate = (date)=>{
-    this.setState({date: date});
+  const deleteItem = (index) =>{
+      let items = [...infracoes];
+      items = items.filter((it,i)=>i != index);
+      setInfracoes(items);
   }
-  selectDate1 = (date)=>{
-    this.setState({date1: date});
-  }
-  render(){
-    return (
-       <SafeAreaView style={[Styles.page,{backgroundColor:'#dcdcdc'}]}>
+  return (
+     <SafeAreaView style={[Styles.page,{backgroundColor:'#dcdcdc'}]}>
         <ScrollView style={{alignSelf:"stretch"}}>
         <LinearGradient
             start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
@@ -29,7 +64,7 @@ export default class App extends React.Component
             style={{ flex:1,alignSelf:'stretch',paddingTop:30}}>
           <Text style={[Styles.lblSubtitle,{fontSize:25}]}>CADASTRO DE INFRATOR</Text>
         </LinearGradient>
-       
+      
           <View style={{flex:1,alignSelf:'stretch',margin:15}}>
             <View style={{backgroundColor:'#fff',flex:3,marginVertical:8,borderRadius:10,paddingHorizontal:10,paddingTop:5}}>
               
@@ -37,22 +72,29 @@ export default class App extends React.Component
               <TextInput placeholder="Nome"
                   placeholderTextColor={Colors.Secondary.Normal}
                   style={[Styles.campoCadastro] }
+                  onChangeText={(nome_) => setNome(nome_)}
               />
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="RG"
                     placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
+                    style={[Styles.campoCadastro,{flex:1,marginEnd:5}]}
+                    keyboardType='number-pad'
+                    onChangeText={(rg_) => setRg(rg_)}
                 />
                 <TextInput placeholder="CPF"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1}] }
+                    keyboardType='number-pad'
+                    onChangeText={(cpf_) => setCpf(cpf_)}
                 />
               </View>
               <View style={{width:300,flexDirection:'row',marginTop:2}}>
-                <DatePicker format="DD/MM/YYYY"
+                <DatePicker
+                    format='DD/MM/YYYY'
                     style={{flex:1}}
-                    date={this.state.date}
-                    onDateChange={this.selectDate}
+                    date={new Date(dateNasc)}
+                    onDateChange={(dateNasc_) => setDateNas(dateNasc_)}
+                    mode='datetime'
                     customStyles={{
                       dateIcon:{
                         width:0,
@@ -72,47 +114,55 @@ export default class App extends React.Component
                   <TextInput placeholder="Sexo"
                       placeholderTextColor={Colors.Secondary.Normal}
                       style={[Styles.campoCadastro,{flex:0.5,marginTop:0,marginStart:5}] }
+                      onChangeText={(sexo_) => setSexo(sexo_)}
                   />
                 </View>
     
                 <TextInput placeholder="Nome da Mãe"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{marginTop:0}]}
+                    onChangeText={(nomeMãe_) => setNomeMae(nomeMãe_)}
                 />
     
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="Logradouro"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
+                    onChangeText={(logradouro_) => setLogradouro(logradouro_)}
                 />
                 <TextInput placeholder="Bairro"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1}] }
+                    onChangeText={(bairro_) => setBairro(bairro_)}
                 />
               </View>
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="Cidade"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
+                    onChangeText={(cidade_) => setCidade(cidade_)}
                 />
                 <TextInput placeholder="UF"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5,marginEnd:5}] }
+                    onChangeText={(uf_) => setUf(uf_)}
                 />
                 <TextInput placeholder="N°"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5}] }
+                    keyboardType='number-pad'
+                    onChangeText={(numero_)=>{setNumero(numero_)}}
                 />
               </View>
             </View>
             
-            <View style={{backgroundColor:'#fff',flex:2,borderRadius:10,padding:10}}>
-             <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações da infração</Text>
+            <View style={{backgroundColor:'#fff',flex:1,borderRadius:10,padding:10}}>
+            <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações da infração</Text>
               <View style={{flexDirection:'row',marginTop:5}}>
                 <DatePicker format="DD/MM/YYYY"
                     style={{width:150}}
-                    date={this.state.date1}
-                    onDateChange={this.selectDate1}
+                    date={dateInfra}
+                    onDateChange={(dateInfra_) => setDateInfra(dateInfra_)}
                     customStyles={{
                       dateIcon:{
                         width:0,
@@ -128,47 +178,50 @@ export default class App extends React.Component
                     }
                   }
                 />
-                <TextInput placeholder="Descrição"
+                <TextInput 
+                    placeholder="Descrição"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{height:80,width:150,borderRadius:25,paddingTop:10,marginTop:0,marginStart:5}] }
                     multiline={true}
                     textAlignVertical='top'
+                    onChangeText={(descricao_) => setDescricao(descricao_)}
                 />
                 </View>
 
                 <View style={{flexDirection:'row',justifyContent:"center"}}>
-                  <TouchableHighlight style={[Styles.btnPrimary,{width:150,marginHorizontal:0,marginEnd:5}]}
+                  <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
                     underlayColor={Colors.Primary.White}
                     onPress={() => {
-                      navigation.navigate('')
+                      var inf = dateInfra + " - " + descricao
+                      setInfracoes([...infracoes,inf]);
                     }}>
                     <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
                   </TouchableHighlight>
-                  <TouchableHighlight style={[Styles.btnPrimary,{width:150,marginHorizontal:0}]}
-                    underlayColor={Colors.Primary.White}
-                    onPress={() => {
-                      navigation.navigate('')
-                    }}>
-                    <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>REMOVER</Text>
-                  </TouchableHighlight>
+                  
                 </View>
-                <TextInput style={[Styles.campoCadastro,{height:80,width:300,borderRadius:25,paddingTop:10}] }
-                    multiline={true}
-                    textAlignVertical='top'
-                />
+                
+                <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:Colors.Secondary.Normal,height:80,padding:10}}>
+                  <SwipeListView
+                    data={infracoes}
+                    renderItem={({item})=><ListaItem data={item} />}
+                    renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index)}}/>}
+                    leftOpenValue={30}
+                    disableLeftSwipe={true}
+                  />
+                </View>
             </View>
             <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
                     underlayColor={Colors.Primary.White}
-                    onPress={() => {
-                      navigation.navigate("Usuario Salvo")
-                    }}>
+                    onPress={() => saveInfrator({Nome:nome, Cpf:cpf, Rg:rg, Mãe:nomeMãe, Logradouro:logradouro,
+                      Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc                               
+                    })}>
               <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
             </TouchableHighlight>
             
           </View>
         </ScrollView>
-       
-       </SafeAreaView>      
-    );
-  }
+     
+     </SafeAreaView>      
+  );
 }
+export default Cadastro

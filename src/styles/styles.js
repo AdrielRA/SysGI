@@ -55,6 +55,15 @@ const Styles = StyleSheet.create({
     alignItems:"center",
     alignSelf:"stretch",
   },
+  BtnAnexo:{
+      backgroundColor:Colors.Secondary.Normal,
+      borderRadius:25,
+      flex:1,
+      marginHorizontal:2.5,
+      height:50,
+      justifyContent:"center",
+
+  },
   btnTextPrimary:{
     fontFamily:"CenturyGothicBold",
     color:Colors.Secondary.White,
@@ -104,6 +113,23 @@ const Styles = StyleSheet.create({
     color:Colors.Primary.White,
     textAlign:"center",
     textAlignVertical:"center"
+  },
+  DateComponent:{
+    marginHorizontal:2.5,
+    marginTop:10,
+    flex:1,
+  },
+  DescAnexo:{
+    borderColor:Colors.Secondary.Normal,
+    borderWidth:2,
+    borderRadius:25,
+    marginHorizontal:5,
+    marginVertical:10,
+    paddingVertical:10,
+    paddingStart:15,
+    flex:1,
+    height:180,
+    backgroundColor:'#FFF'
   },
   lblSubtitle:{
     fontFamily:"CenturyGothicBold",
