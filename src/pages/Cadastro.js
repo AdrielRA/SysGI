@@ -33,7 +33,7 @@ function Cadastro({navigation})
   let myObjectId = new BSON.ObjectId();
    
   const Infracao = {
-    "Id": myObjectId,
+    "_id":myObjectId,
     "Descrição":descricao,
     "Data ocorrência": dateInfra,
     "Data registro": moment(new Date()).format("DD/MM/YYYY"),
@@ -66,172 +66,173 @@ function Cadastro({navigation})
       setInfracoes(items);
   }
   return (
-     <SafeAreaView style={[Styles.page,{backgroundColor:'#dcdcdc'}]}>
+     <SafeAreaView style={Styles.page}>
         <ScrollView style={{alignSelf:"stretch"}}>
-        <LinearGradient
-            start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
-            locations={[0, 1]}
-            colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
-            style={{ flex:1,alignSelf:'stretch',paddingTop:30}}>
-          <Text style={[Styles.lblSubtitle,{fontSize:25}]}>CADASTRO DE INFRATOR</Text>
-        </LinearGradient>
-      
-          <View style={{flex:1,alignSelf:'stretch',margin:15}}>
-            <View style={{backgroundColor:'#fff',flex:3,marginVertical:8,borderRadius:10,paddingHorizontal:10,paddingTop:5}}>
-              
-              <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações pessoais</Text>
-              <TextInput placeholder="Nome"
-                  placeholderTextColor={Colors.Secondary.Normal}
-                  style={[Styles.campoCadastro] }
-                  onChangeText={(nome_) => setNome(nome_)}
-              />
-              <View style={{width:300,height:53,flexDirection:'row'}}>
-                <TextInput placeholder="RG"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:1,marginEnd:5}]}
-                    keyboardType='number-pad'
-                    onChangeText={(rg_) => setRg(rg_)}
-                />
-                <TextInput placeholder="CPF"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:1}] }
-                    keyboardType='number-pad'
-                    onChangeText={(cpf_) => setCpf(cpf_)}
-                />
-              </View>
-              <View style={{width:300,flexDirection:'row',marginTop:2}}>
-                <DatePicker
-                    format='DD/MM/YYYY'
-                    style={{flex:1}}
-                    date={dateNasc}
-                    onDateChange={(dateNasc_) => setDateNas(dateNasc_)}
-                    customStyles={{
-                      dateIcon:{
-                        width:0,
-                        height:0,
-                      },
-                      dateInput: {
-                        borderWidth:0,
-                        
-                      },
-                      dateTouchBody: { borderRadius:25,
-                        borderColor:Colors.Secondary.Normal,
-                        borderWidth:1,
-                      }
-                    }
-                  }
-                  />
-                  <TextInput placeholder="Sexo"
-                      placeholderTextColor={Colors.Secondary.Normal}
-                      style={[Styles.campoCadastro,{flex:0.5,marginTop:0,marginStart:5}] }
-                      onChangeText={(sexo_) => setSexo(sexo_)}
-                  />
-                </View>
-    
-                <TextInput placeholder="Nome da Mãe"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{marginTop:0}]}
-                    onChangeText={(nomeMãe_) => setNomeMae(nomeMãe_)}
-                />
-    
-              <View style={{width:300,height:53,flexDirection:'row'}}>
-                <TextInput placeholder="Logradouro"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
-                    onChangeText={(logradouro_) => setLogradouro(logradouro_)}
-                />
-                <TextInput placeholder="Bairro"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:1}] }
-                    onChangeText={(bairro_) => setBairro(bairro_)}
-                />
-              </View>
-              <View style={{width:300,height:53,flexDirection:'row'}}>
-                <TextInput placeholder="Cidade"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
-                    onChangeText={(cidade_) => setCidade(cidade_)}
-                />
-                <TextInput placeholder="UF"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:0.5,marginEnd:5}] }
-                    onChangeText={(uf_) => setUf(uf_)}
-                />
-                <TextInput placeholder="N°"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{flex:0.5}] }
-                    keyboardType='number-pad'
-                    onChangeText={(numero_)=>{setNumero(numero_)}}
-                />
-              </View>
-            </View>
-            
-            <View style={{backgroundColor:'#fff',flex:1,borderRadius:10,padding:10}}>
-            <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações da infração</Text>
-              <View style={{flexDirection:'row',marginTop:5}}>
-                <DatePicker format="DD/MM/YYYY"
-                    style={{width:150}}
-                    date={dateInfra}
-                    onDateChange={(dateInfra_) => setDateInfra(dateInfra_)}
-                    customStyles={{
-                      dateIcon:{
-                        width:0,
-                        height:0,
-                      },
-                      dateInput: {
-                        borderWidth:0,
-                      },
-                      dateTouchBody: { borderRadius:25,
-                        borderColor:Colors.Secondary.Normal,
-                        borderWidth:1,
-                      }
-                    }
-                  }
-                />
-                <TextInput 
-                    placeholder="Descrição"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    style={[Styles.campoCadastro,{height:80,width:150,borderRadius:25,paddingTop:10,marginTop:0,marginStart:5}] }
-                    multiline={true}
-                    textAlignVertical='top'
-                    onChangeText={(descricao_) => setDescricao(descricao_)}
-                />
-                </View>
-
-                <View style={{flexDirection:'row',justifyContent:"center"}}>
-                  <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
-                    underlayColor={Colors.Primary.White}
-                    onPress={() => {
-                      var inf = dateInfra + " - " + descricao
-                      setInfracoes([...infracoes,inf]);
-                      setInfracoesBD([...infracoesBD,Infracao]);
-                    }}>
-                    <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
-                  </TouchableHighlight>
-                  
-                </View>
+          <LinearGradient
+                start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
+                locations={[0, 1]}
+                colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
+                style={{ flex:1,alignSelf:'stretch',padding:30}}>
+              <Text style={[Styles.lblSubtitle,{fontSize:25}]}>CADASTRO DE INFRATOR</Text>
+              <View style={{backgroundColor:'#fff',flex:3,marginVertical:8,borderRadius:10,paddingHorizontal:10,paddingTop:5}}>
                 
-                <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:Colors.Secondary.Normal,height:80,padding:10}}>
-                  <SwipeListView
-                    data={infracoes}
-                    renderItem={({item})=><ListaItem data={item} />}
-                    renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index)}}/>}
-                    leftOpenValue={30}
-                    disableLeftSwipe={true}
+                <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações pessoais</Text>
+                <View>
+                  <TextInput placeholder="Nome"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={Styles.campoCadastro}
+                      onChangeText={(nome_) => setNome(nome_)}
                   />
                 </View>
-            </View>
-            <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
-                    underlayColor={Colors.Primary.White}
-                    onPress={() => saveInfrator({Nome:nome, Cpf:cpf, Rg:rg, Mãe:nomeMãe, Logradouro:logradouro,
-                      Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc,Data_registro:moment(new Date()).format("DD/MM/YYYY"),Infrações:infracoesBD                            
-                    })}>
-              <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
-            </TouchableHighlight>
-            
-          </View>
+               
+                <View style={{flexDirection:'row'}}>
+                  <TextInput placeholder="RG"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{marginEnd:3}]}
+                      keyboardType='number-pad'
+                      onChangeText={(rg_) => setRg(rg_)}
+                  />
+                  <TextInput placeholder="CPF"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={Styles.campoCadastro}
+                      keyboardType='number-pad'
+                      onChangeText={(cpf_) => setCpf(cpf_)}
+                  />
+                </View>
+                <View style={{flexDirection:'row'}}>
+                  <DatePicker
+                      style={{flex:3.5,marginEnd:3,marginTop:5}}
+                      format='DD/MM/YYYY'
+                      date={dateNasc}
+                      onDateChange={(dateNasc_) => setDateNas(dateNasc_)}
+                      customStyles={{
+                        dateIcon:{
+                          width:0,
+                          height:0,
+                        },
+                        dateInput: {
+                          borderWidth:0,
+                         },
+                        dateTouchBody: { borderRadius:25,
+                          borderColor:Colors.Secondary.Normal,
+                          borderWidth:1,
+                        }
+                      }
+                    }
+                    />
+                    <TextInput placeholder="Sexo"
+                        placeholderTextColor={Colors.Secondary.Normal}
+                        style={[Styles.campoCadastro,{flex:1.5}]}
+                        onChangeText={(sexo_) => setSexo(sexo_)}
+                    />
+                </View>
+                <View>
+                  <TextInput placeholder="Nome da Mãe"
+                        placeholderTextColor={Colors.Secondary.Normal}
+                        style={Styles.campoCadastro}
+                        onChangeText={(nomeMãe_) => setNomeMae(nomeMãe_)}
+                    />
+                </View>
+                  
+      
+                <View style={{flexDirection:'row'}}>
+                  <TextInput placeholder="Logradouro"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{flex:1,marginEnd:3}] }
+                      onChangeText={(logradouro_) => setLogradouro(logradouro_)}
+                  />
+                  <TextInput placeholder="Bairro"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{flex:1}] }
+                      onChangeText={(bairro_) => setBairro(bairro_)}
+                  />
+                </View>
+                <View style={{flexDirection:'row'}}>
+                  <TextInput placeholder="Cidade"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{flex:1,marginEnd:3}] }
+                      onChangeText={(cidade_) => setCidade(cidade_)}
+                  />
+                  <TextInput placeholder="UF"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{flex:0.5,marginEnd:3}] }
+                      onChangeText={(uf_) => setUf(uf_)}
+                  />
+                  <TextInput placeholder="N°"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{flex:0.5}] }
+                      keyboardType='number-pad'
+                      onChangeText={(numero_)=>{setNumero(numero_)}}
+                  />
+                </View>
+              </View>
+              
+              <View style={{backgroundColor:'#fff',flex:1,borderRadius:10,padding:10}}>
+              <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações da infração</Text>
+                <View style={{flexDirection:'row',marginTop:5}}>
+                  <TextInput 
+                      placeholder="Descrição"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      style={[Styles.campoCadastro,{height:80,width:150,borderRadius:25,paddingTop:10,marginTop:0,marginStart:5}] }
+                      multiline={true}
+                      textAlignVertical='top'
+                      onChangeText={(descricao_) => setDescricao(descricao_)}
+                  />
+                  </View>
+  
+                  <View style={{flexDirection:'row',justifyContent:"center"}}>
+                  <DatePicker format="DD/MM/YYYY"
+                      style={{flex:1,marginEnd:3,marginTop:7}}
+                      date={dateInfra}
+                      onDateChange={(dateInfra_) => setDateInfra(dateInfra_)}
+                      customStyles={{
+                        dateIcon:{
+                          width:0,
+                          height:0,
+                        },
+                        dateInput: {
+                          borderWidth:0,
+                        },
+                        dateTouchBody: { borderRadius:25,
+                          borderColor:Colors.Secondary.Normal,
+                          borderWidth:1,
+                          height:39
+                        }
+                      }
+                    }
+                  />
+                    <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
+                      underlayColor={Colors.Primary.White}
+                      onPress={() => {
+                        var inf = dateInfra + " - " + descricao
+                        setInfracoes([...infracoes,inf]);
+                        setInfracoesBD([...infracoesBD,Infracao]);
+                      }}>
+                      <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
+                    </TouchableHighlight>
+                    
+                  </View>
+                  
+                  <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:Colors.Secondary.Normal,height:80,padding:10}}>
+                    <SwipeListView
+                      data={infracoes}
+                      renderItem={({item})=><ListaItem data={item} />}
+                      renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index)}}/>}
+                      leftOpenValue={30}
+                      disableLeftSwipe={true}
+                    />
+                  </View>
+              </View>
+              <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
+                      underlayColor={Colors.Primary.White}
+                      onPress={() => saveInfrator({Nome:nome, Cpf:cpf, Rg:rg, Mãe:nomeMãe, Logradouro:logradouro,
+                        Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc,Data_registro:moment(new Date()).format("DD/MM/YYYY"),Infrações:infracoesBD                            
+                      })}>
+                <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
+              </TouchableHighlight>
+
+          </LinearGradient>
         </ScrollView>
-     
      </SafeAreaView>      
   );
 }

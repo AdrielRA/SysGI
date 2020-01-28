@@ -29,9 +29,10 @@ const Styles = StyleSheet.create({
     paddingHorizontal:15,
     borderRadius:25,
     borderWidth:1,
-    borderColor:Colors.Secondary.Normal,
-    marginVertical:7.5,
-    paddingVertical:5,
+    borderColor:'#DCDCDC',
+    marginVertical:5,
+    height:40,
+    flex:1,
   },
   picker:{
     fontFamily:"CenturyGothic",
