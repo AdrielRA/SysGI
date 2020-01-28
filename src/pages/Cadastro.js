@@ -10,9 +10,10 @@ import styled from 'styled-components/native'
 import {SwipeListView} from 'react-native-swipe-list-view'
 import ListaItem from '../components/ListaItem'
 import ListaItemSwipe from '../components/ListaItemSwipe'
+import { BSON } from 'mongodb-stitch-react-native-sdk';
+
 function Cadastro({navigation})
 {
-<<<<<<< HEAD
   const mongoClient = Stitch.defaultAppClient;
   const[dateNasc,setDateNas]=useState(new Date());
   const[dateInfra,setDateInfra]=useState(moment(new Date()).format("DD/MM/YYYY"));
@@ -28,11 +29,19 @@ function Cadastro({navigation})
   const[numero,setNumero] = useState('');
   const[descricao,setDescricao] = useState('');
   const[infracoes,setInfracoes] = useState([]);
- 
+  const[infracoesBD,setInfracoesBD] = useState([]);
+  let myObjectId = new BSON.ObjectId();
+   
+  const Infracao = {
+    "Id": myObjectId,
+    "Descrição":descricao,
+    "Data ocorrência": dateInfra,
+    "Data registro": moment(new Date()).format("DD/MM/YYYY"),
+  }
+
   const saveInfrator = (infrator)=>{
-    console.log(dateNasc);
-    if(!mongoClient.auth.isLoggedIn){
-      mongoClient.auth.loginWithCredential(new AnonymousCredential())
+       if(!mongoClient.auth.isLoggedIn){
+       mongoClient.auth.loginWithCredential(new AnonymousCredential())
       .then(infrator_ => {
         console.log(`Successfully logged in as user ${infrator_.id}`);
         this.setState({ currentUserId: user_.id });
@@ -44,55 +53,20 @@ function Cadastro({navigation})
     }
 
     if(mongoClient.auth.isLoggedIn){
-      mongoClient.callFunction("add_infrator", [infrator]).then(salvar =>{
+      mongoClient.callFunction("add_infrator", [infrator,infracoesBD]).then(salvar =>{
         console.log(`Resultado: ${salvar.msg}`);
         if(salvar.res){ navigation.goBack(); }
       });
     }
-=======
-  constructor(props){
-    super(props);
-    this.state={
-      date:'',
-      date1:'',
-      Infrator:this.props.navigation.getParam("Infrator")
-    };
   }
   
-componentDidMount(){
-  const _show = () => {
-    
-    console.log(this.state.Infrator.Nome);
-  }
-  _show();
-}
-
-  selectDate = (date)=>{
-    this.setState({date: date});
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
-  }
   const deleteItem = (index) =>{
       let items = [...infracoes];
-      items = items.filter((it,i)=>i != index);
+      items = items.filter((it,i)=> i != index);
       setInfracoes(items);
   }
-<<<<<<< HEAD
   return (
      <SafeAreaView style={[Styles.page,{backgroundColor:'#dcdcdc'}]}>
-=======
-  render(){
-    if(this.state.Infrator === undefined){
-      this.state.Infrator = {
-        Nome:"", Cpf:"", Rg:"", Mãe:"", Logradouro:"",
-        Num_residência:"", Bairro:"", Cidade:"",
-        Uf:"", Sexo:undefined, Data_nascimento:undefined,
-        Data_registro:undefined, Infrações:[]
-      }
-    }
-
-    return (
-       <SafeAreaView style={[Styles.page,{backgroundColor:'#dcdcdc'}]}>
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
         <ScrollView style={{alignSelf:"stretch"}}>
         <LinearGradient
             start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
@@ -109,42 +83,28 @@ componentDidMount(){
               <TextInput placeholder="Nome"
                   placeholderTextColor={Colors.Secondary.Normal}
                   style={[Styles.campoCadastro] }
-<<<<<<< HEAD
                   onChangeText={(nome_) => setNome(nome_)}
-=======
-                  value={this.state.Infrator.Nome}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
               />
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="RG"
                     placeholderTextColor={Colors.Secondary.Normal}
-<<<<<<< HEAD
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}]}
                     keyboardType='number-pad'
                     onChangeText={(rg_) => setRg(rg_)}
-=======
-                    style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
-                    value={this.state.Infrator.Rg}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
                 <TextInput placeholder="CPF"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1}] }
-<<<<<<< HEAD
                     keyboardType='number-pad'
                     onChangeText={(cpf_) => setCpf(cpf_)}
-=======
-                    value={this.state.Infrator.Cpf}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
               </View>
               <View style={{width:300,flexDirection:'row',marginTop:2}}>
                 <DatePicker
                     format='DD/MM/YYYY'
                     style={{flex:1}}
-                    date={new Date(dateNasc)}
+                    date={dateNasc}
                     onDateChange={(dateNasc_) => setDateNas(dateNasc_)}
-                    mode='datetime'
                     customStyles={{
                       dateIcon:{
                         width:0,
@@ -164,72 +124,44 @@ componentDidMount(){
                   <TextInput placeholder="Sexo"
                       placeholderTextColor={Colors.Secondary.Normal}
                       style={[Styles.campoCadastro,{flex:0.5,marginTop:0,marginStart:5}] }
-<<<<<<< HEAD
                       onChangeText={(sexo_) => setSexo(sexo_)}
-=======
-                      value={this.state.Infrator.Sexo}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                   />
                 </View>
     
                 <TextInput placeholder="Nome da Mãe"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{marginTop:0}]}
-<<<<<<< HEAD
                     onChangeText={(nomeMãe_) => setNomeMae(nomeMãe_)}
-=======
-                    value={this.state.Infrator.Mãe}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
     
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="Logradouro"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
-<<<<<<< HEAD
                     onChangeText={(logradouro_) => setLogradouro(logradouro_)}
-=======
-                    value={this.state.Infrator.Logradouro}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
                 <TextInput placeholder="Bairro"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1}] }
-<<<<<<< HEAD
                     onChangeText={(bairro_) => setBairro(bairro_)}
-=======
-                    value={this.state.Infrator.Bairro}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
               </View>
               <View style={{width:300,height:53,flexDirection:'row'}}>
                 <TextInput placeholder="Cidade"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:1,marginEnd:5}] }
-<<<<<<< HEAD
                     onChangeText={(cidade_) => setCidade(cidade_)}
-=======
-                    value={this.state.Infrator.Cidade}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
                 <TextInput placeholder="UF"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5,marginEnd:5}] }
-<<<<<<< HEAD
                     onChangeText={(uf_) => setUf(uf_)}
-=======
-                    value={this.state.Infrator.Uf}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
                 <TextInput placeholder="N°"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5}] }
-<<<<<<< HEAD
                     keyboardType='number-pad'
                     onChangeText={(numero_)=>{setNumero(numero_)}}
-=======
-                    value={this.state.Infrator.Num_residência}
->>>>>>> 10ccf74ab5ef4ad8cd492ca33b3cca8fc6b39a75
                 />
               </View>
             </View>
@@ -272,6 +204,7 @@ componentDidMount(){
                     onPress={() => {
                       var inf = dateInfra + " - " + descricao
                       setInfracoes([...infracoes,inf]);
+                      setInfracoesBD([...infracoesBD,Infracao]);
                     }}>
                     <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
                   </TouchableHighlight>
@@ -291,7 +224,7 @@ componentDidMount(){
             <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
                     underlayColor={Colors.Primary.White}
                     onPress={() => saveInfrator({Nome:nome, Cpf:cpf, Rg:rg, Mãe:nomeMãe, Logradouro:logradouro,
-                      Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc                               
+                      Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc,Data_registro:moment(new Date()).format("DD/MM/YYYY"),Infrações:infracoesBD                            
                     })}>
               <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
             </TouchableHighlight>
