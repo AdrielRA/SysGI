@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, KeyboardAvoidingView , Text, TextInput,TouchableHighlight, Picker } from 'react-native';
+import { View, KeyboardAvoidingView , Text, TextInput,TouchableHighlight, Picker, Alert } from 'react-native';
 import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
 import { LinearGradient } from 'expo-linear-gradient';
+import firebase from '../services/firebase';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
@@ -17,27 +18,77 @@ function Signup({navigation}) {
   const [senha, setSenha] = useState('');
   const [confSenha, setConfSenha] = useState('');
 
-  const _saveUser = (user) => {
-    
-    if(!mongoClient.auth.isLoggedIn){
-      mongoClient.auth.loginWithCredential(new AnonymousCredential())
-      .then(user_ => {
-        console.log(`Successfully logged in as user ${user_.id}`);
-        this.setState({ currentUserId: user_.id });
-      })
-      .catch(err => {
-        console.log(`Failed to log in anonymously: ${err}`);
-        this.setState({ currentUserId: undefined });
-      });
-    }
 
-    if(mongoClient.auth.isLoggedIn){
-      mongoClient.callFunction("add_user", [user]).then(salvar =>{
-        console.log(`Resultado: ${salvar.msg}`);
-        if(salvar.res){ navigation.goBack(); }
-      });
+  const _camposOk = () => {
+    if(categoria === "0"){
+      Alert.alert("Atenção:", "Selecione uma categoria!")
+      return false;
     }
-     
+    else if(!nome || nome === ''){
+      Alert.alert("Atenção:", "Nome informado é inválido!")
+      return false;
+    }
+    else if(!telefone || telefone.length < 11){
+      Alert.alert("Atenção:", "Verifique o número de telefone!")
+      return false;
+    }
+    else if(email != confEmail){
+      Alert.alert("Atenção:", "Os emails divergem entre si!")
+      return false;
+    }
+    else if(senha != confSenha){
+      Alert.alert("Atenção:", "Senhas estão divergentes!")
+      return false;
+    }
+    else return true;
+  }
+
+  const _saveUser = (user) => {
+    firebase.auth().signOut();
+
+    if(!_camposOk()) return;
+
+    firebase.auth().createUserWithEmailAndPassword(email, senha)
+    .then(() => {
+      if(firebase.auth().currentUser){
+        let fire_user = firebase.auth().currentUser;
+        firebase.database().ref('users').child(fire_user.uid).set(user);
+        firebase.database().ref('users').child(fire_user.uid).once('value')
+        .then((snapshot)=>{
+          if(!fire_user.emailVerified){            
+            fire_user.sendEmailVerification()
+            .then(()=>{
+              Alert.alert("Sucesso!",`Em breve receberá um e-mail de verificação, ${snapshot.val().Nome}!`);
+            })
+            .catch((err) => {Alert.alert("Falha: " + err.code, err.message);});
+          }
+        });
+        navigation.goBack();
+      }
+      else{
+        Alert.alert("Falha!","Não foi possivel completar seu cadastro!");
+      }
+    })
+    .catch((e) =>{
+      switch(e.code){
+        case 'auth/invalid-email':
+          Alert.alert("Atenção:", "Email informado é inválido!");
+          break;
+        case 'auth/weak-password':
+          Alert.alert("Atenção:", "Senha deve conter ao menos 6 caracteres!");
+          break;
+        case 'auth/email-already-in-use':
+          Alert.alert("Email inválido!", "Ele já está em uso.");
+          break;
+        case 'auth/network-request-failed':
+          Alert.alert("Sem internet:", "Verifique sua conexão e tente novamente!");
+          break;
+        default:
+          Alert.alert("Algo deu errado...", "Por favor tente novamente mais tarde!");
+          //Alert.alert(`ERROR: ${e.code}`, e.message);
+          break;
+      }
+    });     
   };
 
   return (
@@ -53,7 +104,7 @@ function Signup({navigation}) {
             style={Styles.picker}
             selectedValue={categoria}
             onValueChange={(itemValue, itemIndex) => CategoriaChanged(itemValue)}>
-            <Picker.Item label="Categoria" value={null} />
+            <Picker.Item label="Categoria" value="0" />
             <Picker.Item label="Professor" value="1"/>
             <Picker.Item label="Advogado" value="2"/>
             <Picker.Item label="Policial" value="3"/>
@@ -111,7 +162,7 @@ function Signup({navigation}) {
           </TouchableHighlight>
           <TouchableHighlight style={Styles.btnSecundary}
             underlayColor={Colors.Primary.White}
-            onPress={() => _saveUser({Nome:nome, Email:email, Telefone:telefone, Credencial:Number(categoria), Passpassword:senha}) }>
+            onPress={() => _saveUser({Nome:nome, Telefone:telefone, Credencial:(Number(categoria) * -1)}) }>
             <Text style={Styles.btnTextSecundary}>SALVAR</Text>
           </TouchableHighlight>
         </View>

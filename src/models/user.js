@@ -5,5 +5,10 @@ class User {
   Telefone;
   Passpassword;
   Credencial;
-  constructor() { }
+  
+  login(){
+
+  }
 }
+
+export default new User;

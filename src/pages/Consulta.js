@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { View, Image, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
 import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
 import { LinearGradient } from 'expo-linear-gradient';
 import { SearchBar } from 'react-native-elements';
 import ItemInfração from '../components/ItemInfração'
+import firebase from '../services/firebase';
 import moment from 'moment';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function Consulta({navigation}) {
-  const mongoClient = Stitch.defaultAppClient;
+  //const mongoClient = Stitch.defaultAppClient;
+  const fire_user = firebase.auth().currentUser;
   const [TermoPesquisa, setTermoPesquisa] = useState('');
   const [Infrator, setInfrator] = useState(undefined);
 
   useEffect(() => {
-    if(!mongoClient.auth.isLoggedIn){
+
+    firebase.auth().onAuthStateChanged((user)=>{
+      if(!user) {
+        Alert.alert("Atenção:","Seu usuário foi desconectado!");
+        navigation.navigate('Login');
+      }
+    });
+
+    /*if(!mongoClient.auth.isLoggedIn){
       mongoClient.auth.loginWithCredential(new AnonymousCredential())
       .then(user => {
         console.log(`Successfully logged in as user ${user.id}`);
@@ -24,25 +34,37 @@ function Consulta({navigation}) {
         console.log(`Failed to log in anonymously: ${err}`);
         this.setState({ currentUserId: undefined });
       });
-    }
+    }*/
   }, []);
 
   useEffect(() => {
-    if(TermoPesquisa.length >= 7)
+    if(TermoPesquisa.length >= 8)
     {
       _consultarInfrator(TermoPesquisa);
     }
   }, [TermoPesquisa]);
 
   const _consultarInfrator = (rg) => {
-    
-    if(mongoClient.auth.isLoggedIn){
-      mongoClient.callFunction("consulta_infrator", [rg]).then(infrator =>{
-        //console.log(`Resultado: ${infrator.Infrações[0].Descrição}`);        
-        setInfrator(infrator);
+    if(fire_user){
+      let infratores = firebase.database().ref("infratores");
+      let query = infratores.orderByChild("Rg").equalTo(rg);
+      query.once("value", function(snapshot) {
+        if(snapshot.val() != null)
+        {
+          snapshot.forEach(function(child) {
+            if(child.val()) {
+              let infrator = child.val();
+              infrator.Infrações = infrator.Infrações.filter(function (el) { return el != null; });
+              setInfrator(infrator);
+            }
+          });
+        }
+        else { 
+          setInfrator(undefined);
+          Alert.alert("Infrator não Encontrado!", "Verifique o número do RG e tente novamente!");
+        }
       });
     }
-
   };
 
   return (
