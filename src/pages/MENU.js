@@ -20,7 +20,7 @@ function MENU({navigation}) {
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
         style={Styles.page}>
       <Text style={Styles.lblMENU}>MENU</Text>
-      <Text style={Styles.lblMsg}>Bem-vindo, {userLogged.NomeUsuario}</Text>
+      <Text style={Styles.lblMsg}>Bem-vindo, {userLogged}</Text>
       <View style={{flex:6, width:300, alignItems:"center", justifyContent:"center"}}>
         <Image style={{width: 200, height: 200}}
           source={require('../assets/images/balança.png')}></Image>
