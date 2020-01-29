@@ -114,7 +114,7 @@ function Cadastro({navigation})
                           borderWidth:0,
                          },
                         dateTouchBody: { borderRadius:25,
-                          borderColor:Colors.Secondary.Normal,
+                          borderColor:'#DCDCDC',
                           borderWidth:1,
                         }
                       }
@@ -194,7 +194,7 @@ function Cadastro({navigation})
                           borderWidth:0,
                         },
                         dateTouchBody: { borderRadius:25,
-                          borderColor:Colors.Secondary.Normal,
+                          borderColor:'#DCDCDC',
                           borderWidth:1,
                           height:39
                         }
@@ -213,7 +213,7 @@ function Cadastro({navigation})
                     
                   </View>
                   
-                  <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:Colors.Secondary.Normal,height:80,padding:10}}>
+                  <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:'#DCDCDC',height:80,padding:10}}>
                     <SwipeListView
                       data={infracoes}
                       renderItem={({item})=><ListaItem data={item} />}
