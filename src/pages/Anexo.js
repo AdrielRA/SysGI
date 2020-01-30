@@ -7,6 +7,7 @@ import DatePicker from 'react-native-datepicker'
 import { TextInput } from 'react-native-gesture-handler';
 function Anexo({navigation}) {
    const[date,setdate]=useState('');
+   const item = navigation.getParam("item");
    return(
       <SafeAreaView style={Styles.page}>
            <LinearGradient
@@ -17,33 +18,24 @@ function Anexo({navigation}) {
                <Text style={{textAlign:"center",color:'#fff',fontSize:25,fontFamily:'CenturyGothicBold'}}>DETALHES DA INFRAÇÃO</Text>
             </LinearGradient>
            
-            <View style={{flex:5,alignSelf:'stretch',backgroundColor:'#fff'}}>
-                  <Text style={{fontSize:18,fontFamily:'CenturyGothicBold',marginStart:10,marginTop:10,color:Colors.Secondary.Normal}}>Data da Infração</Text>
+            <View style={{flex:5,alignSelf:'stretch',backgroundColor:'#fff',margin:10}}>
                   <View style={{flexDirection:'row'}}>
-                        
-                        <DatePicker format="DD/MM/YYYY"
-                           style={Styles.DateComponent}
-                           date={date}
-                           onDateChange={(date) =>{setdate(date);}}
-                           customStyles={{
-                              dateIcon:{
-                                 width:0,
-                                 height:0,
-                              },
-                              dateInput: {
-                                 borderWidth:0,
-                              },
-                              dateTouchBody: { borderRadius:25,
-                                 borderColor:Colors.Secondary.White,
-                                 borderWidth:1,
-                                 height:50,
-                                 backgroundColor:Colors.Secondary.Normal
-                              }
-                           
-                           }
-                           }
-                        />
-                        
+                     <Text style={{fontSize:18,fontFamily:'CenturyGothicBold',marginStart:11,marginTop:10,color:Colors.Secondary.Normal,flex:1}}>Data registro</Text>
+                     <Text style={{fontSize:18,fontFamily:'CenturyGothicBold',marginStart:15,marginTop:10,color:Colors.Secondary.Normal,flex:1}}>Data da Infração</Text>
+                  </View>
+                  <View style={{flexDirection:'row'}}>
+                      <TextInput
+                          placeholder="00/00/00"
+                          placeholderTextColor={Colors.Secondary.Normal}
+                          style={Styles.TextInputAnexo}
+                          value={item.Data_registro}
+                     />  
+                       <TextInput
+                          placeholder="00/00/00"
+                          placeholderTextColor={Colors.Secondary.Normal}
+                          style={Styles.TextInputAnexo}
+                          value={item.Data_ocorrência}
+                      />  
                   </View>
                   <View style={{flexDirection:'row'}}>
                      <TextInput placeholder="Descrição da infração"
@@ -52,6 +44,7 @@ function Anexo({navigation}) {
                      multiline={true}
                      textAlignVertical='top'
                      fontSize={15}
+                     value={item.Descrição}
                      />
                   </View>
                   <View style={{flexDirection:'row'}}>
