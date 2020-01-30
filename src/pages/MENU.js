@@ -1,18 +1,42 @@
 import React,{useState, useEffect} from 'react';
-import { View, Text, TouchableHighlight, Image, Switch } from 'react-native';
+import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import firebase from '../services/firebase';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function MENU({navigation}) {
   const userLogged = navigation.getParam("userLogged");
+  const [allowNotify, setAllowNotify] = useState(false);
 
   useEffect(() => {
-    console.log(userLogged);
+    async function _loadNotify(){
+      try{
+        let value = await AsyncStorage.getItem('notify');
+        if (value != null){
+          setAllowNotify(value == "true");
+        }
+        else { await AsyncStorage.setItem('notify', allowNotify.toString()); }
+      }
+      catch{ console.log("Falha ao manipular variavel allowNotify..."); }
+    }
+    _loadNotify();
   }, []);
 
-  const [allowNotify, setAllowNotify] = useState(false);
-  const NotifyChanged = () => { setAllowNotify(!allowNotify) }
+  useEffect(() => {
+    async function _saveNotify(){
+      try{
+        if(allowNotify != undefined)
+          await AsyncStorage.setItem('notify', allowNotify.toString());
+      }
+      catch(err){ console.log("Falha ao salvar allowNotify..." + err.message); }
+    }
+    _saveNotify();
+
+    console.log(allowNotify);
+
+  }, [allowNotify]);
+
   return (
     <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
@@ -45,7 +69,7 @@ function MENU({navigation}) {
         <Switch 
         trackColor={{true: Colors.Primary.Normal, false: 'grey'}}
         thumbColor={Colors.Primary.White}
-        onValueChange={NotifyChanged} value = {allowNotify}></Switch>
+        onValueChange={() => {setAllowNotify(!allowNotify);}} value = {allowNotify}></Switch>
       </View>
     </LinearGradient>
   );
