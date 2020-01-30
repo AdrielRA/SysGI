@@ -4,17 +4,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import DatePicker from 'react-native-datepicker'
-import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
+//import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
 import moment from 'moment'
 import styled from 'styled-components/native'
 import {SwipeListView} from 'react-native-swipe-list-view'
 import ListaItem from '../components/ListaItem'
 import ListaItemSwipe from '../components/ListaItemSwipe'
-import { BSON } from 'mongodb-stitch-react-native-sdk';
-
+import firebase from '../services/firebase';
+import { NativeViewGestureHandler } from 'react-native-gesture-handler';
+//import { BSON } from 'mongodb-stitch-react-native-sdk';
+import uuid from 'uuid/v4'
 function Cadastro({navigation})
 {
-  const mongoClient = Stitch.defaultAppClient;
+ // const mongoClient = Stitch.defaultAppClient;
   const[dateNasc,setDateNas]=useState(new Date());
   const[dateInfra,setDateInfra]=useState(moment(new Date()).format("DD/MM/YYYY"));
   const[nome,setNome] = useState('');
@@ -30,40 +32,30 @@ function Cadastro({navigation})
   const[descricao,setDescricao] = useState('');
   const[infracoes,setInfracoes] = useState([]);
   const[infracoesBD,setInfracoesBD] = useState([]);
-  let myObjectId = new BSON.ObjectId();
+  
+  //let myObjectId = new BSON.ObjectId();
    
   const Infracao = {
-    "_id":myObjectId,
+    "_id":uuid(),
     "Descrição":descricao,
-    "Data ocorrência": dateInfra,
-    "Data registro": moment(new Date()).format("DD/MM/YYYY"),
+    "Data_ocorrência": dateInfra,
+    "Data_registro": moment(new Date()).format("DD/MM/YYYY"),
   }
 
   const saveInfrator = (infrator)=>{
-       if(!mongoClient.auth.isLoggedIn){
-       mongoClient.auth.loginWithCredential(new AnonymousCredential())
-      .then(infrator_ => {
-        console.log(`Successfully logged in as user ${infrator_.id}`);
-        this.setState({ currentUserId: user_.id });
-      })
-      .catch(err => {
-        console.log(`Failed to log in anonymously: ${err}`);
-        this.setState({ currentUserId: undefined });
-      });
-    }
-
-    if(mongoClient.auth.isLoggedIn){
-      mongoClient.callFunction("add_infrator", [infrator,infracoesBD]).then(salvar =>{
-        console.log(`Resultado: ${salvar.msg}`);
-        if(salvar.res){ navigation.goBack(); }
-      });
-    }
+    
+    let infratores = firebase.database().ref('infratores');//selecionando nó
+    let chave = infratores.push().key; //pegar chave
+    infratores.child(chave).set(infrator); //inserindo
   }
   
   const deleteItem = (index) =>{
-      let items = [...infracoes];
+      let items = [...infracoesBD];
       items = items.filter((it,i)=> i != index);
-      setInfracoes(items);
+      setInfracoesBD(items);
+  }
+  const NavigationToAttachment = (item) =>{
+      navigation.navigate('Anexo',{item});
   }
   return (
      <SafeAreaView style={Styles.page}>
@@ -204,9 +196,7 @@ function Cadastro({navigation})
                     <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
                       underlayColor={Colors.Primary.White}
                       onPress={() => {
-                        var inf = dateInfra + " - " + descricao
-                        setInfracoes([...infracoes,inf]);
-                        setInfracoesBD([...infracoesBD,Infracao]);
+                         setInfracoesBD([...infracoesBD,Infracao]);
                       }}>
                       <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
                     </TouchableHighlight>
@@ -215,8 +205,8 @@ function Cadastro({navigation})
                   
                   <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:'#DCDCDC',height:80,padding:10}}>
                     <SwipeListView
-                      data={infracoes}
-                      renderItem={({item})=><ListaItem data={item} />}
+                      data={infracoesBD}
+                      renderItem={({item})=><ListaItem data={item} onLongPress={()=>{NavigationToAttachment(item)}}/>}
                       renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index)}}/>}
                       leftOpenValue={30}
                       disableLeftSwipe={true}

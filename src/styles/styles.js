@@ -34,6 +34,19 @@ const Styles = StyleSheet.create({
     height:40,
     flex:1,
   },
+  TextInputAnexo:{
+    flex:1,
+    borderWidth:1,
+    borderRadius:25,
+    height:40,
+    borderColor:Colors.Secondary.Normal,
+    margin:10,
+    fontSize:17,
+    textAlign:"center",
+    backgroundColor:Colors.Secondary.Normal,
+    color:'#fff'
+
+  },
   picker:{
     fontFamily:"CenturyGothic",
     color:Colors.Primary.White,
@@ -122,7 +135,7 @@ const Styles = StyleSheet.create({
   },
   DescAnexo:{
     borderColor:Colors.Secondary.Normal,
-    borderWidth:2,
+    borderWidth:1,
     borderRadius:25,
     marginHorizontal:5,
     marginVertical:10,
