@@ -10,32 +10,21 @@ import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function Consulta({navigation}) {
-  //const mongoClient = Stitch.defaultAppClient;
   const fire_user = firebase.auth().currentUser;
   const [TermoPesquisa, setTermoPesquisa] = useState('');
   const [Infrator, setInfrator] = useState(undefined);
 
   useEffect(() => {
 
-    firebase.auth().onAuthStateChanged((user)=>{
-      if(!user) {
-        Alert.alert("Atenção:","Seu usuário foi desconectado!");
-        navigation.navigate('Login');
-      }
-    });
-
-    /*if(!mongoClient.auth.isLoggedIn){
-      mongoClient.auth.loginWithCredential(new AnonymousCredential())
-      .then(user => {
-        console.log(`Successfully logged in as user ${user.id}`);
-        this.setState({ currentUserId: user.id });
-      })
-      .catch(err => {
-        console.log(`Failed to log in anonymously: ${err}`);
-        this.setState({ currentUserId: undefined });
-      });
-    }*/
+    
   }, []);
+
+  firebase.auth().onAuthStateChanged((user)=>{
+    if(!user) {
+      Alert.alert("Atenção:","Seu usuário foi desconectado!");
+      navigation.navigate('Login');
+    }
+  });
 
   useEffect(() => {
     if(TermoPesquisa.length >= 8)
@@ -44,7 +33,25 @@ function Consulta({navigation}) {
     }
   }, [TermoPesquisa]);
 
-  const _consultarInfrator = (rg) => {
+  const maskTermo = (rg) =>{
+    setTermoPesquisa(maskRG(rg));
+  }
+  const maskRG = (rg) =>{
+    rg = rg.replace(/\D/g,"");
+    if(rg.length == 9) rg=rg.replace(/(\d{2})(\d{3})(\d{3})(\d{1})$/,"$1.$2.$3-$4");
+    if(rg.length == 8) rg=rg.replace(/(\d{1})(\d{3})(\d{3})(\d{1})$/,"$1.$2.$3-$4");
+
+    return rg;
+  }
+  const maskCpf = (cpf) =>{
+    cpf = cpf.replace(/\D/g,"");
+    if(cpf.length == 11) cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})$/,"$1.$2.$3-$4");
+
+    return cpf;
+  }
+
+  const _consultarInfrator = () => {
+    let rg = TermoPesquisa.replace(/\D/g,"");
     if(fire_user){
       let infratores = firebase.database().ref("infratores");
       let query = infratores.orderByChild("Rg").equalTo(rg);
@@ -86,7 +93,8 @@ function Consulta({navigation}) {
           clearIcon={{ iconStyle:{ color:Colors.Primary.Normal}}}
           value={TermoPesquisa}
           keyboardType="numeric"
-          onChangeText={(termo) => setTermoPesquisa(termo)}
+          onChangeText={(termo) => maskTermo(termo) }
+          onEndEditing={() => {_consultarInfrator(); }}
           ></SearchBar>
           {Infrator != undefined?(
             <View style={{flex:6, alignSelf:"stretch", marginTop:20}}>
@@ -120,11 +128,11 @@ function Consulta({navigation}) {
                     </View>
                     <View style={{alignSelf:"stretch", flexDirection:"row"}}>
                       <Text style={Styles.txtBold}>CPF: </Text>
-                      <Text style={Styles.txtRegular}>{Infrator.Cpf}</Text>
+                      <Text style={Styles.txtRegular}>{maskCpf(Infrator.Cpf)}</Text>
                     </View>
                     <View style={{alignSelf:"stretch", flexDirection:"row"}}>
                       <Text style={Styles.txtBold}>RG: </Text>
-                      <Text style={Styles.txtRegular}>{Infrator.Rg}</Text>
+                      <Text style={Styles.txtRegular}>{maskRG(Infrator.Rg)}</Text>
                     </View>
                     
                   </View>

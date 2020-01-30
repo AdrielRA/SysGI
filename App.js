@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar, ActivityIndicator } from 'react-native';
-import { Stitch, AnonymousCredential } from 'mongodb-stitch-react-native-sdk';
+//import { Stitch, AnonymousCredential } from 'mongodb-stitch-react-native-sdk';
 import Routes from './src/routes';
 import * as Font from 'expo-font';
 import Colors from './src/styles/colors';
@@ -10,15 +10,15 @@ export default class App extends React.Component {
     super()
     this.state={
       fontLoaded:false,
-      currentUserId: undefined,
-      client: undefined,
+      //currentUserId: undefined,
+      //client: undefined,
     }
-    this._loadClient = this._loadClient.bind(this);
-    this._onPressLogout = this._onPressLogout.bind(this);
+    //this._loadClient = this._loadClient.bind(this);
+    //this._onPressLogout = this._onPressLogout.bind(this);
   }
 
   async componentDidMount() {
-    this._loadClient();
+    //this._loadClient();
 
     await Font.loadAsync({
       'CenturyGothicBold': require('./src/assets/fonts/CenturyGothicBold.ttf'),
@@ -35,7 +35,7 @@ export default class App extends React.Component {
     );
   }
 
-  _loadClient() {
+  /*_loadClient() {
     Stitch.initializeDefaultAppClient("sysgi-kroky").then(client => {
       this.setState({ client });
       if(client.auth.isLoggedIn) {
@@ -64,5 +64,5 @@ export default class App extends React.Component {
         console.log(`Failed to log out: ${err}`);
         this.setState({ currentUserId: undefined })
     });
-  }
+  }*/
 }

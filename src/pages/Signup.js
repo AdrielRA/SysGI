@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { View, KeyboardAvoidingView , Text, TextInput,TouchableHighlight, Picker, Alert } from 'react-native';
-import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
 import { LinearGradient } from 'expo-linear-gradient';
 import firebase from '../services/firebase';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function Signup({navigation}) {
-  const mongoClient = Stitch.defaultAppClient;
 
   const [categoria, setCategoria] = useState(0);
   const CategoriaChanged = (categoria) => { setCategoria(categoria); };
@@ -68,6 +66,7 @@ function Signup({navigation}) {
       else{
         Alert.alert("Falha!","Não foi possivel completar seu cadastro!");
       }
+      firebase.auth().signOut();
     })
     .catch((e) =>{
       switch(e.code){

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert } from 'react-native';
-import { Stitch } from "mongodb-stitch-react-native-sdk";
+import { View, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckBox } from 'react-native-elements';
 import Styles from '../styles/styles';
@@ -9,16 +8,82 @@ import firebase from '../services/firebase';
 
 function Login({navigation}) {
   
-  const [keepLogin, setLoginState] = useState(false);
+  const [keepLogin, setLoginState] = useState();
+  const [loadLogin, setLoadLogin] = useState(true);
+  const [entrando, setEntrando] = useState(false);
+  const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState('');
-  const [Liberar, setLiberar] = useState(undefined);
   const [Senha, setSenha] = useState('');
-  const mongoClient = Stitch.defaultAppClient;
+
+  useEffect(() => {
+    async function _loadKeepLogin(){
+      try{
+        let value = await AsyncStorage.getItem('keep');
+        if (value != null){
+          setLoginState(value == "true");
+        }
+        else { await AsyncStorage.setItem('keep', keepLogin.toString()); }
+      }
+      catch{ console.log("Falha ao manipular variavel keepLogin..."); }
+    }
+    _loadKeepLogin();
+
+  }, []);
+
+  useEffect(() => {
+    async function _saveKeepLogin(){
+      try{
+        if(keepLogin != undefined)
+          await AsyncStorage.setItem('keep', keepLogin.toString());
+      }
+      catch(err){ console.log("Falha ao salvar keepLogin..." + err.message); }
+    }
+    _saveKeepLogin();
+    //console.log("Keep:" + keepLogin);
+
+    if(keepLogin == false && loadLogin){
+      firebase.auth().signOut();
+      //console.log("Desconectou! Keep: " + keepLogin + " | load: " + loadLogin);
+      setLoadLogin(false);
+    }
+  }, [keepLogin]);
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      if(keepLogin && loadLogin){
+        setEntrando(true);
+        if(user.emailVerified){
+          firebase.database().ref("users").child(user.uid).once('value')
+          .then((snapshot) => {
+            if(snapshot.val().Credencial > 0){
+              setEntrando(false); 
+              setEmail('');
+              setSenha('');
+              let userName = snapshot.val().Nome;
+              navigation.navigate('MENU', { userLogged: userName});
+            }
+            else{
+              Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
+              firebase.auth().signOut();
+              setEntrando(false); 
+            }          
+          });
+        }
+        else setEntrando(false);
+      }
+      //else{ console.log("LOGIN Logado, já carregado... Keep: " + keepLogin + " | load: " + loadLogin);}
+        
+    }
+    else {
+      //console.log("LOGIN Desconectado...");
+    }
+    setLoadLogin(false);
+  });
 
   const KeepLoginChange = () => { setLoginState(!keepLogin); };
   const _logar = () => {
     firebase.auth().signOut();
-
+    setEntrando(true);
     firebase.auth().signInWithEmailAndPassword(Email, Senha)
     .then(() => {
       let fire_user = firebase.auth().currentUser;
@@ -26,18 +91,50 @@ function Login({navigation}) {
         firebase.database().ref("users").child(fire_user.uid).once('value')
         .then((snapshot) => {
           if(snapshot.val().Credencial > 0){
+            setEmail('');
+            setSenha('');
+            setEntrando(false); 
             let userName = snapshot.val().Nome;
             navigation.navigate('MENU', { userLogged: userName});
           }
           else{
             Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
-          }          
+            firebase.auth().signOut();
+            setEntrando(false); 
+          }        
         });
       }
-      else{ Alert.alert("Atenção: ", "Verifique seu e-mail primeiro!"); }     
-      
+      else{
+        setEntrando(false); 
+        if(!showReSendEmail){
+          Alert.alert("Atenção: ", "Verifique seu e-mail primeiro!");
+          setShowReSendEmail(true);
+        }
+        else{
+          Alert.alert("Atenção: ", "Verifique sua conta! Deseja receber um novo email verificação?",
+          [
+            {
+              text: 'Não',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel',
+            },
+            {text: 'Sim', onPress: () => {
+              fire_user.sendEmailVerification()
+              .then(() => {
+                Alert.alert("Email enviado!", "Verifique sua caixa de entrada!");
+                setShowReSendEmail(false);
+            })
+              .catch(() => {Alert.alert("Falha de Verificação!", "Não foi possivel enviar o email de verificação, tente mais tarde!")});
+            }},
+          ],
+          {cancelable: false},
+          );
+        }
+        firebase.auth().signOut();
+      }
     })
     .catch((error)=>{
+      setEntrando(false);
       switch(error.code){
         case 'auth/invalid-email':
           Alert.alert("Atenção:", "Email informado é inválido!");
@@ -57,17 +154,23 @@ function Login({navigation}) {
         break;
       }
     });
-
-
-    /*mongoClient.callFunction("logar", [user]).then(liberar =>{
-      console.log(`Resultado: ${liberar}`);
-      setLiberar(liberar);
-      if(liberar){ navigation.navigate('MENU', {userLogged: user}); }
-    })*/
   };
-  const _retryLogin = () => {
-    setLiberar(undefined);
-  }
+
+  const btn_Logar = (<TouchableHighlight style={Styles.btnSecundary}
+                      underlayColor={Colors.Primary.White}
+                      onPress={() => { _logar() }}>
+                      <Text style={Styles.btnTextSecundary}>LOGAR</Text>
+                    </TouchableHighlight>);
+  const btn_Carregando = (<TouchableHighlight style={Styles.btnSecundary}
+                            underlayColor={Colors.Primary.White}
+                            onPress={() => { Alert.alert("Aguarde...","Carregando login!"); }}>
+                            <Text style={Styles.btnTextSecundary}>CARREGANDO...</Text>
+                          </TouchableHighlight>);
+  const btn_Entrando = (<TouchableHighlight style={Styles.btnSecundary}
+                            underlayColor={Colors.Primary.White}
+                            onPress={() => { Alert.alert("Aguarde...","Carregando MENU!"); }}>
+                            <Text style={Styles.btnTextSecundary}>ENTRANDO...</Text>
+                          </TouchableHighlight>);
 
   return (
     <LinearGradient
@@ -81,12 +184,22 @@ function Login({navigation}) {
             placeholder="seuemail@email.com"
             placeholderTextColor={Colors.Terciary.White}
             keyboardType={"email-address"}
+            autoCapitalize="none"
+            editable={!loadLogin && !entrando}
+            autoCorrect={false}
+            value={Email}
+            autoCompleteType="email"
             style={Styles.campo}
             onChangeText={(email) => { setEmail(email);}}
           />
           <TextInput
             placeholder="Senha"
             placeholderTextColor={Colors.Terciary.White}
+            autoCapitalize="none"
+            editable={!loadLogin && !entrando}
+            autoCorrect={false}
+            value={Senha}
+            autoCompleteType="password"
             secureTextEntry={true}
             style={Styles.campo}
             onChangeText={(senha) => { setSenha(senha);}}
@@ -103,11 +216,7 @@ function Login({navigation}) {
               checked={keepLogin}
               onPress={KeepLoginChange}
             />
-          <TouchableHighlight style={Styles.btnSecundary}
-            underlayColor={Colors.Primary.White}
-            onPress={() => { _logar() }}>
-            <Text style={Styles.btnTextSecundary}>LOGAR</Text>
-          </TouchableHighlight>
+          {loadLogin ? (btn_Carregando) : entrando ? (btn_Entrando) : (btn_Logar)}
           <TouchableHighlight style={Styles.btnTransparent}
             underlayColor={"transparent"}
             onPress={() =>  navigation.navigate('Signup')}>
