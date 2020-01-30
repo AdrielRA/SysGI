@@ -17,7 +17,7 @@ import uuid from 'uuid/v4'
 function Cadastro({navigation})
 {
  // const mongoClient = Stitch.defaultAppClient;
-  const[dateNasc,setDateNas]=useState(new Date());
+  const[dateNasc,setDateNas]=useState(moment(new Date()).format("DD/MM/YYYY"));
   const[dateInfra,setDateInfra]=useState(moment(new Date()).format("DD/MM/YYYY"));
   const[nome,setNome] = useState('');
   const[rg,setRg] = useState('');
@@ -218,6 +218,7 @@ function Cadastro({navigation})
                       onPress={() => saveInfrator({Nome:nome, Cpf:cpf, Rg:rg, Mãe:nomeMãe, Logradouro:logradouro,
                         Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc,Data_registro:moment(new Date()).format("DD/MM/YYYY"),Infrações:infracoesBD                            
                       })}>
+                        
                 <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
               </TouchableHighlight>
 
