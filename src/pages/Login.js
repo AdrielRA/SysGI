@@ -7,7 +7,7 @@ import Colors from '../styles/colors';
 import firebase from '../services/firebase';
 
 YellowBox.ignoreWarnings(['Setting a timer']);
-YellowBox.ignoreWarnings(['VirtualizedLists']);
+YellowBox.ignoreWarnings(['VirtualizedList']);
 
 function Login({navigation}) {
   
@@ -58,12 +58,17 @@ function Login({navigation}) {
         if(user.emailVerified){
           firebase.database().ref("users").child(user.uid).once('value')
           .then((snapshot) => {
-            if(snapshot.val().Credencial > 0){
+            if(snapshot.val().Credencial > 0 && snapshot.val().Credencial < 20){
               setEntrando(false); 
               setEmail('');
               setSenha('');
               let userName = snapshot.val().Nome;
               navigation.navigate('MENU', { userLogged: userName});
+            }
+            else if(snapshot.val().Credencial == 99){
+              Alert.alert("Acesso negado!", "Seu usuário não foi validado!");
+              firebase.auth().signOut();
+              setEntrando(false); 
             }
             else{
               Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
@@ -83,7 +88,9 @@ function Login({navigation}) {
     setLoadLogin(false);
   });
 
-  const KeepLoginChange = () => { setLoginState(!keepLogin); };
+  const KeepLoginChange = () => {
+    if(!entrando) setLoginState(!keepLogin);
+  };
   const _logar = () => {
     firebase.auth().signOut();
     setEntrando(true);
@@ -93,18 +100,7 @@ function Login({navigation}) {
       if(fire_user.emailVerified){
         firebase.database().ref("users").child(fire_user.uid).once('value')
         .then((snapshot) => {
-          if(snapshot.val().Credencial > 0){
-            setEmail('');
-            setSenha('');
-            setEntrando(false); 
-            let userName = snapshot.val().Nome;
-            navigation.navigate('MENU', { userLogged: userName});
-          }
-          else{
-            Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
-            firebase.auth().signOut();
-            setEntrando(false); 
-          }        
+          entrar(snapshot);
         });
       }
       else{
@@ -158,6 +154,34 @@ function Login({navigation}) {
       }
     });
   };
+
+  function entrar(snapshot){
+    if(snapshot.val().Credencial > 0 && snapshot.val().Credencial < 20){
+      setEmail('');
+      setSenha('');
+      setEntrando(false); 
+      let userName = snapshot.val().Nome;
+      navigation.navigate('MENU', { userLogged: userName});
+    }
+    else if(snapshot.val().Credencial == 99){
+      delete_user(firebase.auth().currentUser);
+      firebase.auth().signOut();
+      setEntrando(false); 
+    }
+    else{
+      Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
+      //firebase.auth().signOut();
+      setEntrando(false); 
+    }
+  }
+
+  function delete_user(user){
+    firebase.database().ref().child('users').child(user.uid).remove().then(() => {
+      user.delete().then(() => {
+        Alert.alert("Acesso negado!", "Seu usuário não foi validado!");
+      });
+    });
+  }
 
   const btn_Logar = (<TouchableHighlight style={Styles.btnSecundary}
                       underlayColor={Colors.Primary.White}

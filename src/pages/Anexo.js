@@ -10,8 +10,6 @@ import * as DocumentPicker from 'expo-document-picker';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import ItemAnexo from '../components/ItemAnexo';
 import ItemAnexoSwipe from '../components/ItemAnexoSwipe';
-import * as FileSystem from 'expo-file-system';
-
 
 function Anexo({navigation}) {
    const infração = navigation.getParam("item");
