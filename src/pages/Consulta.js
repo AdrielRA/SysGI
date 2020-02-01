@@ -146,7 +146,9 @@ function Consulta({navigation}) {
               <View style={{flex:1, alignSelf:"stretch", marginHorizontal:15, borderRadius:20, backgroundColor:Colors.Primary.White, paddingVertical:20, marginBottom:15}}>
                   <ScrollView style={{flex:1, alignSelf:"stretch"}}>
                     {Infrator.Infrações.map((infração_, i) => {
-                      return <ItemInfração key={i} infração={infração_}/>
+                      return <ItemInfração key={i} infração={infração_} onClick={() =>{
+                        navigation.navigate("Anexo", { item: infração_ });
+                      }}/>
                     })}
                   </ScrollView>
                 </View>

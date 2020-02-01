@@ -34,7 +34,8 @@ const Styles = StyleSheet.create({
     height:40,
     flex:1,
   },
-  TextInputAnexo:{
+  TextAnexo:{
+    fontFamily:"CenturyGothic",
     flex:1,
     borderWidth:1,
     borderRadius:25,
@@ -44,7 +45,8 @@ const Styles = StyleSheet.create({
     fontSize:17,
     textAlign:"center",
     backgroundColor:Colors.Secondary.Normal,
-    color:'#fff'
+    color:'#fff',
+    textAlignVertical:"center",
 
   },
   picker:{
@@ -68,15 +70,6 @@ const Styles = StyleSheet.create({
     marginHorizontal:15,
     alignItems:"center",
     alignSelf:"stretch",
-  },
-  BtnAnexo:{
-      backgroundColor:Colors.Secondary.Normal,
-      borderRadius:25,
-      flex:1,
-      marginHorizontal:2.5,
-      height:50,
-      justifyContent:"center",
-
   },
   btnTextPrimary:{
     fontFamily:"CenturyGothicBold",
@@ -134,16 +127,51 @@ const Styles = StyleSheet.create({
     flex:1,
   },
   DescAnexo:{
+    fontFamily:"CenturyGothic",
     borderColor:Colors.Secondary.Normal,
     borderWidth:1,
     borderRadius:25,
     marginHorizontal:5,
     marginVertical:10,
     paddingVertical:10,
-    paddingStart:15,
+    paddingHorizontal:15,
     flex:1,
-    height:180,
-    backgroundColor:'#FFF'
+    fontSize:18,
+    backgroundColor:Colors.Primary.White
+  },
+  lbAnexos:{
+    borderColor:Colors.Secondary.Normal,
+    borderWidth:1,
+    borderRadius:25,
+    marginHorizontal:5,
+    marginVertical:10,
+    paddingTop:10,
+    paddingBottom:15,
+    flex:1,
+    backgroundColor:Colors.Primary.White
+  },
+  lblAnexo:{
+    fontFamily:"CenturyGothicBold",
+    fontSize:20,
+    color:Colors.Secondary.Normal,
+    textAlign:"center",
+    textAlignVertical:"center",
+    paddingLeft:15,
+    paddingRight:25,
+
+  },
+  scrollAnexos:{
+    paddingHorizontal:15,
+    paddingTop:5,
+    borderBottomLeftRadius:25,
+    borderBottomRightRadius:25,
+    backgroundColor:Colors.Secondary.White,
+  },
+  btngroupAnexo:{
+    borderColor:Colors.Secondary.Normal,
+    flexDirection:"row",
+    borderBottomWidth:1,
+    paddingBottom:10,
   },
   lblSubtitle:{
     fontFamily:"CenturyGothicBold",

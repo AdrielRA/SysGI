@@ -1,6 +1,7 @@
 import React,{useState, useEffect} from 'react';
 import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Permissions from 'expo-permissions';
 import firebase from '../services/firebase';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
@@ -8,6 +9,7 @@ import Colors from '../styles/colors';
 function MENU({navigation}) {
   const userLogged = navigation.getParam("userLogged");
   const [allowNotify, setAllowNotify] = useState(false);
+  const [credencial, setCredencial] = useState(undefined);
 
   useEffect(() => {
     async function _loadNotify(){
@@ -21,6 +23,7 @@ function MENU({navigation}) {
       catch{ console.log("Falha ao manipular variavel allowNotify..."); }
     }
     _loadNotify();
+
   }, []);
 
   useEffect(() => {
@@ -31,11 +34,36 @@ function MENU({navigation}) {
       }
       catch(err){ console.log("Falha ao salvar allowNotify..." + err.message); }
     }
-    _saveNotify();
+    async function _requestNotifyPermission() {
+      const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+      if (status !== 'granted') {
+        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+        if (status === 'granted') {
+          _saveNotify();
+        } else {
+          setAllowNotify(false);
+        }
+      }
+      else { _saveNotify(); }
+    }
 
-    console.log(allowNotify);
+    if(allowNotify){
+      _requestNotifyPermission();
+    }
+    else{_saveNotify();}
 
   }, [allowNotify]);
+
+  function _getCredencial(fire_user){
+    firebase.database().ref('users').child(fire_user.uid)
+    .once('value')
+      .then((snapshot)=>{ setCredencial(snapshot.val().Credencial);
+    });
+  }
+
+  firebase.auth().onAuthStateChanged(function(fire_user) {
+    if (fire_user) { _getCredencial(fire_user); }
+  });
 
   return (
     <LinearGradient
@@ -58,11 +86,12 @@ function MENU({navigation}) {
           onPress={() =>  navigation.navigate('Consulta')}>
           <Text style={Styles.btnTextSecundary}>CONSULTAR</Text>
         </TouchableHighlight>
-        <TouchableHighlight style={Styles.btnSecundary}
-          underlayColor={Colors.Primary.White}
-          onPress={() =>  navigation.navigate('Anexo')}>
-          <Text style={Styles.btnTextSecundary}>Anexo</Text>
-        </TouchableHighlight>
+        {credencial > 10 ? (<TouchableHighlight style={Styles.btnSecundary}
+            underlayColor={Colors.Primary.White}
+            onPress={() =>  navigation.navigate('Controle')}>
+            <Text style={Styles.btnTextSecundary}>CONTROLE</Text>
+          </TouchableHighlight>) : (<></>)
+        }        
       </View>
       <View style={{flex:1, flexDirection:"row", justifyContent:"center", alignItems:"center", width:210}}>
         <Text style={Styles.lblSmallR}>Notificações:</Text>

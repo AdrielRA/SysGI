@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage } from 'react-native';
+import { View, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage, YellowBox } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckBox } from 'react-native-elements';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import firebase from '../services/firebase';
+
+YellowBox.ignoreWarnings(['Setting a timer']);
+YellowBox.ignoreWarnings(['VirtualizedLists']);
 
 function Login({navigation}) {
   
