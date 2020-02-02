@@ -218,8 +218,7 @@ function Cadastro({navigation})
                       onPress={() => saveInfrator({Nome:nome, Cpf:cpf, Rg:rg, Mãe:nomeMãe, Logradouro:logradouro,
                         Num_residência:numero, Bairro:bairro, Cidade:cidade, Uf:uf, Sexo:sexo, Data_nascimento:dateNasc,Data_registro:moment(new Date()).format("DD/MM/YYYY"),Infrações:infracoesBD                            
                       })}>
-                        
-                <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
+               <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
               </TouchableHighlight>
 
           </LinearGradient>
