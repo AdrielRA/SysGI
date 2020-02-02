@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import MENU from './pages/MENU';
 import Cadastro from './pages/Cadastro';
 import Consulta from './pages/Consulta';
+import Controle from './pages/Controle';
 import Anexo from './pages/Anexo';
 const Routes = createAppContainer(
   createStackNavigator({
@@ -14,6 +15,7 @@ const Routes = createAppContainer(
     MENU,
     Cadastro,
     Consulta,
+    Controle,
     Anexo
   },
   {

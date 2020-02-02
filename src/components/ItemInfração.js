@@ -4,7 +4,7 @@ import moment from 'moment';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
-function ItemInfração({infração}){
+function ItemInfração({infração, onClick}){
   return(
     <View style={{flexDirection:"row", alignSelf:"stretch", borderBottomWidth:2, borderBottomColor: Colors.Secondary.White, padding:5, paddingHorizontal:10}}>
       <View style={{flex:1, alignItems:"center"}}>
@@ -19,9 +19,7 @@ function ItemInfração({infração}){
           </Text>
         </View>
       </View>
-      <TouchableOpacity onPress={() => {
-          Alert.alert("Infração selecionada:", "Descrição: " + infração.Descrição);
-        }}>
+      <TouchableOpacity onPress={() => { onClick(); }}>
         <Image style={{width:40, height:40, borderRadius:5}} source={require('../assets/images/icon-mais.png')}></Image>
       </TouchableOpacity> 
       
