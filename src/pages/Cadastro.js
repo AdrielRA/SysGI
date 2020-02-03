@@ -32,7 +32,7 @@ function Cadastro({navigation})
   const[dateNasc,setDateNas]=useState(new Date());
   const[dateInfra,setDateInfra]=useState(new Date());
 
-  const[isSaved, setIsSaved]=useEffect(false);
+  const[isSaved, setIsSaved]=useState(false);
   
   useEffect(() =>{
     console.log(infrator.Infrações);
@@ -45,7 +45,9 @@ function Cadastro({navigation})
   }, [infração]);
 
   const saveInfrator = (infrator)=>{
-    
+    if(!infrator.Data_registro){
+      setInfrator({...infrator, "Data_registro":new Date()})
+    }
     let infratores = firebase.database().ref('infratores');//selecionando nó
     let key = infratores.push().key; //pegar chave
     infratores.child(key).set(infrator).then(() => {
