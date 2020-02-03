@@ -218,4 +218,4 @@ function Cadastro({navigation})
     </SafeAreaView>      
   );
 }
-export default Cadastro
+export default Cadastro;
