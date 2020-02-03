@@ -35,12 +35,11 @@ function Cadastro({navigation})
   const[isSaved, setIsSaved]=useEffect(false);
   
   useEffect(() =>{
-    console.log(infrator.Infrações);
+    //console.log(infrator.Infrações);
 
   }, [infrator]);
 
   useEffect(() =>{
-    //console.log(infração);
 
   }, [infração]);
 
