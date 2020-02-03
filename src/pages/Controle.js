@@ -11,37 +11,41 @@ import Colors from '../styles/colors';
 function Controle({navigation}) {
   const[lista,setLista]=useState([]);
   let logged_cred = 0;
-  //const creds = ['Professor', 'Advogado', 'Policial', 'Delegado', 'Promotor', 'Juiz'];
 
-useEffect(() => {
+  useEffect(() => {
 
-  const users = firebase.database().ref().child('users');
-  const logged_user = users.child(firebase.auth().currentUser.uid);
-  let user_key ='';
-  logged_user.once('value', (snapshot) => {
-    logged_cred = snapshot.val().Credencial;
-  }).then(() => {
-    if(logged_cred > 10) logged_cred = logged_cred -10;
-    const credencial = logged_cred * -1;
-    let query = users.orderByChild("Credencial").equalTo(credencial);
-    query.on("value", function(snapshot) {
-    if(snapshot.val() != null)
-    {
-      let users_res = [];
-      snapshot.forEach(function(child) {
-        user_key = child.key;
-        let user = {...child.val(), "key":user_key}
-        users_res = [...users_res, user]
-      });
+    const users = firebase.database().ref().child('users');
+    const logged_user = users.child(firebase.auth().currentUser.uid);
+    let user_key ='';
+    logged_user.once('value', (snapshot) => {
+      logged_cred = snapshot.val().Credencial;
+    }).then(() => {
+      if(logged_cred > 10) logged_cred = logged_cred -10;
+      const credencial = logged_cred * -1;
+      let query = users.orderByChild("Credencial").equalTo(credencial);
+      query.on("value", function(snapshot) {
+      if(snapshot.val() != null)
+      {
+        let users_res = [];
+        snapshot.forEach(function(child) {
+          user_key = child.key;
+          let user = {...child.val(), "key":user_key}
+          users_res = [...users_res, user]
+        });
 
-      setLista(users_res);
+        setLista(users_res);
+      }
+
+    });
+    });
+  }, []);
+
+  firebase.auth().onAuthStateChanged((user)=>{
+    if(!user) {
+      Alert.alert("Atenção:","Seu usuário foi desconectado!");
+      navigation.navigate('Login');
     }
-
   });
-  });
-
-
-}, []);
 
   function confirmar(item){
     const users = firebase.database().ref().child('users');
