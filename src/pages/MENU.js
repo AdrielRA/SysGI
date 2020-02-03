@@ -54,6 +54,13 @@ function MENU({navigation}) {
 
   }, [allowNotify]);
 
+  firebase.auth().onAuthStateChanged((user)=>{
+    if(!user) {
+      Alert.alert("Atenção:","Seu usuário foi desconectado!");
+      navigation.navigate('Login');
+    }
+  });
+
   function _getCredencial(fire_user){
     firebase.database().ref('users').child(fire_user.uid)
     .once('value')

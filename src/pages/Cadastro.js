@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import { View,Text,SafeAreaView,TextInput,TouchableHighlight,FlatList,ScrollView} from 'react-native';
+import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
@@ -33,29 +33,37 @@ function Cadastro({navigation})
   const[infracoes,setInfracoes] = useState([]);
   const[infracoesBD,setInfracoesBD] = useState([]);
   
-  //let myObjectId = new BSON.ObjectId();
-   
-  const Infracao = {
-    "_id":uuid(),
-    "Descrição":descricao,
-    "Data_ocorrência": dateInfra,
-    "Data_registro": moment(new Date()).format("DD/MM/YYYY"),
-  }
+  useEffect(() =>{
+    console.log(infrator.Infrações);
+
+  }, [infrator]);
+
+  useEffect(() =>{
+    //console.log(infração);
+
+  }, [infração]);
 
   const saveInfrator = (infrator)=>{
     
     let infratores = firebase.database().ref('infratores');//selecionando nó
-    let chave = infratores.push().key; //pegar chave
-    infratores.child(chave).set(infrator); //inserindo
+    let key = infratores.push().key; //pegar chave
+    infratores.child(key).set(infrator).then(() => {
+      Alert.alert("Sucesso:", "Infrator salvo!");
+      setIsSaved(true);
+    })
+    .catch((err) => {
+      Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
+    });
   }
   
   const deleteItem = (index) =>{
-      let items = [...infracoesBD];
+      let items = [...infrator.Infrações];
       items = items.filter((it,i)=> i != index);
-      setInfracoesBD(items);
+      setInfrator({...infrator, "Infrações":items});
   }
   const NavigationToAttachment = (item) =>{
-      navigation.navigate('Anexo',{item});
+    if(isSaved){ navigation.navigate('Anexo',{item}); }
+    else{ Alert.alert("Atenção:", "Salve suas alterações primeiro!"); }      
   }
   return (
      <SafeAreaView style={Styles.page}>
@@ -220,10 +228,24 @@ function Cadastro({navigation})
                       })}>
                <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
               </TouchableHighlight>
-
-          </LinearGradient>
-        </ScrollView>
-     </SafeAreaView>      
+            </View>
+            <View style={{flex:1,alignSelf:'stretch',borderWidth:1,borderRadius:25,borderColor:'#DCDCDC',height:80,padding:10}}>
+              <SwipeListView
+                data={infrator.Infrações}
+                renderItem={({item})=><ListaItem data={item} onLongPress={()=>{NavigationToAttachment(item)}}/>}
+                renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index)}}/>}
+                leftOpenValue={30}
+                disableLeftSwipe={true}/>
+            </View>
+          </View>
+          <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
+            underlayColor={Colors.Primary.White}
+            onPress={() => saveInfrator(infrator)}>
+            <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
+          </TouchableHighlight>
+        </LinearGradient>
+      </ScrollView>
+    </SafeAreaView>      
   );
 }
 export default Cadastro
