@@ -58,9 +58,9 @@ function Cadastro({navigation})
   }
   
   const deleteItem = (index) =>{
-      let items = [...infracoesBD];
+      let items = [...infrator.Infrações];
       items = items.filter((it,i)=> i != index);
-      setInfracoesBD(items);
+      setInfrator({...infrator, "Infrações":items});
   }
   const NavigationToAttachment = (item) =>{
     if(isSaved){ navigation.navigate('Anexo',{item}); }
