@@ -23,33 +23,42 @@ function Cadastro({navigation})
   });
 
   const [infração, setInfração] = useState({
-    "_id":uuid(),
     "Descrição":"",
-    "Data_ocorrência": "",
-    "Data_registro": "",
+    "Data_ocorrência": moment(new Date()).toISOString(),
+    "Data_registro":moment(new Date()).toISOString(),
   });
-
+  
   const[dateNasc,setDateNas]=useState(new Date());
   const[dateInfra,setDateInfra]=useState(new Date());
 
   const[isSaved, setIsSaved]=useState(false);
-  
+  const[id,setID] = useState();
+  const[aux,setAux] = useState(false);
   useEffect(() =>{
-    console.log(infrator.Infrações);
+    if(aux)
+    {
+      firebase.database().ref('infratores').child(id).on('value',(snapshot)=>{
+        if(snapshot.val())
+        {
+          let infrator = snapshot.val();
+          let infras = [];
+          if(snapshot.val().Infrações){
+            infras = Object.values(snapshot.val().Infrações);
+          }
+          infrator.Infrações = infras;
+          setInfrator(infrator);
+        }
+      });
+    }
+  },[aux]);
 
-  }, [infrator]);
-
-  useEffect(() =>{
-    //console.log(infração);
-
-  }, [infração]);
-
-  const saveInfrator = (infrator)=>{
+ const saveInfrator = (infrator)=>{
     if(!infrator.Data_registro){
-      setInfrator({...infrator, "Data_registro":new Date()})
+      setInfrator({...infrator, "Data_registro":moment(new Date()).toISOString()})
     }
     let infratores = firebase.database().ref('infratores');//selecionando nó
     let key = infratores.push().key; //pegar chave
+    setID(key);
     infratores.child(key).set(infrator).then(() => {
       Alert.alert("Sucesso:", "Infrator salvo!");
       setIsSaved(true);
@@ -58,12 +67,24 @@ function Cadastro({navigation})
       Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
     });
   }
-  
-  const deleteItem = (index) =>{
-    let items = [...infrator.Infrações];
+
+  const saveInfracoes = () =>{
+    let inf = firebase.database().ref('infratores');
+    let chave = inf.push().key;
+    inf.child(id).child('Infrações').child(chave).set(infração);
+  }
+
+  const deleteItem = (item,Data_registro) =>{
+    /*let items = [...infrator.Infrações];
     items = items.filter((it,i)=> i != index);
-    setInfrator({...infrator, "Infrações":items});
-}
+    setInfrator({...infrator, "Infrações":items});*/
+    let query= firebase.database().ref('infratores').child(id).child('Infrações').orderByChild("Data_registro").equalTo(Data_registro);
+    query.once('value', (r)=>{
+      let key = Object.keys(r.val())[0]
+      firebase.database().ref('infratores').child(id).child('Infrações').child(key).remove();
+    });
+    setAux(true);
+  }
   const NavigationToAttachment = (item) =>{
     if(isSaved){ navigation.navigate('Anexo',{item}); }
     else{ Alert.alert("Atenção:", "Salve suas alterações primeiro!"); }      
@@ -102,10 +123,10 @@ function Cadastro({navigation})
                 style={{flex:3.5,marginEnd:3,marginTop:5}}
                 format='DD/MM/YYYY'
                 date={dateNasc}
-                onDateChange={(dateNasc) => {
-                  setDateNas(dateNasc);
-                  var dt =dateNasc.split('/');
-                  setInfrator({...infrator, "Data_nascimento":new Date(`${dt[2]}-${dt[1]}-${dt[0]}`)})
+                onDateChange={(dateNasc_) => {
+                  setDateNas(dateNasc_);
+                  var dt = dateNasc_.split('/');
+                  setInfrator({...infrator, "Data_nascimento":new Date(`${dt[2]}-${dt[1]}-${dt[0]}`).toISOString()})
                 }}
                 customStyles={{
                   dateIcon:{
@@ -157,7 +178,13 @@ function Cadastro({navigation})
                 keyboardType='number-pad'
                 onChangeText={(numero)=> setInfrator({...infrator, "Num_residência":numero})}/>
             </View>
+            <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0,paddingVertical:8}]}
+            underlayColor={Colors.Primary.White}
+            onPress={() => saveInfrator(infrator)}>
+            <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
+          </TouchableHighlight>
           </View>
+          
           <View style={{backgroundColor:'#fff',flex:1,borderRadius:10,padding:10}}>
             <Text style={{color:'#800000',fontSize:18,marginStart:8,fontFamily:"CenturyGothic"}}>Informações da infração</Text>
             <View style={{flexDirection:'row',marginTop:5}}>
@@ -175,8 +202,9 @@ function Cadastro({navigation})
                 date={dateInfra}
                 onDateChange={(dataOcorrencia) => { 
                   setDateInfra(dataOcorrencia);
+                  let data = new Date();
                   var dt = dataOcorrencia.split('/');
-                  setInfração({...infração, "Data_ocorrência":new Date(`${dt[2]}-${dt[1]}-${dt[0]}`)})
+                  setInfração({...infração, "Data_ocorrência":new Date(`${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`).toISOString()})
                 }}
                 customStyles={{
                   dateIcon:{
@@ -196,8 +224,14 @@ function Cadastro({navigation})
               <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
                 underlayColor={Colors.Primary.White}
                 onPress={() => {
-                  setInfração({...infração, "Data_registro":new Date().toISOString()});
-                  setInfrator({...infrator, "Infrações":[...infrator.Infrações, {...infração}]});
+                  if(isSaved){
+                    setInfração({...infração, "Data_registro": moment(new Date()).toISOString()});
+                    setInfrator({...infrator, "Infrações":[...infrator.Infrações, {...infração}]});
+                    saveInfracoes();
+                  }
+                  else{
+                    alert("Salve os dados do infrator!")
+                  }
                 }}>
                 <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
               </TouchableHighlight>
@@ -206,16 +240,13 @@ function Cadastro({navigation})
               <SwipeListView
                 data={infrator.Infrações}
                 renderItem={({item})=><ListaItem data={item} onLongPress={()=>{NavigationToAttachment(item)}}/>}
-                renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index)}}/>}
+                renderHiddenItem={({item,index})=><ListaItemSwipe onDelete={()=>{deleteItem(index,item.Data_registro)}}/>}
                 leftOpenValue={30}
                 disableLeftSwipe={true}/>
             </View>
           </View>
-          <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0}]}
-            underlayColor={Colors.Primary.White}
-            onPress={() => saveInfrator(infrator)}>
-            <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
-          </TouchableHighlight>
+          
+          
         </LinearGradient>
       </ScrollView>
     </SafeAreaView>      
