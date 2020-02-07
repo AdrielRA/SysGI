@@ -11,22 +11,32 @@ import ListaItem from '../components/ListaItem'
 import ListaItemSwipe from '../components/ListaItemSwipe'
 import firebase from '../services/firebase';
 import Network  from '../controllers/network';
-import uuid from 'uuid/v4'
+
 function Cadastro({navigation})
 {
   const infrator_ = navigation.getParam("Infrator");
+  const infratores = firebase.database().ref('infratores');
+
   const[infratorKey, setInfratorKey]=useState(undefined);
   const[isNew, setIsNew]=useState(true);
   const[fireInfrações, setFireInfrações]=useState({});
   const[favorito, setFavorito]=useState(undefined);
+  const[dateNasc,setDateNas]=useState(new Date());
+  const[dateInfra,setDateInfra]=useState(new Date());
+  const[isSaved, setIsSaved]=useState(false);
+
   const [infrator, setInfrator]=useState({
     "Nome":"", "Cpf":"", "Rg":"", "Mãe":"", "Logradouro":"",
     "Num_residência":"", "Bairro":"", "Cidade":"", "Uf":"", "Sexo":"",
     "Data_nascimento":"", "Data_registro":"","Infrações":[]
   });
-  const infratores = firebase.database().ref('infratores');
+  const [infração, setInfração] = useState({
+    "Descrição":"",
+    "Data_ocorrência": new Date().toISOString(),
+    "Data_registro": "",
+  });
   
-
+  
   useEffect(() => {
     if(infrator_){
       setInfrator(infrator_);
@@ -71,26 +81,6 @@ function Cadastro({navigation})
       setFavorito(null);
     }
   }, [infratorKey]);
-
-  const [infração, setInfração] = useState({
-    //"_id":uuid(),
-    "Descrição":"",
-    "Data_ocorrência": new Date().toISOString(),
-    "Data_registro": "",
-  });
-
-  const[dateNasc,setDateNas]=useState(new Date());
-  const[dateInfra,setDateInfra]=useState(new Date());
-
-  const[isSaved, setIsSaved]=useState(false);
-  
-  useEffect(() =>{
-    
-  }, [infrator]);
-
-  useEffect(() =>{
-
-  }, [infração]);
 
   const saveInfrator = (infrator)=>{
     if(!Network.haveInternet){
@@ -295,8 +285,7 @@ function Cadastro({navigation})
     const childRef = ref.child(fileName);
     childRef.delete()
   }
-
-
+  
   const NavigationToAttachment = (infração_) =>{
     if(isSaved){ 
       if(!Network.haveInternet){
