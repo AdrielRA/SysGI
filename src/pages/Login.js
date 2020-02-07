@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage, YellowBox } from 'react-native';
+import { View, SafeAreaView, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage, YellowBox } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckBox } from 'react-native-elements';
+import Network  from '../controllers/network';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import firebase from '../services/firebase';
@@ -14,11 +15,15 @@ function Login({navigation}) {
   const [keepLogin, setLoginState] = useState();
   const [loadLogin, setLoadLogin] = useState(true);
   const [entrando, setEntrando] = useState(false);
+  const [netAlert, setNetAlert] = useState(false);
   const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState('');
   const [Senha, setSenha] = useState('');
 
   useEffect(() => {
+
+    Network.addListener();
+
     async function _loadKeepLogin(){
       try{
         let value = await AsyncStorage.getItem('keep');
@@ -57,33 +62,18 @@ function Login({navigation}) {
         setEntrando(true);
         if(user.emailVerified){
           firebase.database().ref("users").child(user.uid).once('value')
-          .then((snapshot) => {
-            if(snapshot.val().Credencial > 0 && snapshot.val().Credencial < 20){
-              setEntrando(false); 
-              setEmail('');
-              setSenha('');
-              let userName = snapshot.val().Nome;
-              navigation.navigate('MENU', { userLogged: userName});
-            }
-            else if(snapshot.val().Credencial == 99){
-              Alert.alert("Acesso negado!", "Seu usuário não foi validado!");
-              firebase.auth().signOut();
-              setEntrando(false); 
-            }
-            else{
-              Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
-              firebase.auth().signOut();
-              setEntrando(false); 
-            }          
-          });
+          .then((snapshot) => { entrar(snapshot); });
         }
         else setEntrando(false);
-      }
-      //else{ console.log("LOGIN Logado, já carregado... Keep: " + keepLogin + " | load: " + loadLogin);}
-        
+      }  
     }
     else {
-      //console.log("LOGIN Desconectado...");
+      if(!netAlert && !Network.haveInternet){
+        setNetAlert(true);
+        Network.alertOffline(() => setNetAlert(false));
+        /*Alert.alert("Sem internet!", "Verifique sua conexão e tente novamente!",
+        [ {text: 'OK', onPress:  }, ], {cancelable: false}, );   */     
+      }
     }
     setLoadLogin(false);
   });
@@ -91,7 +81,14 @@ function Login({navigation}) {
   const KeepLoginChange = () => {
     if(!entrando) setLoginState(!keepLogin);
   };
+
   const _logar = () => {
+
+    if(!Network.haveInternet){
+      Network.alertOffline(() => {});
+      return;
+    }
+
     firebase.auth().signOut();
     setEntrando(true);
     firebase.auth().signInWithEmailAndPassword(Email, Senha)
@@ -200,11 +197,12 @@ function Login({navigation}) {
                           </TouchableHighlight>);
 
   return (
+    <SafeAreaView style={Styles.page}>
     <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
-        style={Styles.page}>
+        style={[Styles.page, {alignSelf:"stretch"}]}>
         <Text style={Styles.lblTitle}>SysGI</Text>
         <KeyboardAvoidingView style={{flex:3, alignSelf:"stretch"}} behavior="padding" enabled   keyboardVerticalOffset={100}>
           <TextInput
@@ -252,6 +250,7 @@ function Login({navigation}) {
         </KeyboardAvoidingView>
       <Text style={Styles.lblRodape}>Todos os Direitos Reservados - {new Date().getFullYear()}</Text>
     </LinearGradient>
+    </SafeAreaView>
   );
 }
 

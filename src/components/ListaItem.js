@@ -14,7 +14,7 @@ const Item = styled.TouchableHighlight`
 export default (props)=>{
     return(
         <Item onLongPress={props.onLongPress} underlayColor='#dcdcdc'>
-           <ItemText style={{color:Colors.Secondary.Normal,marginVertical:0}}>{props.data.Data_registro} - {props.data.Descrição}</ItemText>
+           <ItemText style={{color:Colors.Secondary.Normal,marginVertical:0}}>{props.data.Descrição}</ItemText>
         </Item>
     );
 }

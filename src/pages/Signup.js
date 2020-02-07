@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, KeyboardAvoidingView , Text, TextInput,TouchableHighlight, Picker, Alert } from 'react-native';
+import { View, SafeAreaView, KeyboardAvoidingView , Text, TextInput,TouchableHighlight, Picker, Alert, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Network  from '../controllers/network';
 import firebase from '../services/firebase';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
@@ -10,6 +11,7 @@ function Signup({navigation}) {
   const [categoria, setCategoria] = useState(0);
   const CategoriaChanged = (categoria) => { setCategoria(categoria); };
   const [nome, setNome] = useState('');
+  const [inscrição, setInscrição] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
   const [confEmail, setConfEmail] = useState('');
@@ -24,6 +26,10 @@ function Signup({navigation}) {
     }
     else if(!nome || nome === ''){
       Alert.alert("Atenção:", "Nome informado é inválido!")
+      return false;
+    }
+    else if(!inscrição || inscrição === ''){
+      Alert.alert("Atenção:", "Informe Matricula/Inscrição que seja válida!")
       return false;
     }
     else if(!telefone || telefone.length < 11){
@@ -42,6 +48,12 @@ function Signup({navigation}) {
   }
 
   const _saveUser = (user) => {
+
+    if(!Network.haveInternet){
+      Network.alertOffline(() => {});
+      return;
+    }
+
     firebase.auth().signOut();
 
     if(!_camposOk()) return;
@@ -91,68 +103,78 @@ function Signup({navigation}) {
   };
 
   return (
+    <SafeAreaView style={Styles.page}>
     <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
-        style={Styles.page}>
-      <Text style={Styles.lblSubtitle}>CADASTRO</Text>
-      <KeyboardAvoidingView style={{flex:5, alignSelf:"stretch"}} behavior="padding" enabled   keyboardVerticalOffset={200}>
-        <View style={Styles.pickerDiv}>
-          <Picker
-            style={Styles.picker}
-            selectedValue={categoria}
-            onValueChange={(itemValue, itemIndex) => CategoriaChanged(itemValue)}>
-            <Picker.Item label="Categoria" value="0" />
-            <Picker.Item label="Professor" value="1"/>
-            <Picker.Item label="Advogado" value="2"/>
-            <Picker.Item label="Policial" value="3"/>
-            <Picker.Item label="Delegado" value="4"/>
-            <Picker.Item label="Promotor" value="5"/>
-            <Picker.Item label="Juiz" value="6"/>
-          </Picker>
-        </View>
-        <TextInput
-            placeholder="Nome de Usuário"
+        style={[Styles.page, {alignSelf:"stretch"}]}>
+      <Text style={[Styles.lblSubtitle, {flex:0.75, paddingTop:30}]}>CADASTRO</Text>
+      <KeyboardAvoidingView style={{flex:5, alignSelf:"stretch"}} behavior="padding"   keyboardVerticalOffset={25}>
+        <ScrollView>
+          <View style={Styles.pickerDiv}>
+            <Picker
+              style={Styles.picker}
+              selectedValue={categoria}
+              onValueChange={(itemValue, itemIndex) => CategoriaChanged(itemValue)}>
+              <Picker.Item label="Categoria" value="0" />
+              <Picker.Item label="Professor" value="1"/>
+              <Picker.Item label="Advogado" value="2"/>
+              <Picker.Item label="Policial" value="3"/>
+              <Picker.Item label="Delegado" value="4"/>
+              <Picker.Item label="Promotor" value="5"/>
+              <Picker.Item label="Juiz" value="6"/>
+            </Picker>
+          </View>
+          <TextInput
+              placeholder="Nome de Usuário"
+              placeholderTextColor={Colors.Terciary.White}
+              style={Styles.campo}
+              onChangeText={(nome_) => setNome(nome_)}
+          />
+          <TextInput
+              placeholder="Matricula/Inscrição"
+              placeholderTextColor={Colors.Terciary.White}
+              style={Styles.campo}
+              onChangeText={(inscrição_) => setInscrição(inscrição_)}
+          />
+          <TextInput
+              placeholder="Telefone"
+              placeholderTextColor={Colors.Terciary.White}
+              keyboardType="phone-pad"
+              style={Styles.campo}
+              onChangeText={(telefone_) => setTelefone(telefone_)}
+          />
+          <TextInput
+            placeholder="emai@email.com"
             placeholderTextColor={Colors.Terciary.White}
+            keyboardType="email-address"
             style={Styles.campo}
-            onChangeText={(nome_) => setNome(nome_)}
-        />
-        <TextInput
-            placeholder="Telefone"
+            onChangeText={(email_) => setEmail(email_)}
+          />
+          <TextInput
+            placeholder="emai.confirma@email.com"
             placeholderTextColor={Colors.Terciary.White}
-            keyboardType="phone-pad"
+            keyboardType="email-address"
             style={Styles.campo}
-            onChangeText={(telefone_) => setTelefone(telefone_)}
-        />
-        <TextInput
-          placeholder="emai@email.com"
-          placeholderTextColor={Colors.Terciary.White}
-          keyboardType="email-address"
-          style={Styles.campo}
-          onChangeText={(email_) => setEmail(email_)}
-        />
-        <TextInput
-          placeholder="emai.confirma@email.com"
-          placeholderTextColor={Colors.Terciary.White}
-          keyboardType="email-address"
-          style={Styles.campo}
-          onChangeText={(confEmail_) => setConfEmail(confEmail_)}
-        />
-        <TextInput
-          placeholder="Senha"
-          placeholderTextColor={Colors.Terciary.White}
-          secureTextEntry={true}
-          style={Styles.campo}
-          onChangeText={(senha_) => setSenha(senha_)}
-        />
-        <TextInput
-          placeholder="Confirma Senha"
-          placeholderTextColor={Colors.Terciary.White}
-          secureTextEntry={true}
-          style={Styles.campo}
-          onChangeText={(confSenha_) => setConfSenha(confSenha_)}
-        />
+            onChangeText={(confEmail_) => setConfEmail(confEmail_)}
+          />
+          <TextInput
+            placeholder="Senha"
+            placeholderTextColor={Colors.Terciary.White}
+            secureTextEntry={true}
+            style={Styles.campo}
+            onChangeText={(senha_) => setSenha(senha_)}
+          />
+          <TextInput
+            placeholder="Confirma Senha"
+            placeholderTextColor={Colors.Terciary.White}
+            secureTextEntry={true}
+            style={Styles.campo}
+            onChangeText={(confSenha_) => setConfSenha(confSenha_)}
+          />
+        </ScrollView>
+        
         <View style={{flexDirection: 'row', justifyContent:"center", alignItems:"center"}}>
           <TouchableHighlight style={Styles.btnTransparent}
             underlayColor={'transparent'}
@@ -161,13 +183,14 @@ function Signup({navigation}) {
           </TouchableHighlight>
           <TouchableHighlight style={Styles.btnSecundary}
             underlayColor={Colors.Primary.White}
-            onPress={() => _saveUser({Nome:nome, Telefone:telefone, Credencial:(Number(categoria) * -1)}) }>
+            onPress={() => _saveUser({Nome:nome, Inscrição:inscrição, Telefone:telefone, Credencial:(Number(categoria) * -1)}) }>
             <Text style={Styles.btnTextSecundary}>SALVAR</Text>
           </TouchableHighlight>
         </View>
       </KeyboardAvoidingView >
       <Text style={Styles.lblRodape}>Todos os Direitos Reservados - {new Date().getFullYear()}</Text>
     </LinearGradient>
+    </SafeAreaView>
   );
 }
 export default Signup;

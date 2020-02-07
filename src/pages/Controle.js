@@ -1,45 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, ScrollView, Text, TouchableHighlight, Alert } from 'react-native';
+import { View, SafeAreaView, Image, ScrollView, Text, TouchableHighlight, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import ItemControle from '../components/ItemControle';
 import ItemControleSwipe from '../components/ItemControleSwipe';
+import Credencial from '../controllers/credencial';
+import Network  from '../controllers/network';
 import firebase from '../services/firebase';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
 function Controle({navigation}) {
   const[lista,setLista]=useState([]);
-  let logged_cred = 0;
+
+  const users = firebase.database().ref().child('users');
+  const query = users.orderByChild("Credencial").equalTo(Credencial.loggedCred % 10 * -1);
 
   useEffect(() => {
 
-    const users = firebase.database().ref().child('users');
-    const logged_user = users.child(firebase.auth().currentUser.uid);
-    let user_key ='';
-    logged_user.once('value', (snapshot) => {
-      logged_cred = snapshot.val().Credencial;
-    }).then(() => {
-      if(logged_cred > 10) logged_cred = logged_cred -10;
-      const credencial = logged_cred * -1;
-      let query = users.orderByChild("Credencial").equalTo(credencial);
-      query.on("value", function(snapshot) {
+    query.on("value", function(snapshot) {
+      let users_res = [];
       if(snapshot.val() != null)
       {
-        let users_res = [];
         snapshot.forEach(function(child) {
-          user_key = child.key;
-          let user = {...child.val(), "key":user_key}
-          users_res = [...users_res, user]
+          users_res = [...users_res, {...child.val(), "key":child.key}]
         });
-
-        setLista(users_res);
       }
-
-    });
+      setLista(users_res);
     });
   }, []);
-
+  
   firebase.auth().onAuthStateChanged((user)=>{
     if(!user) {
       Alert.alert("Atenção:","Seu usuário foi desconectado!");
@@ -48,33 +38,46 @@ function Controle({navigation}) {
   });
 
   function confirmar(item){
-    const users = firebase.database().ref().child('users');
-    users.child(item.key).child('Credencial').set(Math.abs(item.Credencial)).then(() => {
-      Alert.alert("Sucesso:","Usuário confirmado!");
-      let index = lista.indexOf(item);
-      lista.splice(index, 1);
-      setLista([...lista]);
-
-
-    }).catch(() => {
-      Alert.alert("Falha:","Não foi possivel liberar este usuário no momento!");
-    });
+    if(!Network.haveInternet){
+      Network.alertOffline(() => {});
+      return;
+    }
+    if(Credencial.isAdimin(Credencial.loggedCred)){
+      const users = firebase.database().ref().child('users');
+      users.child(item.key).child('Credencial').set(Math.abs(item.Credencial)).then(() => {
+        Alert.alert("Sucesso:","Usuário confirmado!");
+      }).catch(() => {
+        Alert.alert("Falha:","Não foi possivel liberar este usuário no momento!");
+      });
+    }
+    else{
+      Credencial.accessDenied();
+      navigation.goBack();
+    }
+    
   }
 
   function remover(item){
-    const users = firebase.database().ref().child('users');
-    users.child(item.key).child('Credencial').set(99).then(() => {
-      Alert.alert("Sucesso:","Usuário removido!");
-      let index = lista.indexOf(item);
-      lista.splice(index, 1);
-      setLista([...lista]);
-    }).catch(() => {
-      Alert.alert("Falha:","Não foi possivel remover este usuário no momento!");
-    });
+    if(!Network.haveInternet){
+      Network.alertOffline(() => {});
+      return;
+    }
+    if(Credencial.isAdimin(Credencial.loggedCred)){
+      const users = firebase.database().ref().child('users');
+      users.child(item.key).child('Credencial').set(99).then(() => {
+        Alert.alert("Sucesso:","Usuário removido!");
+      }).catch(() => {
+        Alert.alert("Falha:","Não foi possivel remover este usuário no momento!");
+      });
+    }
+    else{
+      Credencial.accessDenied();
+      navigation.goBack();
+    }
   }
 
   return (
-    <View style={Styles.page}>
+    <SafeAreaView style={Styles.page}>
       <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
@@ -103,7 +106,7 @@ function Controle({navigation}) {
             <Text style={[Styles.btnTextPrimary, {}]}>VOLTAR</Text>
           </TouchableHighlight>
         </View>
-    </View>
+    </SafeAreaView>
     
   );
 }

@@ -6,6 +6,7 @@ import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import moment from 'moment';
 import firebase from '../services/firebase';
+import Credencial from '../controllers/credencial';
 import * as DocumentPicker from 'expo-document-picker';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import ItemAnexo from '../components/ItemAnexo';
@@ -13,6 +14,8 @@ import ItemAnexoSwipe from '../components/ItemAnexoSwipe';
 
 function Anexo({navigation}) {
    const infração = navigation.getParam("item");
+   const[infraKey, setInfraKey] = useState(undefined);
+   const[fireList, setFireList] = useState({});
    const[lista,setLista]=useState([]);
    const[nomeAnexo,setNomeAnexo]=useState('');
    const[Anexo,setAnexo]=useState(undefined);
@@ -20,6 +23,43 @@ function Anexo({navigation}) {
 
    const anexos_db = firebase.database().ref().child('anexos');
    const anexos_st = firebase.storage().ref().child('anexos');
+
+
+   useEffect(() => {
+      //console.log(infração.infratorKey);
+      const infrações = firebase.database().ref('infratores').child(infração.infratorKey).child('Infrações');
+
+      let query = infrações.orderByChild("Data_registro").equalTo(infração.Data_registro);
+      query.once("value", (snapshot) => {
+         if(snapshot.val()){
+            setInfraKey(Object.keys(snapshot.val())[0]);
+         }
+      });
+   }, [infração]);
+
+   useEffect(() => {
+      if(infraKey){
+         let anexos = anexos_db.child(infração.infratorKey).child(infraKey);
+
+         anexos.on("value", (snapshot) => {
+            let results = [];
+            if(snapshot.val()){
+               //setFireList(Object.values(snapshot.val()));
+               
+               
+               snapshot.forEach(function(child) {
+                  if(child.val()) {
+                     results.push({...child.val(), "key":child.key, "uri":'', "progress":100})
+                  }
+               });
+            }
+            setLista(results);
+         });
+      }
+      
+
+   }, [infraKey])
+
 
    useEffect(()=>{
       const index = lista.length - 1;
@@ -32,9 +72,10 @@ function Anexo({navigation}) {
    }, [Anexo]);
 
    async function upload(item){
-      let key = anexos_db.push().key;
-      console.log("KEY: " + key);
-      let anexo = anexos_st.child(key);
+      let anexos = anexos_db.child(infração.infratorKey).child(infraKey);
+      let key = anexos.push().key;
+      //console.log("KEY: " + key);
+      let anexo = anexos_st.child(infração.infratorKey).child(infraKey).child(key);
       let index = lista.indexOf(item);
 
       try {
@@ -52,7 +93,7 @@ function Anexo({navigation}) {
             if(index >= 0){
                lista[index].progress = prog;
                setLista([...lista]);
-               if(lista[index].progress >= 100) blob.close();
+               if(lista[index].progress >= 100) { blob.close(); }
             }
          }, (error) => {console.log(error.code)
          }, () => {
@@ -60,6 +101,15 @@ function Anexo({navigation}) {
             lista[index].status = url;
             setLista([...lista]);
             console.log("URL: " + lista[index].status);
+
+            let data = {"fileName":item.fileName, "status":url};
+            anexos.child(key).set(data)
+            .then(() => {
+               console.log("Anexado...");
+            })
+            .catch((err) => {
+               console.log(err);
+            });
          });
        })}
        catch (error) {
@@ -68,9 +118,16 @@ function Anexo({navigation}) {
    }
 
    const getAnexo = async() => {
-      let file = await DocumentPicker.getDocumentAsync({copyToCacheDirectory: false, type:"application/pdf"});
-      if (file.type === 'cancel') { return; }
-      setAnexo(file);
+      if(!Network.haveInternet){
+         Network.alertOffline(() => {});
+         return;
+       }
+      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar)){
+         let file = await DocumentPicker.getDocumentAsync({copyToCacheDirectory: false, type:"application/pdf"});
+         if (file.type === 'cancel') { return; }
+         setAnexo(file);
+      }
+      else Credencial.accessDenied();
    }
 
    function changeNomeAnexo(anexo){
@@ -108,14 +165,24 @@ function Anexo({navigation}) {
    }
 
    function removeAnexo(item) {
+      if(!Network.haveInternet){
+         Network.alertOffline(() => {});
+         return;
+       }
       const index = lista.indexOf(item);
       console.log("KEY[" + index + "]: " + item.key);
       if (index > -1) {
-         let anexo = anexos_st.child(item.key);
+         let anexo = anexos_st.child(infração.infratorKey).child(infraKey).child(item.key);
          anexo.delete().then(() =>{
-            lista.splice(index, 1);
-            setLista([...lista]);
-         });
+            anexos_db.child(infração.infratorKey).child(infraKey).child(item.key).remove()
+            .catch((err) => {
+               console.log(err);
+            });
+
+            //lista.splice(index, 1);
+            //setLista([...lista]);
+
+         }).catch((err) => {console.log(err);});
       }
    }
 

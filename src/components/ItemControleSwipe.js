@@ -4,7 +4,7 @@ import {Image } from 'react-native'
 
 const ItemControleSwipe = styled.TouchableHighlight`
   width:100%;
-  height:80px;
+  height:100px;
   margin-bottom:5px;
   padding-top:7.5px;
   padding-left:7.5px;

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
-import { Stitch, AnonymousCredential } from "mongodb-stitch-react-native-sdk";
+import { View, SafeAreaView, Image, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
+import Credencial from '../controllers/credencial';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SearchBar } from 'react-native-elements';
 import ItemInfração from '../components/ItemInfração'
 import firebase from '../services/firebase';
+import Network  from '../controllers/network';
 import moment from 'moment';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
@@ -13,11 +14,7 @@ function Consulta({navigation}) {
   const fire_user = firebase.auth().currentUser;
   const [TermoPesquisa, setTermoPesquisa] = useState('');
   const [Infrator, setInfrator] = useState(undefined);
-
-  useEffect(() => {
-
-    
-  }, []);
+  const[infratorKey, setInfratorKey]=useState(undefined);
 
   firebase.auth().onAuthStateChanged((user)=>{
     if(!user) {
@@ -51,23 +48,35 @@ function Consulta({navigation}) {
   }
 
   const _consultarInfrator = () => {
+
+    if(!Network.haveInternet){
+      Network.alertOffline(() => {});
+      return;
+    }
+
     let rg = TermoPesquisa.replace(/\D/g,"");
     if(fire_user){
       let infratores = firebase.database().ref("infratores");
       let query = infratores.orderByChild("Rg").equalTo(rg);
-      query.once("value", function(snapshot) {
+      query.on("value", function(snapshot) {
         if(snapshot.val() != null)
         {
           snapshot.forEach(function(child) {
             if(child.val()) {
+              setInfratorKey(child.key);
               let infrator = child.val();
-              infrator.Infrações = infrator.Infrações.filter(function (el) { return el != null; });
+              let infras = [];
+              if(child.val().Infrações){
+                infras = Object.values(child.val().Infrações);
+              }
+              infrator.Infrações = infras;
               setInfrator(infrator);
             }
           });
         }
         else { 
           setInfrator(undefined);
+          query.off("value");
           Alert.alert("Infrator não Encontrado!", "Verifique o número do RG e tente novamente!");
         }
       });
@@ -75,7 +84,7 @@ function Consulta({navigation}) {
   };
 
   return (
-    <View style={Styles.page}>
+    <SafeAreaView style={Styles.page}>
       <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
@@ -103,12 +112,13 @@ function Consulta({navigation}) {
                 <View style={{flexDirection:"row", alignSelf:"stretch"}}>
                   <View style={{flex:1, alignSelf:"stretch", alignItems:"center", paddingVertical:10}}>
                     <Text style={Styles.txtBoldWhite}>Ultima Infração</Text>
-                    <Text style={Styles.txtRegularWhite}>{
+                    <Text style={Styles.txtRegularWhite}>{Infrator.Infrações.length > 0?(
+
                       moment(new Date(
                         Infrator.Infrações.sort(function (a, b) {
-                          return  a.Data_ocorrência < b.Data_ocorrência ? 1 : 0;
+                          return  new Date(b.Data_ocorrência) - new Date(a.Data_ocorrência);
                         })[0].Data_ocorrência
-                      )).format('DD/MM/YYYY')                      
+                      )).format('DD/MM/YYYY')    ) : "--/--/----"                  
                     }</Text>
                   </View>
                   <View style={{backgroundColor:"#fff", width:2}}></View>
@@ -137,7 +147,13 @@ function Consulta({navigation}) {
                     
                   </View>
                   <TouchableOpacity onPress={() => {
-                      navigation.navigate("Cadastro",{Infrator:Infrator});
+                    if(!Network.haveInternet){
+                      Network.alertOffline(() => {});
+                      return;
+                    }
+                    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToDetalhes))
+                      navigation.navigate("Cadastro", {Infrator});
+                    else Credencial.accessDenied();
                     }}>
                     <Image style={{height:60, width:60, borderRadius:5}} source={require('../assets/images/edit-icon.png')} ></Image>
                   </TouchableOpacity>                  
@@ -147,14 +163,20 @@ function Consulta({navigation}) {
                   <ScrollView style={{flex:1, alignSelf:"stretch"}}>
                     {Infrator.Infrações.map((infração_, i) => {
                       return <ItemInfração key={i} infração={infração_} onClick={() =>{
-                        navigation.navigate("Anexo", { item: infração_ });
+                        if(!Network.haveInternet){
+                          Network.alertOffline(() => {});
+                          return;
+                        }
+                        if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar))
+                          navigation.navigate("Anexo", { item: {...infração_, infratorKey} });
+                        else Credencial.accessDenied();
                       }}/>
                     })}
                   </ScrollView>
                 </View>
             </View>
           ) : (<View style={{flex:6}}></View>)}
-    </View>
+    </SafeAreaView>
     
   );
 }

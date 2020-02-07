@@ -1,8 +1,10 @@
 import React,{useState, useEffect} from 'react';
-import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage } from 'react-native';
+import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage, Alert, SafeAreaView } from 'react-native';
+import Network  from '../controllers/network';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Permissions from 'expo-permissions';
 import firebase from '../services/firebase';
+import Credencial from '../controllers/credencial';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
@@ -23,7 +25,6 @@ function MENU({navigation}) {
       catch{ console.log("Falha ao manipular variavel allowNotify..."); }
     }
     _loadNotify();
-
   }, []);
 
   useEffect(() => {
@@ -55,29 +56,20 @@ function MENU({navigation}) {
   }, [allowNotify]);
 
   firebase.auth().onAuthStateChanged((user)=>{
-    if(!user) {
+    if (user) { Credencial._getCredencial(user, setCredencial); }    
+    else {
       Alert.alert("Atenção:","Seu usuário foi desconectado!");
       navigation.navigate('Login');
     }
   });
-
-  function _getCredencial(fire_user){
-    firebase.database().ref('users').child(fire_user.uid)
-    .once('value')
-      .then((snapshot)=>{ setCredencial(snapshot.val().Credencial);
-    });
-  }
-
-  firebase.auth().onAuthStateChanged(function(fire_user) {
-    if (fire_user) { _getCredencial(fire_user); }
-  });
-
+  
   return (
+    <SafeAreaView style={Styles.page}>
     <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
-        style={Styles.page}>
+        style={[Styles.page, {alignSelf:"stretch"}]}>
       <Text style={Styles.lblMENU}>MENU</Text>
       <Text style={Styles.lblMsg}>Bem-vindo, {userLogged}</Text>
       <View style={{flex:6, width:300, alignItems:"center", justifyContent:"center"}}>
@@ -85,17 +77,42 @@ function MENU({navigation}) {
           source={require('../assets/images/balança.png')}></Image>
         <TouchableHighlight style={Styles.btnSecundary}
             underlayColor={Colors.Primary.White}
-            onPress={() =>  navigation.navigate('Cadastro')}>
+            onPress={() => {
+              if(!Network.haveInternet)
+                Network.alertOffline(() => {});
+              else{
+                if(Credencial.haveAccess(credencial, Credencial.AccessToCadastro))
+                  navigation.navigate('Cadastro');
+                else Credencial.accessDenied();
+              }              
+            }}>
             <Text style={Styles.btnTextSecundary}>CADASTRAR</Text>
           </TouchableHighlight>
         <TouchableHighlight style={Styles.btnSecundary}
           underlayColor={Colors.Primary.White}
-          onPress={() =>  navigation.navigate('Consulta')}>
+          onPress={() =>{
+            if(!Network.haveInternet)
+              Network.alertOffline(() => {});
+            else{
+              if(Credencial.haveAccess(credencial, Credencial.AccessToConsulta))
+                navigation.navigate('Consulta');
+              else Credencial.accessDenied();
+            }
+            
+          }}>
           <Text style={Styles.btnTextSecundary}>CONSULTAR</Text>
         </TouchableHighlight>
         {credencial > 10 ? (<TouchableHighlight style={Styles.btnSecundary}
             underlayColor={Colors.Primary.White}
-            onPress={() =>  navigation.navigate('Controle')}>
+            onPress={() =>  {
+              if(!Network.haveInternet)
+                Network.alertOffline(() => {});
+              else{
+                if(Credencial.isAdimin(credencial))
+                  navigation.navigate('Controle')
+                else Credencial.accessDenied();
+              }
+            }}>
             <Text style={Styles.btnTextSecundary}>CONTROLE</Text>
           </TouchableHighlight>) : (<></>)
         }        
@@ -108,6 +125,7 @@ function MENU({navigation}) {
         onValueChange={() => {setAllowNotify(!allowNotify);}} value = {allowNotify}></Switch>
       </View>
     </LinearGradient>
+    </SafeAreaView>
   );
 }
 

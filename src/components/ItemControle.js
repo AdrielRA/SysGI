@@ -3,7 +3,7 @@ import styled from 'styled-components/native'
 import Colors from '../styles/colors'
 
 const ItemControle = styled.TouchableHighlight`
-    height:80px;
+    height:100px;
     margin-bottom:5px;
     background-color:#fff;
     padding-left:4%;
@@ -15,18 +15,35 @@ const ItemView = styled.View`
    align-self:flex-start;
    
  `;
+ const ItemTextBold = styled.Text`
+ font-size:15px;
+ text-align-vertical:center;
+ font-weight:bold;
+ align-self:flex-start;
+`;
  const ItemText = styled.Text`
    font-size:15px;
    text-align-vertical:center;
-   font-weight:bold;
    align-self:flex-start;
  `;
 export default (props)=>{
     return(
         <ItemControle onLongPress={props.onLongPress} underlayColor='#dcdcdc'>
             <ItemView>
+              <ItemView style={{flexDirection:"row"}}>
+                <ItemTextBold style={{color:Colors.Secondary.Normal,marginVertical:0}}>NOME: </ItemTextBold>
                 <ItemText style={{color:Colors.Secondary.Normal,marginVertical:0}}>{props.data.Nome}</ItemText>
+              </ItemView>
+              <ItemView style={{flexDirection:"row"}}>
+                <ItemTextBold style={{color:Colors.Secondary.Normal,marginVertical:0}}>INSCRIÇÃO: </ItemTextBold>
+                <ItemText style={{color:Colors.Secondary.Normal,marginVertical:0}}>{props.data.Inscrição}</ItemText>
+              </ItemView>
+              <ItemView style={{flexDirection:"row"}}>
+                <ItemTextBold style={{color:Colors.Secondary.Normal,marginVertical:0}}>TELEFONE: </ItemTextBold>
                 <ItemText style={{color:Colors.Secondary.Normal,marginVertical:0}}>{props.data.Telefone}</ItemText>
+              </ItemView>
+              <ItemView style={{flexDirection:"row"}}>
+                <ItemTextBold style={{color:Colors.Secondary.Normal,marginVertical:0}}>CATEGORIA: </ItemTextBold>
                 <ItemText style={{color:Colors.Secondary.Normal,marginVertical:0}}>
                 {
                   props.data.Credencial < 0 ?
@@ -41,6 +58,12 @@ export default (props)=>{
                   ))
                   : "Inválido"
                 }</ItemText>
+              </ItemView>
+
+                
+               
+                
+                
             </ItemView>
         </ItemControle>
     );
