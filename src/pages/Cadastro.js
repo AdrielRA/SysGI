@@ -109,9 +109,7 @@ function Cadastro({navigation})
     }
     else{
       if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToEditar)){
-        let newInfra = infrator;
-        newInfra.Infrações = fireInfrações;
-        infratores.child(infratorKey).set(newInfra).then(() => {
+        infratores.child(infratorKey).set(JSON.parse( JSON.stringify({...infrator, "Infrações":fireInfrações}))).then(() => {
           Alert.alert("Sucesso:", "Infrator atualizado!");
         })
         .catch((err) => {
@@ -168,6 +166,7 @@ function Cadastro({navigation})
           infratores.child(infratorKey).remove().then(() => {
             removeAnexos("Sucesso:", "Infrator removido!", '', true);
             setFavorito(false);
+            removeAllFavorites(infratorKey);
           }).catch((err) => {
             Alert.alert("Falha:", "Infrator não foi removido!");
           });
@@ -185,6 +184,16 @@ function Cadastro({navigation})
       return;
     }
     setFavorito(!favorito);
+  }
+
+  const removeAllFavorites = (key) => {
+    
+    firebase.database().ref().child('users').orderByChild("Infratores_favoritados").startAt("")
+    .once("value", (snapshot) => {
+      snapshot.forEach(user => {
+        user.ref.child("Infratores_favoritados").set(user.val().Infratores_favoritados.filter(e => e != key));
+      });
+    });
   }
 
   useEffect(() => {
@@ -314,22 +323,35 @@ function Cadastro({navigation})
               <ScrollView>
                 <View style={{flexDirection:"row"}}>
                   <TextInput placeholder="Nome"
+                    autoCapitalize="words"
+                    textContentType="name"
+                    keyboardType="name-phone-pad"
+                    returnKeyType="next"
+                    autoCompleteType="name"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={Styles.campoCadastro}
                     value={infrator.Nome}
+                    autoFocus={true}
+                    maxLength={60}
                     onChangeText={(nome) => setInfrator({...infrator, "Nome":nome})}/>
                 </View>
                 <View style={{flexDirection:'row'}}>
                   <TextInput placeholder="RG"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
                     style={[Styles.campoCadastro,{marginEnd:3}]}
                     value={infrator.Rg}
+                    maxLength={13}
+                    editable={isNew}
                     keyboardType='number-pad'
-                    onChangeText={(rg) => setInfrator({...infrator, "Rg":rg})}/>
+                    onChangeText={(rg) => setInfrator({...infrator, "Rg":rg})}
+                    onEndEditing={() => {}}/>
                   <TextInput placeholder="CPF"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
                     style={Styles.campoCadastro}
                     value={infrator.Cpf}
+                    maxLength={11}
                     keyboardType='number-pad'
                     onChangeText={(cpf) => setInfrator({...infrator, "Cpf":cpf})}/>
                 </View>
@@ -359,45 +381,73 @@ function Cadastro({navigation})
                   }/>
                   <TextInput placeholder="Sexo"
                       placeholderTextColor={Colors.Secondary.Normal}
+                      returnKeyType="next"
                       style={[Styles.campoCadastro,{flex:1.5}]}
                       value={infrator.Sexo}
-                      onChangeText={(sexo) => setInfrator({...infrator, "Sexo":sexo})}/>
+                      maxLength={1}
+                      onChangeText={(sexo) => {
+                        sexo = sexo.toUpperCase();
+                        if(sexo != 'M' && sexo != 'F' && sexo != 'O'){ sexo = ''; }
+                        setInfrator({...infrator, "Sexo":sexo})
+                      }}/>
                 </View>
                 <View style={{flexDirection:"row"}}>
                   <TextInput placeholder="Nome da Mãe"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
+                    autoCapitalize="words"
+                    autoCompleteType="name"
                     style={Styles.campoCadastro}
                     value={infrator.Mãe}
+                    maxLength={60}
                     onChangeText={(mãe) => setInfrator({...infrator, "Mãe":mãe})}/>
                 </View>
                 <View style={{flexDirection:'row'}}>
                   <TextInput placeholder="Logradouro"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
+                    textContentType="fullStreetAddress"
+                    autoCompleteType="street-address"
                     style={[Styles.campoCadastro,{flex:1,marginEnd:3}] }
                     value={infrator.Logradouro}
+                    maxLength={120}
                     onChangeText={(logradouro) => setInfrator({...infrator, "Logradouro":logradouro})}/>
                   <TextInput placeholder="Bairro"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
+                    autoCapitalize="words"
+                    textContentType="sublocality"
                     style={[Styles.campoCadastro,{flex:1}] }
                     value={infrator.Bairro}
+                    maxLength={60}
                     onChangeText={(bairro) => setInfrator({...infrator, "Bairro":bairro})}/>
                 </View>
                 <View style={{flexDirection:'row'}}>
                   <TextInput placeholder="Cidade"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
+                    autoCapitalize="words"
+                    textContentType="addressCity"
+                    autoCompleteType="street-address"
                     style={[Styles.campoCadastro,{flex:1,marginEnd:3}] }
                     value={infrator.Cidade}
+                    maxLength={50}
                     onChangeText={(cidade) => setInfrator({...infrator, "Cidade":cidade})}/>
                   <TextInput placeholder="UF"
                     placeholderTextColor={Colors.Secondary.Normal}
+                    returnKeyType="next"
+                    autoCapitalize="characters"
+                    textContentType="addressState"
                     style={[Styles.campoCadastro,{flex:0.5,marginEnd:3}] }
                     value={infrator.Uf}
-                    onChangeText={(uf) => setInfrator({...infrator, "Uf":uf})}/>
+                    maxLength={2}
+                    onChangeText={(uf) => setInfrator({...infrator, "Uf":uf.toUpperCase()})}/>
                   <TextInput placeholder="N°"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5}] }
                     value={infrator.Num_residência}
                     keyboardType='number-pad'
+                    maxLength={10}
                     onChangeText={(numero)=> setInfrator({...infrator, "Num_residência":numero})}/>
                 </View>
               </ScrollView>              
@@ -470,7 +520,6 @@ function Cadastro({navigation})
                     infra.Data_registro = new Date().toISOString();
                     setInfração(infra);
                     saveInfração();
-                    //setInfrator({...infrator, "Infrações":[...infrator.Infrações, infra]});
                   }}>
                   <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
                 </TouchableHighlight>

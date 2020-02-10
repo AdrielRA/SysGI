@@ -13,8 +13,9 @@ const Item = styled.TouchableHighlight`
    flex:1;
  `;
 export default (props)=>{
+    props.data.Data_ocorrência = moment(props.data.Data_ocorrência).format("DD/MM/YYYY");
     useEffect(()=>{
-        props.data.Data_ocorrência= moment(props.data.Data_ocorrência).format("DD/MM/YYYY");
+        props.data.Data_ocorrência = moment(props.data.Data_ocorrência).format("DD/MM/YYYY");
     },[props]);
     return(
         <Item onLongPress={props.onLongPress} underlayColor='#dcdcdc'>
