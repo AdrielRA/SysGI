@@ -3,6 +3,7 @@ import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage, Alert, Saf
 import Network  from '../controllers/network';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Permissions from 'expo-permissions';
+import {Notifications} from 'expo';
 import firebase from '../services/firebase';
 import Credencial from '../controllers/credencial';
 import Styles from '../styles/styles';
@@ -30,8 +31,12 @@ function MENU({navigation}) {
   useEffect(() => {
     async function _saveNotify(){
       try{
-        if(allowNotify != undefined)
+        if(allowNotify != undefined){
+          let token = await Notifications.getExpoPushTokenAsync();
+          firebase.database().ref().child('users').child(firebase.auth().currentUser.uid).child('Device').set(token);
+          
           await AsyncStorage.setItem('notify', allowNotify.toString());
+        }
       }
       catch(err){ console.log("Falha ao salvar allowNotify..." + err.message); }
     }
@@ -45,7 +50,9 @@ function MENU({navigation}) {
           setAllowNotify(false);
         }
       }
-      else { _saveNotify(); }
+      else { 
+        _saveNotify(); 
+      }
     }
 
     if(allowNotify){
