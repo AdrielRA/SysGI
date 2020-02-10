@@ -82,44 +82,63 @@ function Cadastro({navigation})
     }
   }, [infratorKey]);
 
+  const dadosOk = (infrator)=>{
+    if(infrator.Nome || infrator.Cpf || infrator.Rg ||
+      infrator.Logradouro || infrator.Num_residência ||
+      infrator.Bairro || infrator.Cidade || infrator.Uf ||
+      infrator.Sexo || infrator.Data_nascimento || infrator.Data_registro === "")
+      {
+        return false;
+      }
+      else{
+       return true;
+      }
+  }
+
   const saveInfrator = (infrator)=>{
     if(!Network.haveInternet){
       Network.alertOffline(() => {});
       return;
     }
-                
-    if(isNew){
-      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToCadastro)){
-        if(!infrator.Data_registro){
-          setInfrator({...infrator, "Data_registro":new Date().toISOString()})
+
+    if(dadosOk(infrator)){
+      if(isNew){
+        if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToCadastro)){
+          if(!infrator.Data_registro){
+            setInfrator({...infrator, "Data_registro":new Date().toISOString()})
+          }
+          
+          let key = infratores.push().key;
+          infratores.child(key).set(infrator).then(() => {
+            Alert.alert("Sucesso:", "Infrator salvo!");
+            setInfratorKey(key);
+            setIsNew(false);
+            setIsSaved(true);
+          })
+          .catch((err) => {
+            Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
+          });
         }
-        
-        let key = infratores.push().key;
-        infratores.child(key).set(infrator).then(() => {
-          Alert.alert("Sucesso:", "Infrator salvo!");
-          setInfratorKey(key);
-          setIsNew(false);
-          setIsSaved(true);
-        })
-        .catch((err) => {
-          Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
-        });
+        else Credencial.accessDenied();
       }
-      else Credencial.accessDenied();
+      else{
+        if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToEditar)){
+          let newInfra = infrator;
+          newInfra.Infrações = fireInfrações;
+          infratores.child(infratorKey).set(newInfra).then(() => {
+            Alert.alert("Sucesso:", "Infrator atualizado!");
+          })
+          .catch((err) => {
+            Alert.alert("Falha:", "Infrator não foi atualizado!");
+          });
+        }
+        else Credencial.accessDenied();
+      }
     }
     else{
-      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToEditar)){
-        let newInfra = infrator;
-        newInfra.Infrações = fireInfrações;
-        infratores.child(infratorKey).set(newInfra).then(() => {
-          Alert.alert("Sucesso:", "Infrator atualizado!");
-        })
-        .catch((err) => {
-          Alert.alert("Falha:", "Infrator não foi atualizado!");
-        });
-      }
-      else Credencial.accessDenied();
-    }
+      alert("Existem campos em branco!");
+    }            
+    
     
   }
 
