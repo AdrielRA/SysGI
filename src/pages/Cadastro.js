@@ -28,18 +28,18 @@ function Cadastro({navigation})
   const[dateInfra,setDateInfra]=useState(new Date());
   const[isSaved, setIsSaved]=useState(false);
   const[estado,setEstado] = useState(undefined);
-  const [cidade, setCidade] = useState([]);
-  const[city,setCity]  =useState('');
-  const[idEstado,setIdEstado] = useState('');
+  const [cidades, setCidades] = useState([]);
+  const[cidade,setCidade]  =useState('');
+  const[idEstado,setIdEstado] = useState(-1);
+  
   useEffect(()=>{
-    if(infrator.Uf != ""){
-        var filtro = Object.values(Cidades)[idEstado-1];
-        setCidade(filtro.cidades);
-      }
+    if(idEstado > -1){
+      console.log(idEstado);
+      let filtro = Object.values(Cidades)[idEstado];
+      if(filtro) setCidades(filtro.cidades);
+    }
   },[idEstado])
-  //useEffect(()=>{
-     
-  //},[])
+  
   const [infrator, setInfrator]=useState({
     "Nome":"", "Cpf":"", "Rg":"", "Mãe":"", "Logradouro":"",
     "Num_residência":"", "Bairro":"", "Cidade":"", "Uf":"", "Sexo":"",
@@ -56,6 +56,13 @@ function Cadastro({navigation})
     
     if(infrator_){
       setInfrator(infrator_);
+      let filteredCitys = Cidades.filter(c => c.sigla == infrator_.Uf)/*.map((c) => {
+        filteredCitys.push(c);
+      });*/
+      
+      setCidades(filteredCitys[0].cidades);
+      //setEstado(infrator_.Uf);
+      //setCidade(infrator_.Cidade);
       setIsNew(false);
       setIsSaved(true);
       setDateNas(moment(new Date(infrator_.Data_nascimento)).format('DD/MM/YYYY'));
@@ -135,7 +142,6 @@ function Cadastro({navigation})
 
     return res;
   }
-
 
   const saveInfrator = (infrator)=>{
    // console.log(infrator);
@@ -492,11 +498,14 @@ function Cadastro({navigation})
                         mode="dropdown"
                         selectedValue={infrator.Uf}
                         onValueChange={(itemValue,itemIndex)=>{
-                          setIdEstado(itemIndex);
-                          setInfrator({...infrator,"Uf":itemValue})
+                          if(itemIndex > 0){
+                            setIdEstado(itemIndex);
+                            if(itemValue != infrator.Uf)
+                              setInfrator({...infrator,"Uf":itemValue})
+                          }                          
                         }}> 
                       {Estados.map((item, index) => {
-                        return (< Picker.Item label={item.sigla} value={item.nome} key={index} />);
+                        return (< Picker.Item label={item.sigla} value={item.sigla} key={index} />);
                       })}   
                     </Picker>
                   </View>
@@ -505,8 +514,10 @@ function Cadastro({navigation})
                         style={{fontFamily:"CenturyGothic",color:Colors.Secondary.Normal}}
                         mode="dropdown"
                         selectedValue={infrator.Cidade}
-                        onValueChange={(itemValue,itenIndex)=>{setInfrator({...infrator,"Cidade":itemValue})}}> 
-                        {cidade.map((item, index) => {
+                        onValueChange={(itemValue,itenIndex)=>{
+                          setInfrator({...infrator,"Cidade":itemValue});
+                        }}> 
+                        {cidades.map((item, index) => {
                           return (< Picker.Item label={item} value={item} key={index} />);
                         })}   
                     </Picker>

@@ -1,4 +1,8 @@
 export default[
+    {"sigla": "UF",
+      "nome": "Estado",
+      "cidades": []
+    },
     {"sigla": "AC",
       "nome": "Acre",
       "cidades": [

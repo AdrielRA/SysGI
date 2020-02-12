@@ -1,5 +1,5 @@
 export default[
-    {"nome": "Cidade", "sigla": "Uf"},
+    {"nome": "Estado", "sigla": "UF"},
     {"nome": "Acre", "sigla": "AC"},
     {"nome": "Alagoas", "sigla": "AL"},
     {"nome": "Amazonas", "sigla": "AM"},
