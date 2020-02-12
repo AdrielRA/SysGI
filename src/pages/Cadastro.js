@@ -34,6 +34,7 @@ function Cadastro({navigation})
   useEffect(()=>{
     if(infrator.Uf != ""){
         var filtro = Object.values(Cidades)[idEstado-1];
+        console.log(filtro);
         setCidade(filtro.cidades);
       }
   },[idEstado])
@@ -47,8 +48,8 @@ function Cadastro({navigation})
   });
   const [infração, setInfração] = useState({
     "Descrição":"",
-    "Data_ocorrência": new Date().toISOString(),
-    "Data_registro": "",
+    "Data_ocorrência":moment(new Date()).toISOString(),
+    "Data_registro": moment(new Date()).toISOString(),
   });
   
   
@@ -88,14 +89,18 @@ function Cadastro({navigation})
           infrator.Infrações = infras;
           setInfrator(infrator);
         }
-        else {
+        else{
+          if(!favorito){return navigation.goBack()}
+          else{
           infratores.child(infratorKey).off("value");
           Alert.alert("Infrator não Encontrado!", "Provavelmente ele foi removido por alguém!");
           navigation.goBack();
+         }
         }
       });
       setFavorito(null);
     }
+   
   }, [infratorKey]);
 
   const camposOk = (infrator)=>{
@@ -496,7 +501,7 @@ function Cadastro({navigation})
                           setInfrator({...infrator,"Uf":itemValue})
                         }}> 
                       {Estados.map((item, index) => {
-                        return (< Picker.Item label={item.sigla} value={item.nome} key={index} />);
+                        return (< Picker.Item label={item.sigla} value={item.sigla} key={index} />);
                       })}   
                     </Picker>
                   </View>
