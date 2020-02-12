@@ -34,7 +34,6 @@ function Cadastro({navigation})
   
   useEffect(()=>{
     if(idEstado > -1){
-      console.log(idEstado);
       let filtro = Object.values(Cidades)[idEstado];
       if(filtro) setCidades(filtro.cidades);
     }
@@ -47,8 +46,8 @@ function Cadastro({navigation})
   });
   const [infração, setInfração] = useState({
     "Descrição":"",
-    "Data_ocorrência": new Date().toISOString(),
-    "Data_registro": "",
+    "Data_ocorrência":moment(new Date()).toISOString(),
+    "Data_registro": moment(new Date()).toISOString(),
   });
   
   
@@ -95,14 +94,18 @@ function Cadastro({navigation})
           infrator.Infrações = infras;
           setInfrator(infrator);
         }
-        else {
+        else{
+          if(!favorito){return navigation.goBack()}
+          else{
           infratores.child(infratorKey).off("value");
           Alert.alert("Infrator não Encontrado!", "Provavelmente ele foi removido por alguém!");
           navigation.goBack();
+         }
         }
       });
       setFavorito(null);
     }
+   
   }, [infratorKey]);
 
   const camposOk = (infrator)=>{
