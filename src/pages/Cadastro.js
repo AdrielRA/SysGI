@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert, Image} from 'react-native';
+import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert, Image,Picker} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
@@ -11,6 +11,9 @@ import ListaItem from '../components/ListaItem'
 import ListaItemSwipe from '../components/ListaItemSwipe'
 import firebase from '../services/firebase';
 import Network  from '../controllers/network';
+import Estados from '../components/Estados'
+import Cidades from '../components/Cidades'
+
 
 function Cadastro({navigation})
 {
@@ -24,11 +27,23 @@ function Cadastro({navigation})
   const[dateNasc,setDateNas]=useState(new Date());
   const[dateInfra,setDateInfra]=useState(new Date());
   const[isSaved, setIsSaved]=useState(false);
-
+  const[estado,setEstado] = useState(undefined);
+  const [cidade, setCidade] = useState([]);
+  const[city,setCity]  =useState('');
+  const[idEstado,setIdEstado] = useState('');
+  useEffect(()=>{
+    if(infrator.Uf != ""){
+        var filtro = Object.values(Cidades)[idEstado-1];
+        setCidade(filtro.cidades);
+      }
+  },[idEstado])
+  //useEffect(()=>{
+     
+  //},[])
   const [infrator, setInfrator]=useState({
     "Nome":"", "Cpf":"", "Rg":"", "Mãe":"", "Logradouro":"",
     "Num_residência":"", "Bairro":"", "Cidade":"", "Uf":"", "Sexo":"",
-    "Data_nascimento":new Date().toISOString(), "Data_registro":"","Infrações":[]
+    "Data_nascimento":"", "Data_registro":moment(new Date()).toISOString(),"Infrações":[]
   });
   const [infração, setInfração] = useState({
     "Descrição":"",
@@ -38,6 +53,7 @@ function Cadastro({navigation})
   
   
   useEffect(() => {
+    
     if(infrator_){
       setInfrator(infrator_);
       setIsNew(false);
@@ -122,6 +138,7 @@ function Cadastro({navigation})
 
 
   const saveInfrator = (infrator)=>{
+   // console.log(infrator);
     if(!Network.haveInternet){
       Network.alertOffline(() => {});
       return;
@@ -164,7 +181,8 @@ function Cadastro({navigation})
         });
       }
     }
- }
+  
+  }
 
   const saveInfração = () => {
     if(!Network.haveInternet){
@@ -468,25 +486,31 @@ function Cadastro({navigation})
                     onChangeText={(bairro) => setInfrator({...infrator, "Bairro":bairro})}/>
                 </View>
                 <View style={{flexDirection:'row'}}>
-                  <TextInput placeholder="Cidade"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    returnKeyType="next"
-                    autoCapitalize="words"
-                    textContentType="addressCity"
-                    autoCompleteType="street-address"
-                    style={[Styles.campoCadastro,{flex:1,marginEnd:3}] }
-                    value={infrator.Cidade}
-                    maxLength={50}
-                    onChangeText={(cidade) => setInfrator({...infrator, "Cidade":cidade})}/>
-                  <TextInput placeholder="UF"
-                    placeholderTextColor={Colors.Secondary.Normal}
-                    returnKeyType="next"
-                    autoCapitalize="characters"
-                    textContentType="addressState"
-                    style={[Styles.campoCadastro,{flex:0.5,marginEnd:3}] }
-                    value={infrator.Uf}
-                    maxLength={2}
-                    onChangeText={(uf) => setInfrator({...infrator, "Uf":uf.toUpperCase()})}/>
+                  <View style={{flex:1,justifyContent:"center",borderWidth:1,borderRadius:25, borderColor:'#DCDCDC',height:40,marginVertical:5,marginEnd:3,paddingStart:10}}>
+                    <Picker
+                        style={{fontFamily:"CenturyGothic",color:Colors.Secondary.Normal}}
+                        mode="dropdown"
+                        selectedValue={infrator.Uf}
+                        onValueChange={(itemValue,itemIndex)=>{
+                          setIdEstado(itemIndex);
+                          setInfrator({...infrator,"Uf":itemValue})
+                        }}> 
+                      {Estados.map((item, index) => {
+                        return (< Picker.Item label={item.sigla} value={item.nome} key={index} />);
+                      })}   
+                    </Picker>
+                  </View>
+                  <View style={{flex:1,borderWidth:1,justifyContent:"center",borderRadius:25, borderColor:'#DCDCDC',height:40,marginVertical:5,marginEnd:3,paddingStart:10}}>
+                    <Picker
+                        style={{fontFamily:"CenturyGothic",color:Colors.Secondary.Normal}}
+                        mode="dropdown"
+                        selectedValue={infrator.Cidade}
+                        onValueChange={(itemValue,itenIndex)=>{setInfrator({...infrator,"Cidade":itemValue})}}> 
+                        {cidade.map((item, index) => {
+                          return (< Picker.Item label={item} value={item} key={index} />);
+                        })}   
+                    </Picker>
+                  </View>
                   <TextInput placeholder="N°"
                     placeholderTextColor={Colors.Secondary.Normal}
                     style={[Styles.campoCadastro,{flex:0.5}] }
