@@ -28,7 +28,7 @@ function Cadastro({navigation})
   const [infrator, setInfrator]=useState({
     "Nome":"", "Cpf":"", "Rg":"", "Mãe":"", "Logradouro":"",
     "Num_residência":"", "Bairro":"", "Cidade":"", "Uf":"", "Sexo":"",
-    "Data_nascimento":"", "Data_registro":"","Infrações":[]
+    "Data_nascimento":new Date().toISOString(), "Data_registro":"","Infrações":[]
   });
   const [infração, setInfração] = useState({
     "Descrição":"",
@@ -82,18 +82,44 @@ function Cadastro({navigation})
     }
   }, [infratorKey]);
 
-  const dadosOk = (infrator)=>{
-    if(infrator.Nome || infrator.Cpf || infrator.Rg ||
-      infrator.Logradouro || infrator.Num_residência ||
-      infrator.Bairro || infrator.Cidade || infrator.Uf ||
-      infrator.Sexo || infrator.Data_nascimento || infrator.Data_registro === "")
-      {
-        return false;
-      }
-      else{
-       return true;
-      }
+  const camposOk = (infrator)=>{
+    let msg = "";
+    if(!infrator.Nome || infrator.Nome == "") msg = "Nome fornecido é inválido!";
+    else if(!infrator.Rg || infrator.Rg == "") msg = "RG fornecido é inválido!";
+    else if(!infrator.Cpf || infrator.Cpf == "") msg = "CPF fornecido é inválido!";
+    else if(!infrator.Data_nascimento || infrator.Data_nascimento == "") msg = "Data de nascimento fornecida é inválida!";
+    else if(!infrator.Sexo || infrator.Sexo == "") msg = "Sexo fornecido é inválido!";
+    else if(!infrator.Mãe || infrator.Mãe == "") msg = "Nome da mãe fornecido é inválido!";
+    else if(!infrator.Logradouro || infrator.Logradouro == "") msg = "Logradouro fornecido é inválido!";
+    else if(!infrator.Bairro || infrator.Bairro == "") msg = "Bairro fornecido é inválido!";
+    else if(!infrator.Cidade || infrator.Cidade == "") msg = "Cidade fornecida é inválida!";
+    else if(!infrator.Uf || infrator.Uf == "") msg = "Estado fornecido é inválido!";
+    else if(!infrator.Num_residência || infrator.Num_residência == "") msg = "Nº de residência fornecido é inválido!";
+
+    if(msg != "") Alert.alert("Verifique os dados:", msg);
+    return msg == "";
   }
+
+  const dadosOk = async (infrator)=>{
+
+    let res = false;
+
+    let snapshot = await infratores.orderByChild('Rg').equalTo(infrator.Rg).once("value");
+    if(snapshot.exists())
+    {
+      Alert.alert("Verifique os dados:", "RG fornecido já foi cadastrado em outro infrator!");
+      res = false;
+    } 
+    else{
+      snapshot =  await infratores.orderByChild('Cpf').equalTo(infrator.Cpf).once("value");
+      if(snapshot.exists())
+        Alert.alert("Verifique os dados:", "CPF fornecido já foi cadastrado em outro infrator!");
+      res = !snapshot.exists();
+    }
+
+    return res;
+  }
+
 
   const saveInfrator = (infrator)=>{
     if(!Network.haveInternet){
@@ -101,29 +127,34 @@ function Cadastro({navigation})
       return;
     }
 
-    if(dadosOk(infrator)){
-      if(isNew){
-        if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToCadastro)){
-          if(!infrator.Data_registro){
-            setInfrator({...infrator, "Data_registro":new Date().toISOString()})
+    
+    if(!camposOk(infrator)) { return; }
+    
+    if(isNew){
+      dadosOk(infrator).then((ok) => {
+        if(!ok) return;
+        else {
+          if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToCadastro)){
+            if(!infrator.Data_registro){
+              setInfrator({...infrator, "Data_registro":new Date().toISOString()})
+            }
+            
+            let key = infratores.push().key;
+            infratores.child(key).set(infrator).then(() => {
+              Alert.alert("Sucesso:", "Infrator salvo!");
+              setInfratorKey(key);
+              setIsNew(false);
+              setIsSaved(true);
+            })
+            .catch((err) => {
+              Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
+            });
           }
-          
-          let key = infratores.push().key;
-          infratores.child(key).set(infrator).then(() => {
-            Alert.alert("Sucesso:", "Infrator salvo!");
-            setInfratorKey(key);
-            setIsNew(false);
-            setIsSaved(true);
-          })
-          .catch((err) => {
-            Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
-          });
+          else Credencial.accessDenied();
         }
-        else Credencial.accessDenied();
-      }
-      else Credencial.accessDenied();
+      });
     }
-    else{
+    else {
       if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToEditar)){
         infratores.child(infratorKey).set(JSON.parse( JSON.stringify({...infrator, "Infrações":fireInfrações}))).then(() => {
           Alert.alert("Sucesso:", "Infrator atualizado!");

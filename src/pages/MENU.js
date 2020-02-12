@@ -32,8 +32,14 @@ function MENU({navigation}) {
     async function _saveNotify(){
       try{
         if(allowNotify != undefined){
-          let token = await Notifications.getExpoPushTokenAsync();
-          firebase.database().ref().child('users').child(firebase.auth().currentUser.uid).child('Device').set(token);
+          if(allowNotify){
+            let token = await Notifications.getExpoPushTokenAsync();
+            firebase.database().ref().child('users').child(firebase.auth().currentUser.uid).child('Device').set(token);
+          }
+          else{
+            firebase.database().ref().child('users').child(firebase.auth().currentUser.uid).child('Device').remove();
+          }
+          
           
           await AsyncStorage.setItem('notify', allowNotify.toString());
         }
