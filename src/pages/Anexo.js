@@ -7,6 +7,7 @@ import Colors from '../styles/colors';
 import moment from 'moment';
 import firebase from '../services/firebase';
 import Credencial from '../controllers/credencial';
+import Network  from '../controllers/network';
 import * as DocumentPicker from 'expo-document-picker';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import ItemAnexo from '../components/ItemAnexo';

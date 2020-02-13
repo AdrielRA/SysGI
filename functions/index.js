@@ -6,7 +6,6 @@ admin.initializeApp(functions.config().firebase);
 
 exports.sendPushNotification = functions.database.ref('/infratores/{Id}').onCreate((snapshot, context) => {
 
-    const id = context.params.Id;
     const root = snapshot.ref.root;
 
     let messages = [];

@@ -55,13 +55,8 @@ function Cadastro({navigation})
     
     if(infrator_){
       setInfrator(infrator_);
-      let filteredCitys = Cidades.filter(c => c.sigla == infrator_.Uf)/*.map((c) => {
-        filteredCitys.push(c);
-      });*/
-      
+      let filteredCitys = Cidades.filter(c => c.sigla == infrator_.Uf);      
       setCidades(filteredCitys[0].cidades);
-      //setEstado(infrator_.Uf);
-      //setCidade(infrator_.Cidade);
       setIsNew(false);
       setIsSaved(true);
       setDateNas(moment(new Date(infrator_.Data_nascimento)).format('DD/MM/YYYY'));
@@ -79,6 +74,11 @@ function Cadastro({navigation})
       });
     }
   }, []);
+
+
+  useEffect(() => {
+    console.log("Navegou...");
+  }, [navigation]);
 
   useEffect(() => {
     if(infratorKey){
