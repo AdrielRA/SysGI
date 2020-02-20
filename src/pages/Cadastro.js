@@ -46,8 +46,8 @@ function Cadastro({navigation})
   });
   const [infração, setInfração] = useState({
     "Descrição":"",
-    "Data_ocorrência":moment(new Date()).toISOString(),
-    "Data_registro": moment(new Date()).toISOString(),
+    "Data_ocorrência":new Date().toISOString(),
+    "Data_registro":new Date().toISOString(),
   });
   
   
