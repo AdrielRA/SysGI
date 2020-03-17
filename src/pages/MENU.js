@@ -94,7 +94,7 @@ function MENU({navigation}) {
               if(!Network.haveInternet)
                 Network.alertOffline(() => {});
               else{
-                if(Credencial.haveAccess(credencial, Credencial.AccessToCadastro))
+                if(Credencial.haveAccess(credencial, Credencial.AccessToCadastro) || Credencial.isAdimin(credencial))
                   navigation.navigate('Cadastro');
                 else Credencial.accessDenied();
               }              
@@ -107,7 +107,7 @@ function MENU({navigation}) {
             if(!Network.haveInternet)
               Network.alertOffline(() => {});
             else{
-              if(Credencial.haveAccess(credencial, Credencial.AccessToConsulta))
+              if(Credencial.haveAccess(credencial, Credencial.AccessToConsulta) || Credencial.isAdimin(credencial) )
                 navigation.navigate('Consulta');
               else Credencial.accessDenied();
             }
@@ -115,7 +115,7 @@ function MENU({navigation}) {
           }}>
           <Text style={Styles.btnTextSecundary}>CONSULTAR</Text>
         </TouchableHighlight>
-        {credencial > 10 ? (<TouchableHighlight style={Styles.btnSecundary}
+        {credencial==30? (<TouchableHighlight style={Styles.btnSecundary}
             underlayColor={Colors.Primary.White}
             onPress={() =>  {
               if(!Network.haveInternet)

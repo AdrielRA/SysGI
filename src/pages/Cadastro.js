@@ -163,7 +163,7 @@ function Cadastro({navigation})
       dadosOk(infrator).then((ok) => {
         if(!ok) return;
         else {
-          if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToCadastro)){
+          if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToCadastro) || Credencial.isAdimin(Credencial.loggedCred)){
             if(!infrator.Data_registro){
               setInfrator({...infrator, "Data_registro":new Date().toISOString()})
             }
@@ -184,7 +184,7 @@ function Cadastro({navigation})
       });
     }
     else {
-      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToEditar)){
+      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToEditar) || Credencial.isAdimin(Credencial.loggedCred)){
         infratores.child(infratorKey).set(JSON.parse( JSON.stringify({...infrator, "Infrações":fireInfrações}))).then(() => {
           Alert.alert("Sucesso:", "Infrator atualizado!");
         })
@@ -202,7 +202,7 @@ function Cadastro({navigation})
       return;
     }
 
-    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToInfração)){
+    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToInfração) || Credencial.isAdimin(Credencial.loggedCred)){
       if(infração.Descrição == "") {
         Alert.alert("Atenção:", "Adicione uma descrição primeiro!");
         return;
@@ -233,7 +233,7 @@ function Cadastro({navigation})
       return;
     }
 
-    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToDelete)){
+    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToDelete) || Credencial.isAdimin(Credencial.loggedCred)){
       Alert.alert("Tem certeza?", "Os dados deste infrator serão perdidos para sempre!",
       [
         {
@@ -315,7 +315,7 @@ function Cadastro({navigation})
       Network.alertOffline(() => {});
       return;
     }
-    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToInfração)){
+    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToInfração) || Credencial.isAdimin(Credencial.loggedCred)){
       const infrações = infratores.child(infratorKey).child('Infrações');
 
       let query = infrações.orderByChild("Data_registro").equalTo(item.Data_registro);
@@ -380,7 +380,7 @@ function Cadastro({navigation})
         Network.alertOffline(() => {});
         return;
       }
-      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar))
+      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar) || Credencial.isAdimin(Credencial.loggedCred))
         navigation.navigate('Anexo',{ item: {...infração_, infratorKey} });
       else Credencial.accessDenied();
     }

@@ -20,12 +20,12 @@ class Credencial {
     }    
   }
 
-  AccessToCadastro = [3,4,6];
-  AccessToDelete = [6];
-  AccessToConsulta = [1,2,3,4,5,6];
-  AccessToDetalhes = [2,3,4,5,6];
-  AccessToEditar = [4,6];
-  AccessToInfração = [3,4,6];
+  AccessToCadastro = [3,4,5,6];
+  AccessToDelete = [3,4,5,6];
+  AccessToConsulta = [3,4,5,6,2,1];
+  AccessToDetalhes = [3,,4,5,6];
+  AccessToEditar = [3,4,5,6];
+  AccessToInfração = [3,4,5,6];
   AccessToAnexar = [3,4,5,6];
 
   haveAccess = (credencial, access) => {
@@ -33,9 +33,8 @@ class Credencial {
   }
 
   isAdimin = (credencial) => {
-    return credencial > 10 && credencial < 17;
+    return credencial === 30;
   }
-
   accessDenied = () => { Alert.alert("Atenção:", "Você não tem permissão para acessar este recurso!"); }
 }
 

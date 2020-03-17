@@ -202,7 +202,7 @@ function Consulta({navigation}) {
                       Network.alertOffline(() => {});
                       return;
                     }
-                    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToDetalhes))
+                    if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToDetalhes) || Credencial.isAdimin(Credencial.loggedCred))
                       navigation.navigate("Cadastro", {Infrator});
                     else Credencial.accessDenied();
                     }}>
@@ -232,7 +232,7 @@ function Consulta({navigation}) {
                             Network.alertOffline(() => {});
                             return;
                           }
-                          if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar))
+                          if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar) || Credencial.isAdimin(Credencial.loggedCred))
                             navigation.navigate("Anexo", { item: {...infração_, infratorKey} });
                           else Credencial.accessDenied();
                         }}/>
