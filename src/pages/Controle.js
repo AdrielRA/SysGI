@@ -12,12 +12,20 @@ import Colors from '../styles/colors';
 
 function Controle({navigation}) {
   const[lista,setLista]=useState([]);
-
+  let query = undefined;
   const users = firebase.database().ref().child('users');
-  const query = users.orderByChild("Credencial").equalTo(Credencial.loggedCred % 10 * -1);
+  if(Credencial.loggedCred == 30)
+  {
+    query = users.orderByChild("Credencial").endAt(0);
+  }
+  else
+  {
+    query = users.orderByChild("Credencial").equalTo(Credencial.loggedCred % 10 * -1);
+  }
 
+  
   useEffect(() => {
-
+    if(query!=undefined){
     query.on("value", function(snapshot) {
       let users_res = [];
       if(snapshot.val() != null)
@@ -28,6 +36,7 @@ function Controle({navigation}) {
       }
       setLista(users_res);
     });
+   }
   }, []);
   
   firebase.auth().onAuthStateChanged((user)=>{

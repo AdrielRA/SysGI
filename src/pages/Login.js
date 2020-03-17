@@ -153,7 +153,7 @@ function Login({navigation}) {
   };
 
   function entrar(snapshot){
-    if(snapshot.val().Credencial > 0 && snapshot.val().Credencial < 20){
+    if(snapshot.val().Credencial > 0 && snapshot.val().Credencial <= 30){
       setEmail('');
       setSenha('');
       setEntrando(false); 

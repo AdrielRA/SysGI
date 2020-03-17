@@ -123,7 +123,7 @@ function Anexo({navigation}) {
          Network.alertOffline(() => {});
          return;
        }
-      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar)){
+      if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar) || Credencial.isAdimin(Credencial.loggedCred)){
          let file = await DocumentPicker.getDocumentAsync({copyToCacheDirectory: false, type:"application/pdf"});
          if (file.type === 'cancel') { return; }
          setAnexo(file);
