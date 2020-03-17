@@ -222,6 +222,9 @@ function Anexo({navigation}) {
             <View style={{flexDirection:"row"}}>
                <Text style={Styles.DescAnexo}>{infração.Descrição}</Text>
             </View>
+            <View style={{flexDirection:"row"}}>
+               <Text style={Styles.DescAnexo}>{infração.Reds}</Text>
+            </View>
 
             
             <View style={Styles.lbAnexos}>

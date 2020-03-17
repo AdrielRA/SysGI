@@ -1,6 +1,8 @@
 import React,{useState,useEffect} from 'react';
-import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert, Image,Picker} from 'react-native';
+import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert, Image,Picker, Linking} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import DatePicker from 'react-native-datepicker'
@@ -46,6 +48,7 @@ function Cadastro({navigation})
   });
   const [infração, setInfração] = useState({
     "Descrição":"",
+    "Reds":"",
     "Data_ocorrência":moment(new Date()).toISOString(),
     "Data_registro": moment(new Date()).toISOString(),
   });
@@ -204,13 +207,17 @@ function Cadastro({navigation})
         Alert.alert("Atenção:", "Adicione uma descrição primeiro!");
         return;
       }
+      if(infração.Reds == "") {
+        Alert.alert("Atenção:", "Adicione o Nº REDS primeiro!");
+        return;
+      }
   
       const infrações = infratores.child(infratorKey).child('Infrações');
   
       let key = infrações.push().key;
       infrações.child(key).set({...infração})
       .then(() => {
-        setInfração({...infração, "Descrição":""})
+        setInfração({...infração, "Descrição":"", "Reds":""});
         Alert.alert("Sucesso:", "Infração adicionada!");
       })
       .catch((err) => {
@@ -380,6 +387,18 @@ function Cadastro({navigation})
     else{ Alert.alert("Atenção:", "Salve suas alterações primeiro!"); }      
   }
   
+  const CreatePDF = async () =>{
+    await Print.printToFileAsync({
+      html: "<h1>RELATÓRIO</h1>",
+      width : 612,
+      height : 792,
+      base64 : false
+    })
+    .then(({ uri }) => {
+      Sharing.shareAsync(uri, {dialogTitle: 'Abrir seu relatório?', mimeType :'application/pdf'})
+    }).catch(() => console.log("Falhou..."));
+  }
+  
   return (
     <SafeAreaView style={Styles.page}>
       
@@ -537,7 +556,7 @@ function Cadastro({navigation})
               <View style={{flexDirection:"row", alignSelf:"stretch"}}>
                 <TouchableHighlight style={[Styles.btnSecundary,{
 
-                  paddingHorizontal: isSaved?"17%" : "36%", backgroundColor:"#800",marginHorizontal:0}]}
+                  paddingHorizontal: isSaved?"7%" : "36%", backgroundColor:"#800",marginHorizontal:0}]}
                   underlayColor={Colors.Primary.Normal}
                   onPress={() => saveInfrator(infrator)}>
                   <Text style={[Styles.btnTextSecundary,{color:"#FFF"}]}>SALVAR</Text>
@@ -552,6 +571,11 @@ function Cadastro({navigation})
                     </TouchableHighlight>
                     <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0, justifyContent:"center", paddingHorizontal:15}]}
                       underlayColor={Colors.Primary.Normal}
+                      onPress={() => CreatePDF()}>
+                      <Image style={{height:20, width:20}} source={require('../assets/images/icon_relatory.png')} ></Image>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:5, justifyContent:"center", paddingHorizontal:15}]}
+                      underlayColor={Colors.Primary.Normal}
                       onPress={() => excluirInfrator()}>
                       <Image style={{height:20, width:20}} source={require('../assets/images/icon_lixeira_white.png')} ></Image>
                     </TouchableHighlight>
@@ -561,16 +585,25 @@ function Cadastro({navigation})
               </View>
             </View>
             {isSaved ? (<View style={{backgroundColor:'#fff',flex:1,borderRadius:10,padding:10}}>
-              <Text style={{color:'#800000',fontSize:18,marginStart:10,fontFamily:"CenturyGothicBold"}}>Informações da infração</Text>
-              <View style={{flexDirection:'row',marginTop:5}}>
+              <View style={{height:40}}>
                 <TextInput 
-                  placeholder="Descrição"
+                  placeholder="Infração"
                   placeholderTextColor={Colors.Secondary.Normal}
-                  style={[Styles.campoCadastro,{borderRadius:25,paddingTop:10,marginTop:0}] }
+                  style={[Styles.campoCadastro,{borderRadius:25,paddingTop:8,marginTop:0}] }
                   multiline={true}
                   value={infração.Descrição}
                   textAlignVertical='top'
                   onChangeText={(descrição) => setInfração({...infração, "Descrição":descrição})}/>
+              </View>
+              <View style={{height:40,marginTop:5}}>
+                <TextInput 
+                  placeholder="REDS"
+                  placeholderTextColor={Colors.Secondary.Normal}
+                  style={[Styles.campoCadastro,{borderRadius:25,paddingTop:8,marginTop:0}] }
+                  multiline={false}
+                  value={infração.Reds}
+                  textAlignVertical='top'
+                  onChangeText={(reds) => setInfração({...infração, "Reds":reds})}/>
               </View>
               <View style={{flexDirection:'row',justifyContent:"center"}}>
                 <DatePicker format="DD/MM/YYYY"

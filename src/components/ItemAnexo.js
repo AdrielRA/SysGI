@@ -14,7 +14,6 @@ const ItemView = styled.View`
  `;
  const ItemText = styled.Text`
    font-size:15px;
-   text-align-vertical:center;
    font-weight:bold;
    align-self:flex-start;
    padding-left:5px;

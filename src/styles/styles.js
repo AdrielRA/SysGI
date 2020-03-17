@@ -249,7 +249,6 @@ const Styles = StyleSheet.create({
   searchContent:{
     position:"absolute",
     top:108,
-    left:55,
     right:0,
     alignSelf:"stretch",
     marginHorizontal:15,
@@ -262,24 +261,36 @@ const Styles = StyleSheet.create({
     padding:0,
     paddingBottom:1,
   },
+  searchContentFull:{
+    alignSelf:"stretch",
+    marginHorizontal:10,
+    marginBottom:5,
+    backgroundColor:Colors.Secondary.White,
+    borderRadius:30,
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent',
+    padding:0,
+    paddingBottom:1,
+  },
   searchInput:{
     color:Colors.Primary.Normal,
     backgroundColor:Colors.Secondary.White
   },
-  searchRG:{
+  searchType:{
     position:"absolute",
-    backgroundColor:Colors.Secondary.Normal,
-    color:Colors.Primary.White,
-    fontFamily:"CenturyGothicBold",
-    textAlign:"center",
-    fontSize:28,
     top:109,
     left:0,
     paddingHorizontal:10,
     borderTopLeftRadius:30,
     borderBottomLeftRadius:30,
     marginLeft:15,
-
+    backgroundColor:Colors.Secondary.Normal,
+  },
+  searchText:{
+    color:Colors.Primary.White,
+    fontFamily:"CenturyGothicBold",
+    textAlign:"center",
+    fontSize:28,
   },
   txtBold:{
     color:Colors.Secondary.Black,

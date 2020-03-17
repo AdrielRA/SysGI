@@ -13,6 +13,10 @@ function ItemInfração({infração, onClick}){
           <Text style={Styles.txtRegular}>{infração.Descrição}</Text>
         </View>
         <View style={{alignSelf:"stretch", flexDirection:"row"}}>
+          <Text style={Styles.txtBold}>REDS: </Text>
+          <Text style={Styles.txtRegular}>{infração.Reds}</Text>
+        </View>
+        <View style={{alignSelf:"stretch", flexDirection:"row"}}>
           <Text style={Styles.txtBold}>Data: </Text>
           <Text style={Styles.txtRegular}>
             { moment(new Date(infração.Data_ocorrência)).format('DD/MM/YYYY') }
@@ -20,7 +24,7 @@ function ItemInfração({infração, onClick}){
         </View>
       </View>
       <TouchableOpacity onPress={() => { onClick(); }}>
-        <Image style={{width:40, height:40, borderRadius:5}} source={require('../assets/images/icon-mais.png')}></Image>
+        <Image style={{width:40, height:40,marginTop:10, borderRadius:5}} source={require('../assets/images/icon-mais.png')}></Image>
       </TouchableOpacity> 
       
     </View> 

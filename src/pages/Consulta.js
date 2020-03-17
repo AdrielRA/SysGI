@@ -13,8 +13,27 @@ import Colors from '../styles/colors';
 function Consulta({navigation}) {
   const fire_user = firebase.auth().currentUser;
   const [TermoPesquisa, setTermoPesquisa] = useState('');
+  const [termoAnterior, setTermoAnterior] = useState('');
+  const[Filtro,setFiltro] = useState('');
   const [Infrator, setInfrator] = useState(undefined);
   const[infratorKey, setInfratorKey]=useState(undefined);
+  const[searchType, setSearchType]=useState(1);
+  const[searchPadding, setSearchPadding]=useState(55);
+  const[observerQuery, setObserver]=useState(undefined);
+
+
+  useEffect(() => {
+    switch(searchType){
+      case 1:setSearchPadding(55);
+        break;
+      case 2:setSearchPadding(95);
+        break;
+      case 3:setSearchPadding(75);
+        break;
+      default: break;
+    }
+    setTermoPesquisa('');
+  }, [searchType]);
 
   firebase.auth().onAuthStateChanged((user)=>{
     if(!user) {
@@ -24,14 +43,16 @@ function Consulta({navigation}) {
   });
 
   useEffect(() => {
-    if(TermoPesquisa.length >= 8)
-    {
+    if(TermoPesquisa !== termoAnterior){
+      //console.log("Termo: "+ termoAnterior);
+      //setTermoAnterior(TermoPesquisa);
       _consultarInfrator(TermoPesquisa);
     }
   }, [TermoPesquisa]);
 
-  const maskTermo = (rg) =>{
-    setTermoPesquisa(maskRG(rg));
+  const maskTermo = (txt) =>{
+    if(searchType < 2) setTermoPesquisa(maskRG(txt));
+    else setTermoPesquisa(txt);
   }
   const maskRG = (rg) =>{
     rg = rg.replace(/\D/g,"");
@@ -49,15 +70,39 @@ function Consulta({navigation}) {
 
   const _consultarInfrator = () => {
 
+    if(TermoPesquisa === termoAnterior){
+      return;
+    }
+    else{
+      setTermoAnterior(TermoPesquisa);
+    }
+
     if(!Network.haveInternet){
       Network.alertOffline(() => {});
       return;
+    }    
+
+    let termo = TermoPesquisa;
+    let child_ = "Rg";
+
+    switch(searchType){
+      case 1: termo = termo.replace(/\D/g,"");
+        break;
+      case 2:child_ = "Nome";
+        break;
+      case 3:child_ = "Mãe";
+        break;
+      default: break;
     }
 
-    let rg = TermoPesquisa.replace(/\D/g,"");
+    if(observerQuery){
+      observerQuery.off("value");
+    }
+    //console.log(observerQuery);
     if(fire_user){
       let infratores = firebase.database().ref("infratores");
-      let query = infratores.orderByChild("Rg").equalTo(rg);
+      let query = infratores.orderByChild(child_).limitToFirst(1).equalTo(termo);
+      setObserver(query);
       query.on("value", function(snapshot) {
         if(snapshot.val() != null)
         {
@@ -77,7 +122,8 @@ function Consulta({navigation}) {
         else { 
           setInfrator(undefined);
           query.off("value");
-          Alert.alert("Infrator não Encontrado!", "Verifique o número do RG e tente novamente!");
+          setObserver(undefined);
+          //Alert.alert("Infrator não Encontrado!", "Verifique o número do RG e tente novamente!");
         }
       });
     }
@@ -92,16 +138,21 @@ function Consulta({navigation}) {
         style={{flex:1, alignSelf:"stretch", paddingTop:30}}>
         <Text style={Styles.lblSubtitle}>CONSULTA</Text>
       </LinearGradient>
-      <Text style={Styles.searchRG}>RG</Text>
+      <TouchableOpacity style={Styles.searchType} onPress={() => {
+          setSearchType(searchType < 3 ? searchType + 1 : 1)
+        }}>
+          <Text style={Styles.searchText}>{searchType < 2 ? "RG" : searchType < 3 ? "Nome" : "Mãe"}</Text>
+      </TouchableOpacity>
+      
       <SearchBar lightTheme placeholder="Pesquisar Infrator" placeholderTextColor={Colors.Secondary.Normal}
-          containerStyle={Styles.searchContent}
+          containerStyle={[Styles.searchContent, {left:searchPadding}]}
           inputStyle={Styles.searchInput}
           round={true}
           inputContainerStyle={{backgroundColor:'transparent'}}
           searchIcon={{ iconStyle:{ color:Colors.Primary.Normal}}}
           clearIcon={{ iconStyle:{ color:Colors.Primary.Normal}}}
           value={TermoPesquisa}
-          keyboardType="numeric"
+          keyboardType={searchType < 2 ? "numeric" : "default"}
           onChangeText={(termo) => maskTermo(termo) }
           onEndEditing={() => {_consultarInfrator(); }}
           ></SearchBar>
@@ -159,23 +210,39 @@ function Consulta({navigation}) {
                   </TouchableOpacity>                  
                 </View>
               </View>
-              <View style={{flex:1, alignSelf:"stretch", marginHorizontal:15, borderRadius:20, backgroundColor:Colors.Primary.White, paddingVertical:20, marginBottom:15}}>
+              <View style={{flex:1, alignSelf:"stretch", marginHorizontal:15, borderRadius:20, backgroundColor:Colors.Primary.White, paddingTop:10, paddingBottom:20, marginBottom:15}}>
+                  <SearchBar lightTheme placeholder="Pesquisar Infração" placeholderTextColor={Colors.Secondary.Normal}
+                    containerStyle={[Styles.searchContentFull, {}]}
+                    inputStyle={Styles.searchInput}
+                    round={true}
+                    inputContainerStyle={{backgroundColor:'transparent'}}
+                    searchIcon={{ iconStyle:{ color:Colors.Primary.Normal}}}
+                    clearIcon={{ iconStyle:{ color:Colors.Primary.Normal}}}
+                    value={Filtro}
+                    keyboardType="default"
+                    onChangeText={(filtro) => setFiltro(filtro)}
+                    onEndEditing={(filtro) => {setFiltro(filtro); }}
+                    >
+                  </SearchBar>
                   <ScrollView style={{flex:1, alignSelf:"stretch"}}>
                     {Infrator.Infrações.map((infração_, i) => {
-                      return <ItemInfração key={i} infração={infração_} onClick={() =>{
-                        if(!Network.haveInternet){
-                          Network.alertOffline(() => {});
-                          return;
-                        }
-                        if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar))
-                          navigation.navigate("Anexo", { item: {...infração_, infratorKey} });
-                        else Credencial.accessDenied();
-                      }}/>
+                      if(infração_.Reds.includes(Filtro))
+                        return <ItemInfração key={i} infração={infração_} onClick={() =>{
+                          if(!Network.haveInternet){
+                            Network.alertOffline(() => {});
+                            return;
+                          }
+                          if(Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar))
+                            navigation.navigate("Anexo", { item: {...infração_, infratorKey} });
+                          else Credencial.accessDenied();
+                        }}/>
                     })}
                   </ScrollView>
                 </View>
             </View>
-          ) : (<View style={{flex:6}}></View>)}
+          ) : (<View style={{flex:6}}>
+            <Text style={[Styles.lblMENU, {paddingTop:0, color:Colors.Secondary.Normal}]}>{TermoPesquisa == "" ? "" : "Infrator não encontrado!"}</Text>
+          </View>)}
     </SafeAreaView>
     
   );
