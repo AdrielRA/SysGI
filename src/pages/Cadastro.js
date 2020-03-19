@@ -33,7 +33,7 @@ function Cadastro({navigation})
   const [cidades, setCidades] = useState([]);
   const[cidade,setCidade]  =useState('');
   const[idEstado,setIdEstado] = useState(-1);
-  
+  const[str,setStr] = useState(undefined);
   useEffect(()=>{
     if(idEstado > -1){
       let filtro = Object.values(Cidades)[idEstado];
@@ -387,12 +387,59 @@ function Cadastro({navigation})
     else{ Alert.alert("Atenção:", "Salve suas alterações primeiro!"); }      
   }
   
+    
+    /*setSrc(...src,"Descrição:"+ Object.values(infrator.Infrações)[0].Descrição);
+    setSrc(...src,"REDS"+Object.values(infrator.Infrações)[0].Reds);
+    setSrc(...src,"Data de ocorrência"+Object.values(infrator.Infrações)[0].Data_ocorrência);  
+    setSrc(...src,"Data de registro"+Object.values(infrator.Infrações)[0].Data_registro);*/  
+  
+   const PrintPDF=()=>{
+     let str ="";
+      {infrator.Infrações.map((item,index)=>{
+       item.Data_ocorrência = moment(item.Data_ocorrência).format("DD/MM/YYYY");
+       item.Data_registro = moment(item.Data_registro).format("DD/MM/YYYY");
+       str += 
+       `<p style="margin-left:0px;padding:0px;font-size:23px;font-weight:bold";>${index + 1}ª Infração</p><br> 
+        <li style="font-weight:normal;font-size:18px;margin-left:20px;">Descrição: ${item.Descrição}</li><br>
+        <li style="font-weight:normal;font-size:18px;margin-left:20px;">REDS: ${item.Reds}</li><br>
+        <li style="font-weight:normal;font-size:18px;margin-left:20px;">Data de ocorrência: ${item.Data_ocorrência}</li><br>
+        <li style="font-weight:normal;font-size:18px;margin-left:20px;">Data de registro: ${item.Data_registro}</li><br><br>`;
+     })}
+     setStr(str);
+    return(str); 
+   } 
+   /*useEffect(()=>{
+      if(str!=undefined){
+        alert(str);
+      }
+   },[str])*/
   const CreatePDF = async () =>{
     await Print.printToFileAsync({
-      html: "<h1>RELATÓRIO</h1>",
-      width : 612,
-      height : 792,
-      base64 : false
+      html: `${
+      '<div style="flex-direction:row;display:flex;">'+
+         '<div style="display:flex;margin-right:50px;width:20%;">'+
+           '<img src="https://firebasestorage.googleapis.com/v0/b/sysgi-210bd.appspot.com/o/icon.png?alt=media&token=c89480ea-356f-406e-9033-263f9347c7ea" alt="some text" width=100 height=100>'+
+         '</div>'+
+        '<div style=align-items:center;display:flex;width:80%;justify-content:center;margin-right:130px;>'+
+           '<h1 style="">RELATÓRIO</h1>'+
+        '</div>'+
+      '</div>'+ 
+      '<p style="font-size:20px;">Nome = NOME</p>'.replace('NOME', infrator.Nome) +
+      '<p style="font-size:20px;">Rg = RG</p>'.replace('RG', infrator.Rg) +
+      '<p style="font-size:20px;">Cpf = CPF</p>'.replace('CPF', infrator.Cpf) +
+      '<p style="font-size:20px;">Data de Nascimento = DATADENASCIMENTO</p>'.replace('DATADENASCIMENTO', moment(infrator.Data_nascimento).format("DD/MM/YYYY")) +
+      '<p style="font-size:20px;">Sexo = SEXO</p>'.replace('SEXO', infrator.Sexo) +
+      '<p style="font-size:20px;">Nome da mãe = NOMEMAE</p>'.replace('NOMEMAE', infrator.Mãe) +
+      '<p style="font-size:20px;">Logradouro = Logradouro</p>'.replace('LOGRADOURO', infrator.Logradouro) +
+      '<p style="font-size:20px;">Bairro = BAIRRO</p>'.replace('BAIRRO', infrator.Bairro) +
+      '<p style="font-size:20px;">Uf = UF</p>'.replace('UF', infrator.Uf) +
+      '<p style="font-size:20px;">Cidade = CIDADE</p>'.replace('CIDADE', infrator.Cidade) +
+      '<p style="font-size:20px;">Nº = Numero</p><br>'.replace('Numero', infrator.Num_residência)}
+      <p style="font-size:25px;font-weight:bold;">Infrações</p>
+      ${'<ul>Lista</ul>'.replace('Lista', PrintPDF())}`,
+             width : 612,
+             height : 792,
+             base64 : false
     })
     .then(({ uri }) => {
       Sharing.shareAsync(uri, {dialogTitle: 'Abrir seu relatório?', mimeType :'application/pdf'})
@@ -571,7 +618,7 @@ function Cadastro({navigation})
                     </TouchableHighlight>
                     <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:0, justifyContent:"center", paddingHorizontal:15}]}
                       underlayColor={Colors.Primary.Normal}
-                      onPress={() => CreatePDF()}>
+                      onPress={() => {CreatePDF()}}>
                       <Image style={{height:20, width:20}} source={require('../assets/images/icon_relatory.png')} ></Image>
                     </TouchableHighlight>
                     <TouchableHighlight style={[Styles.btnSecundary,{backgroundColor:"#800",marginHorizontal:5, justifyContent:"center", paddingHorizontal:15}]}
@@ -636,6 +683,7 @@ function Cadastro({navigation})
                     infra.Data_registro = new Date().toISOString();
                     setInfração(infra);
                     saveInfração();
+                  
                   }}>
                   <Text style={[Styles.btnTextSecundary,{color:Colors.Secondary.White,fontSize:13}]}>ADICIONAR</Text>
                 </TouchableHighlight>
