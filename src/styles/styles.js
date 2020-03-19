@@ -50,7 +50,7 @@ const Styles = StyleSheet.create({
 
   },
   picker:{
-    fontFamily:"CenturyGothic",
+    
     color:Colors.Primary.White,
     height:40,
   },

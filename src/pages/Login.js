@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { StackActions, NavigationActions } from 'react-navigation'
 import { View, SafeAreaView, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage, YellowBox } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckBox } from 'react-native-elements';
@@ -158,7 +159,12 @@ function Login({navigation}) {
       setSenha('');
       setEntrando(false); 
       let userName = snapshot.val().Nome;
-      navigation.navigate('MENU', { userLogged: userName});
+      const resetAction = StackActions.reset({
+        index: 0,
+        actions: [NavigationActions.navigate({ routeName: 'MENU', params: {userLogged: userName} })],
+      });
+      navigation.dispatch(resetAction);
+      //navigation.navigate('MENU', { userLogged: userName});
     }
     else if(snapshot.val().Credencial == 99){
       delete_user(firebase.auth().currentUser);

@@ -19,7 +19,7 @@ const Routes = createAppContainer(
     Anexo
   },
   {
-    initialRouteName:"Login",
+    //initialRouteName:"Login",
     defaultNavigationOptions:{
       headerShown:false
     },

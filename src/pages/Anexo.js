@@ -8,6 +8,7 @@ import moment from 'moment';
 import firebase from '../services/firebase';
 import Credencial from '../controllers/credencial';
 import Network  from '../controllers/network';
+import Uploader  from '../controllers/uploader';
 import * as DocumentPicker from 'expo-document-picker';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import ItemAnexo from '../components/ItemAnexo';
@@ -16,7 +17,6 @@ import ItemAnexoSwipe from '../components/ItemAnexoSwipe';
 function Anexo({navigation}) {
    const infração = navigation.getParam("item");
    const[infraKey, setInfraKey] = useState(undefined);
-   const[fireList, setFireList] = useState({});
    const[lista,setLista]=useState([]);
    const[nomeAnexo,setNomeAnexo]=useState('');
    const[Anexo,setAnexo]=useState(undefined);
@@ -25,6 +25,15 @@ function Anexo({navigation}) {
    const anexos_db = firebase.database().ref().child('anexos');
    const anexos_st = firebase.storage().ref().child('anexos');
 
+   useEffect(() => {
+      Uploader.callback = callBack_;
+   });
+
+   useEffect(() => {
+    navigation.addListener("didBlur", (e) => {
+      if(!e.state){  Uploader.callback = undefined; }
+    });
+  }, [navigation])
 
    useEffect(() => {
       //console.log(infração.infratorKey);
@@ -45,8 +54,6 @@ function Anexo({navigation}) {
          anexos.on("value", (snapshot) => {
             let results = [];
             if(snapshot.val()){
-               //setFireList(Object.values(snapshot.val()));
-               
                
                snapshot.forEach(function(child) {
                   if(child.val()) {
@@ -54,17 +61,42 @@ function Anexo({navigation}) {
                   }
                });
             }
-            setLista(results);
+            let listUploading = [];
+            if(Uploader.uploadQueue.length > 0){
+               listUploading = Uploader.uploadQueue.filter(i => i.infraKey == infraKey);
+               results.map((r) => {
+                  listUploading = listUploading.filter(i => i.key != r.key);
+               });
+            }
+            setLista([...results, ...listUploading]);
          });
       }
-      
-
    }, [infraKey])
 
 
+   callBack_ = () => {
+      let listProntos = [];
+      let listUploading = [];
+
+      try{
+         listProntos = lista.filter(i => i.status != "" && i.status != "up");
+         listUploading = Uploader.uploadQueue.filter(i => i.infraKey == infraKey);
+      }
+      catch{}
+      
+      try{
+         setLista([...listProntos, ...listUploading]);
+      }
+      catch{}
+   }
+
    useEffect(()=>{
+      /*itensToUp = lista.filter(i => i.status == "add");
+      itensToUp.map((item) => {
+         Uploader.upload(item, infratorKey, infraKey);
+      });
       const index = lista.length - 1;
-      if(index >= 0 && lista[index].status == "") upload(lista[index]);
+      if(index >= 0 && lista[index].status == "") upload(lista[index]);*/
 
    }, [lista]);
 
@@ -72,10 +104,9 @@ function Anexo({navigation}) {
       if(Anexo) changeNomeAnexo(Anexo);
    }, [Anexo]);
 
-   async function upload(item){
+   /*async function upload(item){
       let anexos = anexos_db.child(infração.infratorKey).child(infraKey);
       let key = anexos.push().key;
-      //console.log("KEY: " + key);
       let anexo = anexos_st.child(infração.infratorKey).child(infraKey).child(key);
       let index = lista.indexOf(item);
 
@@ -112,11 +143,43 @@ function Anexo({navigation}) {
                console.log(err);
             });
          });
-       })}
-       catch (error) {
+         });
+
+         /*let uploading_ = anexo.put(blob);
+
+         uploading_.on('state_changed', (snapshot) => {
+
+            let prog = Math.floor((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+
+            if(index >= 0){
+               lista[index].progress = prog;
+               setLista([...lista]);
+               if(lista[index].progress >= 100) { blob.close(); }
+            }
+         }, (error) => {console.log(error.code)
+         }, () => {
+            anexo.getDownloadURL().then((url) => {
+            lista[index].status = url;
+            setLista([...lista]);
+            console.log("URL: " + lista[index].status);
+
+            let data = {"fileName":item.fileName, "status":url};
+            anexos.child(key).set(data)
+            .then(() => {
+               console.log("Anexado...");
+            })
+            .catch((err) => {
+               console.log(err);
+            });
+         });
+         });
+
+         Uploader.addToQueue(infraKey, uploading_.ref);
+      }
+      catch (error) {
          console.log('ERR: ' + error.message);
-       }
-   }
+      }
+   }*/
 
    const getAnexo = async() => {
       if(!Network.haveInternet){
@@ -153,7 +216,10 @@ function Anexo({navigation}) {
    async function addAnexo(fileName){
       fileName = maskFileName(fileName);
       let item = {"key":"", fileName, "uri":Anexo.uri.replace('file://', ''), "progress":0, "status":""};
-      setLista([...lista, item]);
+      
+      Uploader.upload(item, infração.infratorKey, infraKey);
+      
+      //setLista([...lista, item]);
    }
 
    function maskFileName(fileName){

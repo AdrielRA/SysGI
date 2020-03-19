@@ -48,10 +48,16 @@ export default (props)=>{
                 {
                   props.data.Credencial < 0 ?
                   (props.data.Credencial == -1 ? 'Professor' :(
-                    props.data.Credencial == -2 ? 'Advogado' :(
-                      props.data.Credencial == -3 ? 'Policial' :(
-                        props.data.Credencial == -4 ? 'Delegado' :(
-                          props.data.Credencial == -5 ? 'Promotor' : 'Juiz'
+                    props.data.Credencial == -2 ? 'Conselho Tutelar' :(
+                      props.data.Credencial == -3 ? 'Advogado' :(
+                        props.data.Credencial == -4 ? 'CONSEPA' :(
+                          props.data.Credencial == -5 ? 'CREAS' :(
+                            props.data.Credencial == -6 ? 'Policial' :(
+                              props.data.Credencial == -7 ? 'Delegado' :(
+                                props.data.Credencial == -8 ? 'Promotor' : 'Juiz'
+                              )
+                            )
+                          )
                         )
                       )
                     )

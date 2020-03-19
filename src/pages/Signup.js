@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView, KeyboardAvoidingView , Text, TextInput,TouchableHighlight, Picker, Alert, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Network  from '../controllers/network';
@@ -17,7 +17,6 @@ function Signup({navigation}) {
   const [confEmail, setConfEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confSenha, setConfSenha] = useState('');
-
 
   const _camposOk = () => {
     if(categoria === "0"){
@@ -119,11 +118,14 @@ function Signup({navigation}) {
               onValueChange={(itemValue, itemIndex) => CategoriaChanged(itemValue)}>
               <Picker.Item label="Categoria" value="0" />
               <Picker.Item label="Professor" value="1"/>
-              <Picker.Item label="Advogado" value="2"/>
-              <Picker.Item label="Policial" value="3"/>
-              <Picker.Item label="Delegado" value="4"/>
-              <Picker.Item label="Promotor" value="5"/>
-              <Picker.Item label="Juiz" value="6"/>
+              <Picker.Item label="Conselho Tutelar" value="2"/>
+              <Picker.Item label="Advogado" value="3"/>
+              <Picker.Item label="CONSEPA" value="4"/>
+              <Picker.Item label="CREAS" value="5"/>
+              <Picker.Item label="Policial" value="6"/>
+              <Picker.Item label="Delegado" value="7"/>
+              <Picker.Item label="Promotor" value="8"/>
+              <Picker.Item label="Juiz" value="9"/>
             </Picker>
           </View>
           <TextInput

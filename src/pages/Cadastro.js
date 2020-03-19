@@ -42,7 +42,7 @@ function Cadastro({navigation})
   },[idEstado])
   
   const [infrator, setInfrator]=useState({
-    "Nome":"", "Cpf":"", "Rg":"", "Mãe":"", "Logradouro":"",
+    "Nome":"", "Cpf":"", "Rg":"", "Mãe":"", "MedidaSE":"", "Logradouro":"",
     "Num_residência":"", "Bairro":"", "Cidade":"", "Uf":"", "Sexo":"",
     "Data_nascimento":"", "Data_registro":moment(new Date()).toISOString(),"Infrações":[]
   });
@@ -77,11 +77,6 @@ function Cadastro({navigation})
       });
     }
   }, []);
-
-
-  useEffect(() => {
-    console.log("Navegou...");
-  }, [navigation]);
 
   useEffect(() => {
     if(infratorKey){
@@ -119,6 +114,7 @@ function Cadastro({navigation})
     else if(!infrator.Data_nascimento || infrator.Data_nascimento == "") msg = "Data de nascimento fornecida é inválida!";
     else if(!infrator.Sexo || infrator.Sexo == "") msg = "Sexo fornecido é inválido!";
     else if(!infrator.Mãe || infrator.Mãe == "") msg = "Nome da mãe fornecido é inválido!";
+    else if(infrator.MedidaSE === undefined || infrator.MedidaSE === "") msg = "Medida socioeducativa não foi definida!";
     else if(!infrator.Logradouro || infrator.Logradouro == "") msg = "Logradouro fornecido é inválido!";
     else if(!infrator.Bairro || infrator.Bairro == "") msg = "Bairro fornecido é inválido!";
     else if(!infrator.Cidade || infrator.Cidade == "") msg = "Cidade fornecida é inválida!";
@@ -192,6 +188,7 @@ function Cadastro({navigation})
           Alert.alert("Falha:", "Infrator não foi atualizado!");
         });
       }
+      else Credencial.accessDenied();
     }
   
   }
@@ -488,10 +485,26 @@ function Cadastro({navigation})
                     returnKeyType="next"
                     autoCapitalize="words"
                     autoCompleteType="name"
-                    style={Styles.campoCadastro}
+                    style={[Styles.campoCadastro, {marginTop:8}]}
                     value={infrator.Mãe}
                     maxLength={60}
                     onChangeText={(mãe) => setInfrator({...infrator, "Mãe":mãe})}/>
+                  <View style={[Styles.pickerDiv, {borderColor:'#DCDCDC', marginHorizontal:0, marginLeft:5, height:40, width:135}]}>
+                    <Picker
+                      style={[Styles.picker, {color:Colors.Secondary.Normal}]}
+                      selectedValue={infrator.MedidaSE}
+                      mode="dropdown"
+                      onValueChange={(itemValue, itemIndex) =>{
+                        if(itemIndex > 0){
+                          if(itemValue !== infrator.MedidaSE)
+                            setInfrator({...infrator, "MedidaSE":itemValue})}
+                        }
+                      }>
+                      <Picker.Item label="Med.Socioed." value=""/>
+                      <Picker.Item label="SIM" value={true}/>
+                      <Picker.Item label="NÃO" value={false}/>
+                    </Picker>
+                  </View>
                 </View>
                 <View style={{flexDirection:'row'}}>
                   <TextInput placeholder="Logradouro"

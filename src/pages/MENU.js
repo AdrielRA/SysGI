@@ -1,5 +1,6 @@
 import React,{useState, useEffect} from 'react';
-import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage, Alert, SafeAreaView } from 'react-native';
+import { View, Text, TouchableHighlight, Image, Switch, AsyncStorage, Alert, SafeAreaView, BackHandler } from 'react-native';
+import { StackActions, NavigationActions } from 'react-navigation'
 import Network  from '../controllers/network';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Permissions from 'expo-permissions';
@@ -27,6 +28,16 @@ function MENU({navigation}) {
     }
     _loadNotify();
   }, []);
+
+  // Código quando a tela perde o foco
+  /*useEffect(() => {
+
+    navigation.addListener("didBlur", (e) => {
+      if(!e.state){
+        BackHandler.exitApp();
+      }
+    });
+  }, [navigation])*/
 
   useEffect(() => {
     async function _saveNotify(){
@@ -75,6 +86,15 @@ function MENU({navigation}) {
       navigation.navigate('Login');
     }
   });
+
+  logOff = () => {
+    firebase.auth().signOut();
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Login' })],
+    });
+    navigation.dispatch(resetAction);
+  }
   
   return (
     <SafeAreaView style={Styles.page}>
@@ -115,13 +135,13 @@ function MENU({navigation}) {
           }}>
           <Text style={Styles.btnTextSecundary}>CONSULTAR</Text>
         </TouchableHighlight>
-        {credencial==30? (<TouchableHighlight style={Styles.btnSecundary}
+        {(credencial > 10 && credencial < 20) || credencial == 30 ? (<TouchableHighlight style={Styles.btnSecundary}
             underlayColor={Colors.Primary.White}
             onPress={() =>  {
               if(!Network.haveInternet)
                 Network.alertOffline(() => {});
               else{
-                if(Credencial.isAdimin(credencial))
+                if((credencial > 10 && credencial < 20) || Credencial.isAdimin(credencial))
                   navigation.navigate('Controle')
                 else Credencial.accessDenied();
               }
@@ -137,6 +157,12 @@ function MENU({navigation}) {
         thumbColor={Colors.Primary.White}
         onValueChange={() => {setAllowNotify(!allowNotify);}} value = {allowNotify}></Switch>
       </View>
+      <TouchableHighlight
+        style={{position:"absolute", bottom:25, right:15}} 
+        underlayColor={"#00000000"}
+        onPress={() => { logOff(); }}>
+        <Image style={{height:30,width:30}} source={require('../assets/images/logoff.png')} ></Image>
+      </TouchableHighlight>
     </LinearGradient>
     </SafeAreaView>
   );

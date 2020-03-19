@@ -1,9 +1,6 @@
 import { Alert } from 'react-native';
 import firebase from '../services/firebase';
 
-
-
-
 class Credencial {
   
   loggedCred = undefined;
@@ -20,13 +17,13 @@ class Credencial {
     }    
   }
 
-  AccessToCadastro = [3,4,5,6];
-  AccessToDelete = [3,4,5,6];
-  AccessToConsulta = [3,4,5,6,2,1];
-  AccessToDetalhes = [3,,4,5,6];
-  AccessToEditar = [3,4,5,6];
-  AccessToInfração = [3,4,5,6];
-  AccessToAnexar = [3,4,5,6];
+  AccessToCadastro = [5,6,7,8,9];
+  AccessToEditar = [5,7,8,9];
+  AccessToDelete = [8,9];
+  AccessToConsulta = [1,2,3,4,5,6,7,8,9];
+  AccessToDetalhes = [3,4,5,6,7,8,9];  
+  AccessToInfração = [4,5,6,7,8,9];
+  AccessToAnexar = [4,5,6,7,8,9];
 
   haveAccess = (credencial, access) => {
     return access.includes(credencial % 10);
