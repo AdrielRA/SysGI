@@ -427,6 +427,7 @@ function Cadastro({navigation})
       '<p style="font-size:20px;">Data de Nascimento = DATADENASCIMENTO</p>'.replace('DATADENASCIMENTO', moment(infrator.Data_nascimento).format("DD/MM/YYYY")) +
       '<p style="font-size:20px;">Sexo = SEXO</p>'.replace('SEXO', infrator.Sexo) +
       '<p style="font-size:20px;">Nome da mãe = NOMEMAE</p>'.replace('NOMEMAE', infrator.Mãe) +
+      '<p style="font-size:20px;">Medida SE = MEDIDASE</p>'.replace('MEDIDASE', infrator.MedidaSE ? "Sim":"Não")+
       '<p style="font-size:20px;">Logradouro = Logradouro</p>'.replace('LOGRADOURO', infrator.Logradouro) +
       '<p style="font-size:20px;">Bairro = BAIRRO</p>'.replace('BAIRRO', infrator.Bairro) +
       '<p style="font-size:20px;">Uf = UF</p>'.replace('UF', infrator.Uf) +
