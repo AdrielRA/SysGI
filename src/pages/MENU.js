@@ -12,6 +12,7 @@ import Colors from '../styles/colors';
 
 function MENU({navigation}) {
   const userLogged = navigation.getParam("userLogged");
+  const userLoggedId = navigation.getParam("userLoggedId");
   const [allowNotify, setAllowNotify] = useState(false);
   const [credencial, setCredencial] = useState(undefined);
 
@@ -28,6 +29,18 @@ function MENU({navigation}) {
     }
     _loadNotify();
   }, []);
+
+  useEffect(() => {
+    if(userLoggedId){
+      firebase.database().ref('users').child(userLoggedId).on("value", (snapshot) => {
+        if(snapshot.val().SessionId === undefined){
+          Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
+          firebase.auth().signOut();
+          return_login();
+        }
+      })
+    }
+  }, [])
 
   // Código quando a tela perde o foco
   /*useEffect(() => {
@@ -80,15 +93,31 @@ function MENU({navigation}) {
   }, [allowNotify]);
 
   firebase.auth().onAuthStateChanged((user)=>{
-    if (user) { Credencial._getCredencial(user, setCredencial); }    
+    if (user) {Credencial._getCredencial(user, setCredencial); }    
     else {
-      Alert.alert("Atenção:","Seu usuário foi desconectado!");
-      navigation.navigate('Login');
+      //Alert.alert("Atenção:","Seu usuário foi desconectado!");
+      //return_login();
     }
   });
-
+  
   logOff = () => {
-    firebase.auth().signOut();
+
+    if(!firebase.auth().currentUser){
+      return_login();
+    }
+    else{
+      firebase.database().ref("users").child(firebase.auth().currentUser.uid).once('value')
+      .then((snapshot) => {
+        if(snapshot.val().Recovery != undefined){
+          snapshot.ref.child('SessionId').remove();
+        }
+      });
+    }
+    
+  }
+
+  const return_login = () => {
+    console.log('retornou...');
     const resetAction = StackActions.reset({
       index: 0,
       actions: [NavigationActions.navigate({ routeName: 'Login' })],

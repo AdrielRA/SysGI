@@ -8,6 +8,16 @@ const Styles = StyleSheet.create({
     alignItems:"center",
     flex: 1,
   },
+  txtNormal:{
+    fontFamily:"CenturyGothic"
+  },
+  txtBold:{
+    fontFamily:"CenturyGothicBold"
+  },
+  txtCenter:{textAlign:"center"},
+  txtWhite:{
+    color:'#fff'
+  },
   campo:{
     fontFamily:"CenturyGothic",
     backgroundColor:"transparent",

@@ -3,6 +3,7 @@ import { View, SafeAreaView, KeyboardAvoidingView , Text, TextInput,TouchableHig
 import { LinearGradient } from 'expo-linear-gradient';
 import Network  from '../controllers/network';
 import firebase from '../services/firebase';
+import * as Crypto from 'expo-crypto';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 
@@ -61,18 +62,28 @@ function Signup({navigation}) {
     .then(() => {
       if(firebase.auth().currentUser){
         let fire_user = firebase.auth().currentUser;
-        firebase.database().ref('users').child(fire_user.uid).set(user);
-        firebase.database().ref('users').child(fire_user.uid).once('value')
-        .then((snapshot)=>{
-          if(!fire_user.emailVerified){            
-            fire_user.sendEmailVerification()
-            .then(()=>{
-              Alert.alert("Sucesso!",`Em breve receberá um e-mail de verificação, ${snapshot.val().Nome}!`);
-            })
-            .catch((err) => {Alert.alert("Falha: " + err.code, err.message);});
-          }
-        });
-        navigation.goBack();
+        let Recovery = "";
+        (async () => {
+          const digest = await Crypto.digestStringAsync(
+            Crypto.CryptoDigestAlgorithm.SHA256,
+            user.Inscrição
+          );
+          Recovery = digest.toString('hex').substring(0, 8);
+        })().then(() => {
+          user = {...user, Recovery}
+          firebase.database().ref('users').child(fire_user.uid).set(user);
+          firebase.database().ref('users').child(fire_user.uid).once('value')
+          .then((snapshot)=>{
+            if(!fire_user.emailVerified){            
+              fire_user.sendEmailVerification()
+              .then(()=>{
+                Alert.alert(user.Recovery,`Salve este cód. de recuperação em local seguro! Em breve você receberá um e-mail de verificação!`);
+              })
+              .catch((err) => {Alert.alert("Falha: " + err.code, err.message);});
+            }
+          });
+          navigation.goBack();
+        });        
       }
       else{
         Alert.alert("Falha!","Não foi possivel completar seu cadastro!");
@@ -130,39 +141,67 @@ function Signup({navigation}) {
           </View>
           <TextInput
               placeholder="Nome de Usuário"
+              autoCapitalize="words"
+              textContentType="name"
+              keyboardType="name-phone-pad"
+              returnKeyType="next"
+              autoCompleteType="name"
+              maxLength={60}
               placeholderTextColor={Colors.Terciary.White}
               style={Styles.campo}
               onChangeText={(nome_) => setNome(nome_)}
           />
           <TextInput
               placeholder="Matricula/Inscrição"
+              autoCompleteType="off"
+              returnKeyType="next"
+              maxLength={20}
               placeholderTextColor={Colors.Terciary.White}
               style={Styles.campo}
               onChangeText={(inscrição_) => setInscrição(inscrição_)}
           />
           <TextInput
               placeholder="Telefone"
-              placeholderTextColor={Colors.Terciary.White}
+              textContentType="telephoneNumber"
               keyboardType="phone-pad"
+              autoCompleteType="tel"
+              returnKeyType="next"              
+              maxLength={11}
+              placeholderTextColor={Colors.Terciary.White}              
               style={Styles.campo}
               onChangeText={(telefone_) => setTelefone(telefone_)}
           />
           <TextInput
             placeholder="emai@email.com"
-            placeholderTextColor={Colors.Terciary.White}
+            autoCapitalize="none"
+            textContentType="emailAddress"
             keyboardType="email-address"
+            autoCompleteType="email"
+            returnKeyType="next"            
+            maxLength={50}
+            placeholderTextColor={Colors.Terciary.White}
             style={Styles.campo}
             onChangeText={(email_) => setEmail(email_)}
           />
           <TextInput
             placeholder="emai.confirma@email.com"
-            placeholderTextColor={Colors.Terciary.White}
+            autoCapitalize="none"
+            textContentType="emailAddress"
             keyboardType="email-address"
+            autoCompleteType="email"
+            returnKeyType="next"            
+            maxLength={50}
+            placeholderTextColor={Colors.Terciary.White}
             style={Styles.campo}
             onChangeText={(confEmail_) => setConfEmail(confEmail_)}
           />
           <TextInput
             placeholder="Senha"
+            autoCapitalize="none"
+            textContentType="password"
+            autoCompleteType="password"
+            returnKeyType="next"            
+            maxLength={20}
             placeholderTextColor={Colors.Terciary.White}
             secureTextEntry={true}
             style={Styles.campo}
@@ -170,6 +209,11 @@ function Signup({navigation}) {
           />
           <TextInput
             placeholder="Confirma Senha"
+            autoCapitalize="none"
+            textContentType="password"
+            autoCompleteType="password"
+            returnKeyType="next"            
+            maxLength={20}
             placeholderTextColor={Colors.Terciary.White}
             secureTextEntry={true}
             style={Styles.campo}

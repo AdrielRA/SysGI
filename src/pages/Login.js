@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { StackActions, NavigationActions } from 'react-navigation'
-import { View, SafeAreaView, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, AsyncStorage, YellowBox } from 'react-native';
+import { View, SafeAreaView, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, Alert, Image, AsyncStorage, YellowBox } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import DialogInput from 'react-native-dialog-input';
 import { CheckBox } from 'react-native-elements';
 import Network  from '../controllers/network';
 import Styles from '../styles/styles';
 import Colors from '../styles/colors';
 import firebase from '../services/firebase';
+import Constants from 'expo-constants';
+
 
 YellowBox.ignoreWarnings(['Setting a timer']);
 YellowBox.ignoreWarnings(['VirtualizedList']);
@@ -17,6 +20,7 @@ function Login({navigation}) {
   const [loadLogin, setLoadLogin] = useState(true);
   const [entrando, setEntrando] = useState(false);
   const [netAlert, setNetAlert] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState('');
   const [Senha, setSenha] = useState('');
@@ -36,6 +40,8 @@ function Login({navigation}) {
       catch{ console.log("Falha ao manipular variavel keepLogin..."); }
     }
     _loadKeepLogin();
+
+      
 
   }, []);
 
@@ -153,15 +159,59 @@ function Login({navigation}) {
     });
   };
 
+  const desconnect_all = (cod) => {
+    firebase.database().ref("users").child(firebase.auth().currentUser.uid).once('value')
+        .then((snapshot) => {
+          if(snapshot.val().Recovery != undefined){
+            if(snapshot.val().Recovery === cod){
+              snapshot.ref.child('SessionId').remove().then(() => {
+                Alert.alert("Dispositivos desconectados:", "Realize seu login normalmente!")
+              });
+            }
+            else{
+              Alert.alert("Falha:", "Código informado está incorreto!")
+            }
+          }
+          firebase.auth().signOut();
+          /*else{
+            let new_recovery_cod = "afc2d258";
+            snapshot.ref().child('SessionId').set(new_recovery_cod).once("value", () => {
+              Alert.alert(`Seu novo código: ${new_recovery_cod}`, "Salve-o e use-o para recuperar o acesso sempre que necessário!")
+            });
+          }*/
+    });
+  }
+
   function entrar(snapshot){
     if(snapshot.val().Credencial > 0 && snapshot.val().Credencial <= 30){
+
+      if(snapshot.val().SessionId != undefined){
+        if(Constants.sessionId != snapshot.val().SessionId){
+          Alert.alert("Conta em uso:", "Outro dispositivo conectado! Desconectar de todos?",
+          [
+            {
+              text: 'Não',
+              onPress: () => {firebase.auth().signOut();},
+              style: 'cancel',
+            },
+            {text: 'Sim', onPress: () => { setShowDialog(true); }},
+          ], {cancelable: false});
+          
+          setEntrando(false);
+          return;
+        }
+      }
+      else{
+        snapshot.ref.child('SessionId').set(Constants.sessionId);
+      }
+
       setEmail('');
       setSenha('');
       setEntrando(false); 
       let userName = snapshot.val().Nome;
       const resetAction = StackActions.reset({
         index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'MENU', params: {userLogged: userName} })],
+        actions: [NavigationActions.navigate({ routeName: 'MENU', params: {userLogged: userName, userLoggedId:firebase.auth().currentUser.uid} })],
       });
       navigation.dispatch(resetAction);
       //navigation.navigate('MENU', { userLogged: userName});
@@ -204,7 +254,16 @@ function Login({navigation}) {
 
   return (
     <SafeAreaView style={Styles.page}>
-    <LinearGradient
+      <DialogInput isDialogVisible={showDialog}
+        title={"Desconectar dispositivos"}
+        message={"Digite seu código de controle:"}
+        hintInput ={"Código aqui"}
+        submitInput={ (cod) => { setShowDialog(false); desconnect_all(cod); } }
+        submitText={"Confirmar"}
+        cancelText={"Cancelar"}
+        closeDialog={ () => { setShowDialog(false); }}>
+      </DialogInput>
+      <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
@@ -255,6 +314,12 @@ function Login({navigation}) {
           </TouchableHighlight>
         </KeyboardAvoidingView>
       <Text style={Styles.lblRodape}>Todos os Direitos Reservados - {new Date().getFullYear()}</Text>
+      <TouchableHighlight
+        style={{position:"absolute", bottom:20, right:15}} 
+        underlayColor={"#00000000"}
+        onPress={() => { navigation.navigate('Sobre') }}>
+        <Image style={{height:25,width:25}} source={require('../assets/images/icon_info.png')} ></Image>
+      </TouchableHighlight>
     </LinearGradient>
     </SafeAreaView>
   );

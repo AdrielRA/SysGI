@@ -1,16 +1,17 @@
 {
   "expo": {
     "name": "SysGI",
-    "slug": "SysGI",
+    "slug": "sysgi",
+    "description":"Sistema de Gerenciamento de Infratores",
     "privacy": "public",
     "sdkVersion": "36.0.0",
     "platforms": [
       "ios",
-      "android",
-      "web"
+      "android"
     ],
     "version": "1.0.0",
     "orientation": "portrait",
+    "primaryColor":"#DC143C",
     "icon": "./src/assets/icon.png",
     "splash": {
       "image": "./src/assets/splash.png",
@@ -19,8 +20,9 @@
     },
     "notification": {
       "icon": "./src/assets/icon-notify.png",
-      "color": "#ffffff",
-      "androidMode": "default"
+      "color": "#DC143C",
+      "androidMode": "default",
+      "androidCollapsedTitle": "n/a"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
