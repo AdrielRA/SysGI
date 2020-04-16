@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert, Image,Picker, ActivityIndicator} from 'react-native';
+import { View,Text,SafeAreaView,TextInput,TouchableHighlight, TouchableOpacity,ScrollView, Alert, Image,Picker, ActivityIndicator} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -16,6 +16,7 @@ import firebase from '../services/firebase';
 import Network  from '../controllers/network';
 import Estados from '../components/Estados';
 import Cidades from '../components/Cidades';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 
 
@@ -36,6 +37,9 @@ function Cadastro({navigation})
   const[cidade,setCidade]  =useState('');
   const[idEstado,setIdEstado] = useState(-1);
   const[loadRelatorio, setLoadRelatorio]=useState(false);
+
+  const[getNascimento, setGetNasc] = useState(false);
+  const[getDateInfra, setGetDateInfra] = useState(false);
   
   useEffect(()=>{
     if(idEstado > -1){
@@ -452,29 +456,27 @@ function Cadastro({navigation})
                     onChangeText={(cpf) => setInfrator({...infrator, "Cpf":cpf})}/>
                 </View>
                 <View style={{flexDirection:'row'}}>
-                  <DatePicker
-                    style={{flex:3.5,marginEnd:3,marginTop:5}}
-                    format='DD/MM/YYYY'
+                  <DateTimePickerModal
+                    isVisible={getNascimento}
+                    mode="date"
                     date={dateNasc}
-                    onDateChange={(dateNasc) => {
-                      setDateNas(dateNasc);
-                      var dt =dateNasc.split('/');
-                      setInfrator({...infrator, "Data_nascimento":new Date(`${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`).toISOString()})
-                    }}
-                    customStyles={{
-                      dateIcon:{
-                        width:0,
-                        height:0,
-                      },
-                      dateInput: {
-                        borderWidth:0,
-                        },
-                      dateTouchBody: { borderRadius:25,
-                        borderColor:'#DCDCDC',
-                        borderWidth:1,
-                      }
-                    }
-                  }/>
+                    onConfirm={(date) => {  setDateNas(date); setGetNasc(false);}}
+                    onCancel={() => {setGetNasc(false);}}
+                  />
+                  <TouchableOpacity onPress={() => {setGetNasc(true);}}>
+                   <TextInput placeholder="Data de Nascimento"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      pointerEvents="none"
+                      editable={false}
+                      returnKeyType="next"
+                      style={[Styles.campoCadastro,{flex:1.5}]}
+                      value={moment(dateNasc).format('DD/MM/YYYY')}
+                      onChangeText={(dataNasc) => {
+                        setInfrator({...infrator, "Data_nascimento":dateNasc.toISOString()});
+                        setGetNasc(false);
+                      }}
+                      />
+                  </TouchableOpacity>
                   <TextInput placeholder="Sexo"
                       placeholderTextColor={Colors.Secondary.Normal}
                       returnKeyType="next"
@@ -634,29 +636,26 @@ function Cadastro({navigation})
                   onChangeText={(reds) => setInfração({...infração, "Reds":reds})}/>
               </View>
               <View style={{flexDirection:'row',justifyContent:"center"}}>
-                <DatePicker format="DD/MM/YYYY"
-                  style={{flex:1,marginEnd:3,marginTop:7}}
-                  date={dateInfra}
-                  onDateChange={(dataOcorrencia) => { 
-                    setDateInfra(dataOcorrencia);
-                    var dt = dataOcorrencia.split('/');
-                    setInfração({...infração, "Data_ocorrência":new Date(`${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`).toISOString()})
-                  }}
-                  customStyles={{
-                    dateIcon:{
-                      width:0,
-                      height:0,
-                    },
-                    dateInput: {
-                      borderWidth:0,
-                    },
-                    dateTouchBody: { borderRadius:25,
-                      borderColor:'#DCDCDC',
-                      borderWidth:1,
-                      height:39
-                    }
-                  }
-                }/>
+              <DateTimePickerModal
+                    isVisible={getDateInfra}
+                    mode="datetime"
+                    date={dateInfra}
+                    onConfirm={(date) => {  setDateInfra(date); setGetDateInfra(false);}}
+                    onCancel={() => {setGetDateInfra(false);}}
+                  />
+                  <TouchableOpacity onPress={() => {setGetDateInfra(true);}}>
+                   <TextInput placeholder="Data de Ocorrência"
+                      placeholderTextColor={Colors.Secondary.Normal}
+                      pointerEvents="none"
+                      editable={false}
+                      style={[Styles.campoCadastro,{flex:1.5}]}
+                      value={moment(dateInfra).format('DD/MM/YYYY')}
+                      onChangeText={(dataOcorrencia) => {
+                        setInfrator({...infrator, "Data_ocorrência":dataOcorrencia.toISOString()});
+                        setGetDateInfra(false);
+                      }}
+                      />
+                  </TouchableOpacity>
                 <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
                   underlayColor={Colors.Primary.White}
                   onPress={() => {
