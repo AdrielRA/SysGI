@@ -91,8 +91,8 @@ function Controle({navigation}) {
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Secondary.Normal]}
-        style={{flex:1, alignSelf:"stretch", paddingTop:30}}>
-        <Text style={[Styles.lblSubtitle, {fontSize:24}]}>CONTROLE DE ACESSO</Text>
+        style={{flex:1, alignSelf:"stretch", paddingTop:30,alignItems:"center"}}>
+        <Text style={[Styles.lblSubtitle, {fontSize:24,textAlignVertical:"center"}]}>CONTROLE DE ACESSO</Text>
       </LinearGradient>
       <View style={{flex:6, alignSelf:"stretch"}}>
         <View style={[Styles.lbAnexos, { marginHorizontal:15, paddingBottom:22}]}>

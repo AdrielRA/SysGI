@@ -188,8 +188,8 @@ const Styles = StyleSheet.create({
     flex:2.5,
     fontSize:40,
     color:Colors.Primary.White,
-    textAlign:"center",
-    textAlignVertical:"center"
+    //textAlign:"center",
+    //textAlignVertical:"center"
   },
   lblMENU:{
     fontFamily:"CenturyGothicBold",

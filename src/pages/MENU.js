@@ -126,13 +126,13 @@ function MENU({navigation}) {
   }
   
   return (
-    <SafeAreaView style={Styles.page}>
+    <SafeAreaView style={[Styles.page,{marginTop:0}]}>
     <LinearGradient
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
         style={[Styles.page, {alignSelf:"stretch"}]}>
-      <Text style={Styles.lblMENU}>MENU</Text>
+      <Text style={[Styles.lblMENU,{paddingTop:40}]}>MENU</Text>
       <Text style={Styles.lblMsg}>Bem-vindo, {userLogged}</Text>
       <View style={{flex:6, width:300, alignItems:"center", justifyContent:"center"}}>
         <Image style={{width: 200, height: 200}}

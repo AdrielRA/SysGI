@@ -135,17 +135,20 @@ function Consulta({navigation}) {
         start={{x: 0.0, y: 0.25}} end={{x: 1, y: 1.0}}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal,Colors.Secondary.Normal]}
-        style={{flex:1, alignSelf:"stretch", paddingTop:30}}>
-        <Text style={Styles.lblSubtitle}>CONSULTA</Text>
+        style={{paddingTop:30,width:"100%",height:150,alignItems:"center",justifyContent:"center"}}>
+        <Text style={{
+          fontFamily:"CenturyGothicBold",
+          fontSize:35,
+          color:Colors.Primary.White}}>CONSULTA</Text>
       </LinearGradient>
-      <TouchableOpacity style={Styles.searchType} onPress={() => {
+      <TouchableOpacity style={[Styles.searchType,{top:128}]} onPress={() => {
           setSearchType(searchType < 3 ? searchType + 1 : 1)
         }}>
           <Text style={Styles.searchText}>{searchType < 2 ? "RG" : searchType < 3 ? "Nome" : "Mãe"}</Text>
       </TouchableOpacity>
       
-      <SearchBar lightTheme placeholder="Pesquisar Infrator" placeholderTextColor={Colors.Secondary.Normal}
-          containerStyle={[Styles.searchContent, {left:searchPadding}]}
+       <SearchBar lightTheme placeholder="Pesquisar Infrator" placeholderTextColor={Colors.Secondary.Normal}
+          containerStyle={[Styles.searchContent, {left:searchPadding,top:128}]}
           inputStyle={Styles.searchInput}
           round={true}
           inputContainerStyle={{backgroundColor:'transparent'}}
@@ -154,8 +157,8 @@ function Consulta({navigation}) {
           value={TermoPesquisa}
           keyboardType={searchType < 2 ? "numeric" : "default"}
           onChangeText={(termo) => maskTermo(termo) }
-          onEndEditing={() => {_consultarInfrator(); }}
-          ></SearchBar>
+          onEndEditing={() => {_consultarInfrator(); }}>
+        </SearchBar>
           {Infrator != undefined?(
             <View style={{flex:6, alignSelf:"stretch", marginTop:20}}>
               <View style={{alignSelf:"stretch", marginHorizontal:15, backgroundColor:Colors.Primary.Normal,

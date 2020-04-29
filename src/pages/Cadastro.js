@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import { View,Text,SafeAreaView,TextInput,TouchableHighlight, TouchableOpacity,ScrollView, Alert, Image,Picker, ActivityIndicator} from 'react-native';
+import { View,Text,SafeAreaView,TextInput,TouchableHighlight,ScrollView, Alert, Image,Picker, ActivityIndicator,KeyboardAvoidingView} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -16,7 +16,6 @@ import firebase from '../services/firebase';
 import Network  from '../controllers/network';
 import Estados from '../components/Estados';
 import Cidades from '../components/Cidades';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 
 
@@ -37,9 +36,6 @@ function Cadastro({navigation})
   const[cidade,setCidade]  =useState('');
   const[idEstado,setIdEstado] = useState(-1);
   const[loadRelatorio, setLoadRelatorio]=useState(false);
-
-  const[getNascimento, setGetNasc] = useState(false);
-  const[getDateInfra, setGetDateInfra] = useState(false);
   
   useEffect(()=>{
     if(idEstado > -1){
@@ -417,8 +413,9 @@ function Cadastro({navigation})
           colors={[Colors.Primary.Normal,Colors.Terciary.Normal]}
           style={{ flex:1,alignSelf:'stretch',padding:30, paddingBottom:10}}>
           <Text style={[Styles.lblSubtitle,{fontSize:25, flex:0.75}]}>CADASTRO DE INFRATOR</Text>
-          <View style={{flex:6}}>
-            <View style={{backgroundColor:'#fff',flex:2,marginBottom:5,borderRadius:10,paddingHorizontal:10,paddingTop:5}}>
+          <View style={{flex:7}}>
+           
+            <View style={{backgroundColor:'#fff',height:400,marginBottom:5,borderRadius:10,paddingHorizontal:10,paddingTop:5}}>
               <Text style={{color:'#800000',fontSize:18,marginStart:10,fontFamily:"CenturyGothicBold"}}>Informações pessoais</Text>
               <ScrollView>
                 <View style={{flexDirection:"row"}}>
@@ -456,27 +453,29 @@ function Cadastro({navigation})
                     onChangeText={(cpf) => setInfrator({...infrator, "Cpf":cpf})}/>
                 </View>
                 <View style={{flexDirection:'row'}}>
-                  <DateTimePickerModal
-                    isVisible={getNascimento}
-                    mode="date"
+                  <DatePicker
+                    style={{flex:3.5,marginEnd:3,marginTop:5}}
+                    format='DD/MM/YYYY'
                     date={dateNasc}
-                    onConfirm={(date) => {  setDateNas(date); setGetNasc(false);}}
-                    onCancel={() => {setGetNasc(false);}}
-                  />
-                  <TouchableOpacity onPress={() => {setGetNasc(true);}}>
-                   <TextInput placeholder="Data de Nascimento"
-                      placeholderTextColor={Colors.Secondary.Normal}
-                      pointerEvents="none"
-                      editable={false}
-                      returnKeyType="next"
-                      style={[Styles.campoCadastro,{flex:1.5}]}
-                      value={moment(dateNasc).format('DD/MM/YYYY')}
-                      onChangeText={(dataNasc) => {
-                        setInfrator({...infrator, "Data_nascimento":dateNasc.toISOString()});
-                        setGetNasc(false);
-                      }}
-                      />
-                  </TouchableOpacity>
+                    onDateChange={(dateNasc) => {
+                      setDateNas(dateNasc);
+                      var dt =dateNasc.split('/');
+                      setInfrator({...infrator, "Data_nascimento":new Date(`${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`).toISOString()})
+                    }}
+                    customStyles={{
+                      dateIcon:{
+                        width:0,
+                        height:0,
+                      },
+                      dateInput: {
+                        borderWidth:0,
+                        },
+                      dateTouchBody: { borderRadius:25,
+                        borderColor:'#DCDCDC',
+                        borderWidth:1,
+                      }
+                    }
+                  }/>
                   <TextInput placeholder="Sexo"
                       placeholderTextColor={Colors.Secondary.Normal}
                       returnKeyType="next"
@@ -501,15 +500,15 @@ function Cadastro({navigation})
                     onChangeText={(mãe) => setInfrator({...infrator, "Mãe":mãe})}/>
                   <View style={[Styles.pickerDiv, {borderColor:'#DCDCDC', marginHorizontal:0, marginLeft:5, height:40, width:135}]}>
                     <Picker
-                      style={[Styles.picker, {color:Colors.Secondary.Normal}]}
-                      selectedValue={infrator.MedidaSE}
+                      style={{color:Colors.Primary.White,height:40}}
+                      //selectedValue={infrator.MedidaSE}
                       mode="dropdown"
-                      onValueChange={(itemValue, itemIndex) =>{
+                      /*onValueChange={(itemValue, itemIndex) =>{
                         if(itemIndex > 0){
                           if(itemValue !== infrator.MedidaSE)
                             setInfrator({...infrator, "MedidaSE":itemValue})}
                         }
-                      }>
+                      }*/>
                       <Picker.Item label="Med.Socioed." value=""/>
                       <Picker.Item label="SIM" value={true}/>
                       <Picker.Item label="NÃO" value={false}/>
@@ -614,6 +613,7 @@ function Cadastro({navigation})
                 
               </View>
             </View>
+            
             {isSaved ? (<View style={{backgroundColor:'#fff',flex:1,borderRadius:10,padding:10}}>
               <View style={{height:40}}>
                 <TextInput 
@@ -636,26 +636,29 @@ function Cadastro({navigation})
                   onChangeText={(reds) => setInfração({...infração, "Reds":reds})}/>
               </View>
               <View style={{flexDirection:'row',justifyContent:"center"}}>
-              <DateTimePickerModal
-                    isVisible={getDateInfra}
-                    mode="datetime"
-                    date={dateInfra}
-                    onConfirm={(date) => {  setDateInfra(date); setGetDateInfra(false);}}
-                    onCancel={() => {setGetDateInfra(false);}}
-                  />
-                  <TouchableOpacity onPress={() => {setGetDateInfra(true);}}>
-                   <TextInput placeholder="Data de Ocorrência"
-                      placeholderTextColor={Colors.Secondary.Normal}
-                      pointerEvents="none"
-                      editable={false}
-                      style={[Styles.campoCadastro,{flex:1.5}]}
-                      value={moment(dateInfra).format('DD/MM/YYYY')}
-                      onChangeText={(dataOcorrencia) => {
-                        setInfrator({...infrator, "Data_ocorrência":dataOcorrencia.toISOString()});
-                        setGetDateInfra(false);
-                      }}
-                      />
-                  </TouchableOpacity>
+                <DatePicker format="DD/MM/YYYY"
+                  style={{flex:1,marginEnd:3,marginTop:7}}
+                  date={dateInfra}
+                  onDateChange={(dataOcorrencia) => { 
+                    setDateInfra(dataOcorrencia);
+                    var dt = dataOcorrencia.split('/');
+                    setInfração({...infração, "Data_ocorrência":new Date(`${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`).toISOString()})
+                  }}
+                  customStyles={{
+                    dateIcon:{
+                      width:0,
+                      height:0,
+                    },
+                    dateInput: {
+                      borderWidth:0,
+                    },
+                    dateTouchBody: { borderRadius:25,
+                      borderColor:'#DCDCDC',
+                      borderWidth:1,
+                      height:39
+                    }
+                  }
+                }/>
                 <TouchableHighlight style={[Styles.btnPrimary,{flex:1,marginHorizontal:0}]}
                   underlayColor={Colors.Primary.White}
                   onPress={() => {
@@ -681,6 +684,7 @@ function Cadastro({navigation})
               </View>
             </View>) : (<View style={{flex:1}}></View>)}
           </View>
+        
         </LinearGradient>
     </SafeAreaView>      
   );
