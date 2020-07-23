@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
+import { Button } from "../../components";
 import { Credencial, Network } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
@@ -157,6 +158,42 @@ function MENU({ navigation }) {
     navigation.dispatch(resetAction);
   };
 
+  const handleCadastrar = () => {
+    if (!Network.haveInternet) Network.alertOffline(() => {});
+    else {
+      if (
+        Credencial.haveAccess(credencial, Credencial.AccessToCadastro) ||
+        Credencial.isAdimin(credencial)
+      )
+        navigation.navigate("Cadastro");
+      else Credencial.accessDenied();
+    }
+  };
+
+  const handleConsultar = () => {
+    if (!Network.haveInternet) Network.alertOffline(() => {});
+    else {
+      if (
+        Credencial.haveAccess(credencial, Credencial.AccessToConsulta) ||
+        Credencial.isAdimin(credencial)
+      )
+        navigation.navigate("Consulta");
+      else Credencial.accessDenied();
+    }
+  };
+
+  const handleControle = () => {
+    if (!Network.haveInternet) Network.alertOffline(() => {});
+    else {
+      if (
+        (credencial > 10 && credencial < 20) ||
+        Credencial.isAdimin(credencial)
+      )
+        navigation.navigate("Controle");
+      else Credencial.accessDenied();
+    }
+  };
+
   return (
     <SafeAreaView style={[Styles.page, { marginTop: 0 }]}>
       <LinearGradient
@@ -179,65 +216,11 @@ function MENU({ navigation }) {
           <Image
             style={{ width: 200, height: 200 }}
             source={require("../../assets/images/balança.png")}
-          ></Image>
-          <TouchableHighlight
-            style={Styles.btnSecundary}
-            underlayColor={Colors.Primary.White}
-            onPress={() => {
-              if (!Network.haveInternet) Network.alertOffline(() => {});
-              else {
-                if (
-                  Credencial.haveAccess(
-                    credencial,
-                    Credencial.AccessToCadastro
-                  ) ||
-                  Credencial.isAdimin(credencial)
-                )
-                  navigation.navigate("Cadastro");
-                else Credencial.accessDenied();
-              }
-            }}
-          >
-            <Text style={Styles.btnTextSecundary}>CADASTRAR</Text>
-          </TouchableHighlight>
-          <TouchableHighlight
-            style={Styles.btnSecundary}
-            underlayColor={Colors.Primary.White}
-            onPress={() => {
-              if (!Network.haveInternet) Network.alertOffline(() => {});
-              else {
-                if (
-                  Credencial.haveAccess(
-                    credencial,
-                    Credencial.AccessToConsulta
-                  ) ||
-                  Credencial.isAdimin(credencial)
-                )
-                  navigation.navigate("Consulta");
-                else Credencial.accessDenied();
-              }
-            }}
-          >
-            <Text style={Styles.btnTextSecundary}>CONSULTAR</Text>
-          </TouchableHighlight>
+          />
+          <Button text="CADASTRAR" type="light" onPress={handleCadastrar} />
+          <Button text="CONSULTAR" type="light" onPress={handleConsultar} />
           {(credencial > 10 && credencial < 20) || credencial == 30 ? (
-            <TouchableHighlight
-              style={Styles.btnSecundary}
-              underlayColor={Colors.Primary.White}
-              onPress={() => {
-                if (!Network.haveInternet) Network.alertOffline(() => {});
-                else {
-                  if (
-                    (credencial > 10 && credencial < 20) ||
-                    Credencial.isAdimin(credencial)
-                  )
-                    navigation.navigate("Controle");
-                  else Credencial.accessDenied();
-                }
-              }}
-            >
-              <Text style={Styles.btnTextSecundary}>CONTROLE</Text>
-            </TouchableHighlight>
+            <Button text="CONTROLE" type="light" onPress={handleControle} />
           ) : (
             <></>
           )}

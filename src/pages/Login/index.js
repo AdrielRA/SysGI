@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { TextInput } from "../../components";
+import { Button, TextInput } from "../../components";
 import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
@@ -299,37 +299,21 @@ function Login({ navigation }) {
   }
 
   const btn_Logar = (
-    <TouchableHighlight
-      style={Styles.btnSecundary}
-      underlayColor={Colors.Primary.White}
-      onPress={() => {
-        _logar();
-      }}
-    >
-      <Text style={Styles.btnTextSecundary}>LOGAR</Text>
-    </TouchableHighlight>
+    <Button text="LOGAR" type="light" onPress={_logar}></Button>
   );
   const btn_Carregando = (
-    <TouchableHighlight
-      style={Styles.btnSecundary}
-      underlayColor={Colors.Primary.White}
-      onPress={() => {
-        Alert.alert("Aguarde...", "Carregando login!");
-      }}
-    >
-      <Text style={Styles.btnTextSecundary}>CARREGANDO...</Text>
-    </TouchableHighlight>
+    <Button
+      text="CARREGANDO..."
+      type="light"
+      onPress={() => Alert.alert("Aguarde...", "Carregando login!")}
+    ></Button>
   );
   const btn_Entrando = (
-    <TouchableHighlight
-      style={Styles.btnSecundary}
-      underlayColor={Colors.Primary.White}
-      onPress={() => {
-        Alert.alert("Aguarde...", "Carregando MENU!");
-      }}
-    >
-      <Text style={Styles.btnTextSecundary}>ENTRANDO...</Text>
-    </TouchableHighlight>
+    <Button
+      text="ENTRANDO..."
+      type="light"
+      onPress={() => Alert.alert("Aguarde...", "Carregando MENU!")}
+    ></Button>
   );
 
   return (
@@ -415,13 +399,12 @@ function Login({ navigation }) {
             onPress={KeepLoginChange}
           />
           {loadLogin ? btn_Carregando : entrando ? btn_Entrando : btn_Logar}
-          <TouchableHighlight
-            style={Styles.btnTransparent}
-            underlayColor={"transparent"}
+          <Button
+            text="Solicitar acesso!"
+            type="transparent"
+            textStyle={{ fontSize: 15 }}
             onPress={() => navigation.navigate("Signup")}
-          >
-            <Text style={Styles.btnTextTransparent}>Solicitar acesso!</Text>
-          </TouchableHighlight>
+          ></Button>
         </KeyboardAvoidingView>
         <View style={{ flex: 0.9 }}></View>
         <Text style={[Styles.lblRodape, { position: "absolute", bottom: 22 }]}>

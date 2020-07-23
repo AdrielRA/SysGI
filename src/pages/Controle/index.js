@@ -10,6 +10,7 @@ import {
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Credencial, Network } from "../../controllers";
+import { Button } from "../../components";
 import { Controle as Item } from "../../components/Itens";
 import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -123,10 +124,8 @@ function Controle({ navigation }) {
           CONTROLE DE ACESSO
         </Text>
       </LinearGradient>
-      <View style={{ flex: 6, alignSelf: "stretch" }}>
-        <View
-          style={[Styles.lbAnexos, { marginHorizontal: 15, paddingBottom: 22 }]}
-        >
+      <View style={{ flex: 6, alignSelf: "stretch", paddingHorizontal: 15 }}>
+        <View style={[Styles.lbAnexos, { paddingBottom: 22 }]}>
           <View style={Styles.btngroupAnexo}>
             <Text style={Styles.lblAnexo}>
               Libere ou não o acesso para estes usuários:
@@ -151,15 +150,11 @@ function Controle({ navigation }) {
             />
           </ScrollView>
         </View>
-        <TouchableHighlight
-          style={[Styles.btnPrimary, {}]}
-          underlayColor={Colors.Primary.White}
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <Text style={[Styles.btnTextPrimary, {}]}>VOLTAR</Text>
-        </TouchableHighlight>
+        <Button
+          text="VOLTAR"
+          type="normal"
+          onPress={() => navigation.goBack()}
+        />
       </View>
     </SafeAreaView>
   );

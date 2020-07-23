@@ -5,14 +5,13 @@ import {
   KeyboardAvoidingView,
   Text,
   TouchableHighlight,
-  Picker,
   Alert,
   ScrollView,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Primary, Tertiary } from "../../styles/colors";
-import { TextInput } from "../../components";
+import { Button, Picker, TextInput } from "../../components";
 import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import firebase from "../../services/firebase";
@@ -134,6 +133,19 @@ function Signup({ navigation }) {
       });
   };
 
+  const pickerItems = [
+    { label: "Categoria", value: "0" },
+    { label: "Professor", value: "1" },
+    { label: "Conselho Tutelar", value: "2" },
+    { label: "Advogado", value: "3" },
+    { label: "CONSEPA", value: "4" },
+    { label: "CREAS", value: "5" },
+    { label: "Policial", value: "6" },
+    { label: "Delegado", value: "7" },
+    { label: "Promotor", value: "8" },
+    { label: "Juiz", value: "9" },
+  ];
+
   return (
     <SafeAreaView style={Styles.page}>
       <LinearGradient
@@ -151,26 +163,12 @@ function Signup({ navigation }) {
           //keyboardVerticalOffset={50}
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
-            <View style={Styles.pickerDiv}>
-              <Picker
-                style={Styles.picker}
-                selectedValue={categoria}
-                onValueChange={(itemValue, itemIndex) =>
-                  CategoriaChanged(itemValue)
-                }
-              >
-                <Picker.Item label="Categoria" value="0" />
-                <Picker.Item label="Professor" value="1" />
-                <Picker.Item label="Conselho Tutelar" value="2" />
-                <Picker.Item label="Advogado" value="3" />
-                <Picker.Item label="CONSEPA" value="4" />
-                <Picker.Item label="CREAS" value="5" />
-                <Picker.Item label="Policial" value="6" />
-                <Picker.Item label="Delegado" value="7" />
-                <Picker.Item label="Promotor" value="8" />
-                <Picker.Item label="Juiz" value="9" />
-              </Picker>
-            </View>
+            <Picker
+              items={pickerItems}
+              type="light"
+              selectedValue={categoria}
+              onValueChange={(itemValue) => CategoriaChanged(itemValue)}
+            />
             <TextInput
               placeholder="Nome de Usuário"
               autoCapitalize="words"
@@ -254,16 +252,16 @@ function Signup({ navigation }) {
               alignItems: "center",
             }}
           >
-            <TouchableHighlight
-              style={Styles.btnTransparent}
-              underlayColor={"transparent"}
+            <Button
+              text="VOLTAR"
+              type="transparent"
+              style={{ minWidth: 150 }}
               onPress={() => navigation.goBack()}
-            >
-              <Text style={Styles.btnTextTransparent}>VOLTAR</Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              style={Styles.btnSecundary}
-              underlayColor={Colors.Primary.White}
+            />
+            <Button
+              text="SALVAR"
+              type="light"
+              style={{ minWidth: 150 }}
               onPress={() =>
                 _saveUser({
                   Nome: nome,
@@ -272,9 +270,7 @@ function Signup({ navigation }) {
                   Credencial: Number(categoria) * -1,
                 })
               }
-            >
-              <Text style={Styles.btnTextSecundary}>SALVAR</Text>
-            </TouchableHighlight>
+            />
           </View>
         </KeyboardAvoidingView>
         <Text style={Styles.lblRodape}>

@@ -1,4 +1,6 @@
-import TextInput from "./TextInput";
+import Button from "./Button";
 import * as Itens from "./Itens";
+import Picker from "./Picker";
+import TextInput from "./TextInput";
 
-export { TextInput, Itens };
+export { Button, Itens, Picker, TextInput };

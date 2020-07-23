@@ -4,10 +4,11 @@ import {
   Text,
   SafeAreaView,
   TouchableHighlight,
+  KeyboardAvoidingView,
   ScrollView,
   Alert,
-  Image,
   Picker,
+  Image,
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,7 +17,7 @@ import * as Sharing from "expo-sharing";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Credencial, Network, Relatory } from "../../controllers";
-import { Itens, TextInput } from "../../components";
+import { Button, Itens, Picker as Picker_, TextInput } from "../../components";
 import { Cidades, Estados } from "../../utils";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
@@ -524,6 +525,12 @@ function Cadastro({ navigation }) {
       });
   };
 
+  const medidaItems = [
+    { label: "Med.Socioed.", value: "" },
+    { label: "SIM", value: true },
+    { label: "NÃO", value: false },
+  ];
+
   return (
     <SafeAreaView style={Styles.page}>
       <LinearGradient
@@ -541,7 +548,7 @@ function Cadastro({ navigation }) {
         <Text style={[Styles.lblSubtitle, { fontSize: 25, flex: 0.75 }]}>
           CADASTRO DE INFRATOR
         </Text>
-        <View style={{ flex: 7 }}>
+        <KeyboardAvoidingView style={{ flex: 14 }}>
           <View
             style={{
               backgroundColor: "#fff",
@@ -656,39 +663,23 @@ function Cadastro({ navigation }) {
                   autoCapitalize="words"
                   autoCompleteType="name"
                   type="secondary"
-                  style={{ marginTop: 8 }}
+                  style={{ marginTop: 8, marginEnd: 3.5 }}
                   value={infrator.Mãe}
                   maxLength={60}
                   onChangeText={(mãe) => setInfrator({ ...infrator, Mãe: mãe })}
                 />
-                <View
-                  style={[
-                    Styles.pickerDiv,
-                    {
-                      borderColor: "#DCDCDC",
-                      marginHorizontal: 0,
-                      marginLeft: 5,
-                      height: 40,
-                      width: 135,
-                    },
-                  ]}
-                >
-                  <Picker
-                    style={{ color: Colors.Primary.White, height: 40 }}
-                    //selectedValue={infrator.MedidaSE}
-                    mode="dropdown"
-                    /*onValueChange={(itemValue, itemIndex) =>{
-                        if(itemIndex > 0){
-                          if(itemValue !== infrator.MedidaSE)
-                            setInfrator({...infrator, "MedidaSE":itemValue})}
-                        }
-                      }*/
-                  >
-                    <Picker.Item label="Med.Socioed." value="" />
-                    <Picker.Item label="SIM" value={true} />
-                    <Picker.Item label="NÃO" value={false} />
-                  </Picker>
-                </View>
+                <Picker_
+                  items={medidaItems}
+                  selectedValue={infrator.MedidaSE}
+                  style={{ minWidth: 100 }}
+                  mode="dropdown"
+                  onValueChange={(itemValue, itemIndex) => {
+                    if (itemIndex > 0) {
+                      if (itemValue !== infrator.MedidaSE)
+                        setInfrator({ ...infrator, MedidaSE: itemValue });
+                    }
+                  }}
+                />
               </View>
               <View style={{ flexDirection: "row" }}>
                 <TextInput
@@ -802,22 +793,15 @@ function Cadastro({ navigation }) {
               </View>
             </ScrollView>
             <View style={{ flexDirection: "row", alignSelf: "stretch" }}>
-              <TouchableHighlight
-                style={[
-                  Styles.btnSecundary,
-                  {
-                    paddingHorizontal: isSaved ? "7%" : "36%",
-                    backgroundColor: "#800",
-                    marginHorizontal: 0,
-                  },
-                ]}
-                underlayColor={Colors.Primary.Normal}
+              <Button
+                text="SALVAR"
+                type="normal"
+                style={{
+                  paddingHorizontal: isSaved ? "7%" : "36%",
+                  marginHorizontal: 0,
+                }}
                 onPress={() => saveInfrator(infrator)}
-              >
-                <Text style={[Styles.btnTextSecundary, { color: "#FFF" }]}>
-                  SALVAR
-                </Text>
-              </TouchableHighlight>
+              />
               {isSaved ? (
                 <View style={{ flexDirection: "row" }}>
                   <TouchableHighlight
@@ -921,9 +905,7 @@ function Cadastro({ navigation }) {
                   placeholder="REDS"
                   style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
                   type="secondary"
-                  multiline={false}
                   value={infração.Reds}
-                  textAlignVertical="top"
                   onChangeText={(reds) =>
                     setInfração({ ...infração, Reds: reds })
                   }
@@ -960,25 +942,22 @@ function Cadastro({ navigation }) {
                     },
                   }}
                 />
-                <TouchableHighlight
-                  style={[Styles.btnPrimary, { flex: 1, marginHorizontal: 0 }]}
-                  underlayColor={Colors.Primary.White}
+                <Button
+                  text="ADICIONAR"
+                  type="normal"
+                  style={{
+                    marginHorizontal: 0,
+                    maxHeight: 40,
+                    minWidth: 100,
+                  }}
+                  textStyle={{ fontSize: 13 }}
                   onPress={() => {
                     let infra = infração;
                     infra.Data_registro = new Date().toISOString();
                     setInfração(infra);
                     saveInfração();
                   }}
-                >
-                  <Text
-                    style={[
-                      Styles.btnTextSecundary,
-                      { color: Colors.Secondary.White, fontSize: 13 },
-                    ]}
-                  >
-                    ADICIONAR
-                  </Text>
-                </TouchableHighlight>
+                />
               </View>
               <View
                 style={{
@@ -1017,7 +996,7 @@ function Cadastro({ navigation }) {
           ) : (
             <View style={{ flex: 1 }}></View>
           )}
-        </View>
+        </KeyboardAvoidingView>
       </LinearGradient>
     </SafeAreaView>
   );
