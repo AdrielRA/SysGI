@@ -1,5 +1,4 @@
-import Cidades from "./Cidades";
-import Estados from "./Cidades";
+import TextInput from "./TextInput";
 import * as Itens from "./Itens";
 
-export { Cidades, Estados, Itens };
+export { TextInput, Itens };

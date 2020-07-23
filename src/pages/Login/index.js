@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { StackActions, NavigationActions } from "react-navigation";
 import {
+  View,
   SafeAreaView,
   KeyboardAvoidingView,
   Text,
-  TextInput,
   TouchableHighlight,
   Alert,
   Image,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
+import { TextInput } from "../../components";
 import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
@@ -353,39 +354,50 @@ function Login({ navigation }) {
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
-        style={[Styles.page, { alignSelf: "stretch" }]}
+        style={[Styles.page, { alignSelf: "stretch", flex: 3 }]}
       >
-        <Text style={Styles.lblTitle}>SysGI</Text>
+        <View
+          style={{
+            flex: 0.9,
+            justifyContent: "center",
+          }}
+        >
+          <Text style={Styles.lblTitle}>SysGI</Text>
+        </View>
+
         <KeyboardAvoidingView
-          style={{ flex: 3, alignSelf: "stretch" }}
-          behavior="padding"
-          enabled
+          style={{
+            alignSelf: "stretch",
+            flex: 1.2,
+            paddingHorizontal: 30,
+            paddingBottom: 75,
+          }}
+          //behavior="padding"
+          //enabled
           keyboardVerticalOffset={100}
         >
           <TextInput
             placeholder="seuemail@email.com"
-            placeholderTextColor={Colors.Terciary.White}
             keyboardType={"email-address"}
             autoCapitalize="none"
             editable={!loadLogin && !entrando}
             autoCorrect={false}
             value={Email}
             autoCompleteType="email"
-            style={Styles.campo}
+            type="light"
             onChangeText={(email) => {
               setEmail(email);
             }}
           />
           <TextInput
             placeholder="Senha"
-            placeholderTextColor={Colors.Terciary.White}
             autoCapitalize="none"
             editable={!loadLogin && !entrando}
             autoCorrect={false}
             value={Senha}
             autoCompleteType="password"
             secureTextEntry={true}
-            style={Styles.campo}
+            type="light"
             onChangeText={(senha) => {
               setSenha(senha);
             }}
@@ -411,7 +423,8 @@ function Login({ navigation }) {
             <Text style={Styles.btnTextTransparent}>Solicitar acesso!</Text>
           </TouchableHighlight>
         </KeyboardAvoidingView>
-        <Text style={Styles.lblRodape}>
+        <View style={{ flex: 0.9 }}></View>
+        <Text style={[Styles.lblRodape, { position: "absolute", bottom: 22 }]}>
           Todos os Direitos Reservados - {new Date().getFullYear()}
         </Text>
         <TouchableHighlight

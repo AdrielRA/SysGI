@@ -4,7 +4,6 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Text,
-  TextInput,
   TouchableHighlight,
   Picker,
   Alert,
@@ -12,6 +11,8 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
+import { Primary, Tertiary } from "../../styles/colors";
+import { TextInput } from "../../components";
 import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import firebase from "../../services/firebase";
@@ -139,18 +140,17 @@ function Signup({ navigation }) {
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
-        colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
-        style={[Styles.page, { alignSelf: "stretch" }]}
+        colors={[Primary, Tertiary]}
+        style={Styles.page}
       >
         <Text style={[Styles.lblSubtitle, { flex: 0.75, paddingTop: 30 }]}>
           CADASTRO
         </Text>
         <KeyboardAvoidingView
           style={{ flex: 5, alignSelf: "stretch" }}
-          behavior="padding"
-          keyboardVerticalOffset={25}
+          //keyboardVerticalOffset={50}
         >
-          <ScrollView>
+          <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <View style={Styles.pickerDiv}>
               <Picker
                 style={Styles.picker}
@@ -179,8 +179,7 @@ function Signup({ navigation }) {
               returnKeyType="next"
               autoCompleteType="name"
               maxLength={60}
-              placeholderTextColor={Colors.Terciary.White}
-              style={Styles.campo}
+              type="light"
               onChangeText={(nome_) => setNome(nome_)}
             />
             <TextInput
@@ -188,8 +187,7 @@ function Signup({ navigation }) {
               autoCompleteType="off"
               returnKeyType="next"
               maxLength={20}
-              placeholderTextColor={Colors.Terciary.White}
-              style={Styles.campo}
+              type="light"
               onChangeText={(inscrição_) => setInscrição(inscrição_)}
             />
             <TextInput
@@ -199,8 +197,7 @@ function Signup({ navigation }) {
               autoCompleteType="tel"
               returnKeyType="next"
               maxLength={11}
-              placeholderTextColor={Colors.Terciary.White}
-              style={Styles.campo}
+              type="light"
               onChangeText={(telefone_) => setTelefone(telefone_)}
             />
             <TextInput
@@ -211,8 +208,7 @@ function Signup({ navigation }) {
               autoCompleteType="email"
               returnKeyType="next"
               maxLength={50}
-              placeholderTextColor={Colors.Terciary.White}
-              style={Styles.campo}
+              type="light"
               onChangeText={(email_) => setEmail(email_)}
             />
             <TextInput
@@ -223,8 +219,7 @@ function Signup({ navigation }) {
               autoCompleteType="email"
               returnKeyType="next"
               maxLength={50}
-              placeholderTextColor={Colors.Terciary.White}
-              style={Styles.campo}
+              type="light"
               onChangeText={(confEmail_) => setConfEmail(confEmail_)}
             />
             <TextInput
@@ -234,9 +229,8 @@ function Signup({ navigation }) {
               autoCompleteType="password"
               returnKeyType="next"
               maxLength={20}
-              placeholderTextColor={Colors.Terciary.White}
               secureTextEntry={true}
-              style={Styles.campo}
+              type="light"
               onChangeText={(senha_) => setSenha(senha_)}
             />
             <TextInput
@@ -246,9 +240,8 @@ function Signup({ navigation }) {
               autoCompleteType="password"
               returnKeyType="next"
               maxLength={20}
-              placeholderTextColor={Colors.Terciary.White}
               secureTextEntry={true}
-              style={Styles.campo}
+              type="light"
               onChangeText={(confSenha_) => setConfSenha(confSenha_)}
             />
           </ScrollView>
@@ -256,7 +249,8 @@ function Signup({ navigation }) {
           <View
             style={{
               flexDirection: "row",
-              justifyContent: "center",
+              justifyContent: "space-between",
+              marginHorizontal: 30,
               alignItems: "center",
             }}
           >

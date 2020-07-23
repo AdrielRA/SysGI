@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar, ActivityIndicator } from "react-native";
+import { AppearanceProvider } from "react-native-appearance";
 import Routes from "./src/routes";
 import * as Font from "expo-font";
 import Colors from "./src/styles/colors";
@@ -21,7 +22,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <AppearanceProvider>
       <StatusBar barStyle="light-content" backgroundColor="#800000" />
       {fontLoaded ? (
         <Routes />
@@ -36,6 +37,6 @@ export default function App() {
           }}
         />
       )}
-    </>
+    </AppearanceProvider>
   );
 }

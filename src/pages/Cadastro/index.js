@@ -3,7 +3,6 @@ import {
   View,
   Text,
   SafeAreaView,
-  TextInput,
   TouchableHighlight,
   ScrollView,
   Alert,
@@ -17,7 +16,8 @@ import * as Sharing from "expo-sharing";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Credencial, Network, Relatory } from "../../controllers";
-import { Cidades, Estados, Itens } from "../../components";
+import { Itens, TextInput } from "../../components";
+import { Cidades, Estados } from "../../utils";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -571,8 +571,7 @@ function Cadastro({ navigation }) {
                   keyboardType="name-phone-pad"
                   returnKeyType="next"
                   autoCompleteType="name"
-                  placeholderTextColor={Colors.Secondary.Normal}
-                  style={Styles.campoCadastro}
+                  type="secondary"
                   value={infrator.Nome}
                   autoFocus={true}
                   maxLength={60}
@@ -584,9 +583,9 @@ function Cadastro({ navigation }) {
               <View style={{ flexDirection: "row" }}>
                 <TextInput
                   placeholder="RG"
-                  placeholderTextColor={Colors.Secondary.Normal}
                   returnKeyType="next"
-                  style={[Styles.campoCadastro, { marginEnd: 3 }]}
+                  type="secondary"
+                  style={{ marginEnd: 3 }}
                   value={infrator.Rg}
                   maxLength={13}
                   editable={isNew}
@@ -596,9 +595,8 @@ function Cadastro({ navigation }) {
                 />
                 <TextInput
                   placeholder="CPF"
-                  placeholderTextColor={Colors.Secondary.Normal}
                   returnKeyType="next"
-                  style={Styles.campoCadastro}
+                  type="secondary"
                   value={infrator.Cpf}
                   maxLength={11}
                   keyboardType="number-pad"
@@ -637,9 +635,9 @@ function Cadastro({ navigation }) {
                 />
                 <TextInput
                   placeholder="Sexo"
-                  placeholderTextColor={Colors.Secondary.Normal}
                   returnKeyType="next"
-                  style={[Styles.campoCadastro, { flex: 1.5 }]}
+                  type="secondary"
+                  style={{ flex: 1.5 }}
                   value={infrator.Sexo}
                   maxLength={1}
                   onChangeText={(sexo) => {
@@ -654,11 +652,11 @@ function Cadastro({ navigation }) {
               <View style={{ flexDirection: "row" }}>
                 <TextInput
                   placeholder="Nome da Mãe"
-                  placeholderTextColor={Colors.Secondary.Normal}
                   returnKeyType="next"
                   autoCapitalize="words"
                   autoCompleteType="name"
-                  style={[Styles.campoCadastro, { marginTop: 8 }]}
+                  type="secondary"
+                  style={{ marginTop: 8 }}
                   value={infrator.Mãe}
                   maxLength={60}
                   onChangeText={(mãe) => setInfrator({ ...infrator, Mãe: mãe })}
@@ -695,11 +693,11 @@ function Cadastro({ navigation }) {
               <View style={{ flexDirection: "row" }}>
                 <TextInput
                   placeholder="Logradouro"
-                  placeholderTextColor={Colors.Secondary.Normal}
                   returnKeyType="next"
                   textContentType="fullStreetAddress"
                   autoCompleteType="street-address"
-                  style={[Styles.campoCadastro, { flex: 1, marginEnd: 3 }]}
+                  type="secondary"
+                  style={{ flex: 1, marginEnd: 3 }}
                   value={infrator.Logradouro}
                   maxLength={120}
                   onChangeText={(logradouro) =>
@@ -708,11 +706,10 @@ function Cadastro({ navigation }) {
                 />
                 <TextInput
                   placeholder="Bairro"
-                  placeholderTextColor={Colors.Secondary.Normal}
                   returnKeyType="next"
                   autoCapitalize="words"
                   textContentType="sublocality"
-                  style={[Styles.campoCadastro, { flex: 1 }]}
+                  type="secondary"
                   value={infrator.Bairro}
                   maxLength={60}
                   onChangeText={(bairro) =>
@@ -793,8 +790,8 @@ function Cadastro({ navigation }) {
                 </View>
                 <TextInput
                   placeholder="N°"
-                  placeholderTextColor={Colors.Secondary.Normal}
-                  style={[Styles.campoCadastro, { flex: 0.5 }]}
+                  style={{ flex: 0.5 }}
+                  type="secondary"
                   value={infrator.Num_residência}
                   keyboardType="number-pad"
                   maxLength={10}
@@ -909,11 +906,8 @@ function Cadastro({ navigation }) {
               <View style={{ height: 40 }}>
                 <TextInput
                   placeholder="Infração"
-                  placeholderTextColor={Colors.Secondary.Normal}
-                  style={[
-                    Styles.campoCadastro,
-                    { borderRadius: 25, paddingTop: 8, marginTop: 0 },
-                  ]}
+                  type="secondary"
+                  style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
                   multiline={true}
                   value={infração.Descrição}
                   textAlignVertical="top"
@@ -925,11 +919,8 @@ function Cadastro({ navigation }) {
               <View style={{ height: 40, marginTop: 5 }}>
                 <TextInput
                   placeholder="REDS"
-                  placeholderTextColor={Colors.Secondary.Normal}
-                  style={[
-                    Styles.campoCadastro,
-                    { borderRadius: 25, paddingTop: 8, marginTop: 0 },
-                  ]}
+                  style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
+                  type="secondary"
                   multiline={false}
                   value={infração.Reds}
                   textAlignVertical="top"
