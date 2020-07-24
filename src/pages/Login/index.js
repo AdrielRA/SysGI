@@ -36,7 +36,6 @@ function Login({ navigation }) {
 
   useEffect(() => {
     Network.addListener();
-
     async function _loadKeepLogin() {
       try {
         let value = await AsyncStorage.getItem("keep");
@@ -356,7 +355,7 @@ function Login({ navigation }) {
             paddingHorizontal: 30,
             paddingBottom: 75,
           }}
-          //behavior="padding"
+          behavior="padding"
           //enabled
           keyboardVerticalOffset={100}
         >

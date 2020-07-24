@@ -1,12 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { StatusBar, ActivityIndicator } from "react-native";
+import { StatusBar, ActivityIndicator, Alert } from "react-native";
 import { AppearanceProvider } from "react-native-appearance";
+import * as Updates from "expo-updates";
 import Routes from "./src/routes";
 import * as Font from "expo-font";
 import Colors from "./src/styles/colors";
 
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
+
+  const getUpdate = async () => {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        Alert.alert(
+          "Nova versão disponível:",
+          "Deseja instalar ela agora?",
+          [
+            {
+              text: "Não",
+              onPress: () => {},
+              style: "cancel",
+            },
+            {
+              text: "Sim",
+              onPress: async () => await Updates.reloadAsync(),
+            },
+          ],
+          { cancelable: false }
+        );
+      }
+    } catch {}
+  };
 
   const loadFont = async () => {
     await Font.loadAsync({
@@ -16,6 +42,8 @@ export default function App() {
   };
 
   useEffect(() => {
+    getUpdate();
+
     loadFont().then(() => {
       setFontLoaded(true);
     });
