@@ -2,7 +2,7 @@
 
 #### Sistema de Gerenciamento de Infratores
 
-:star2: Software desenvolvido por acadêmicos do curso de Ciências da Computação da [**UNIFENAS**](https://www.unifenas.br/)
+:star2: Software desenvolvido por acadêmicos do curso de Ciências da Computação da [**UNIFENAS(Universidade José do Rosário Vellano)**](https://www.unifenas.br/)
 
 ## Configuração
 
@@ -21,7 +21,7 @@ Este projeto foi desenvolvido utilizando-se React Native. Para facilitar o desen
 - Expo-cli
   - Instale globalmente, seguindo o [passo-a-passo](https://docs.expo.io/get-started/installation/)
 
-## Executar
+## Executando
 
 Tenha instalado uma IDE para desenvolvimento React. Recomenda-se o uso do [_Visual Studio Code_](https://code.visualstudio.com/download).
 
