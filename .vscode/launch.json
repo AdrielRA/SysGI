@@ -1,17 +1,12 @@
 {
-    // Use o IntelliSense para aprender sobre possíveis atributos.
-    // Passe o mouse para ver as descrições dos atributos existentes.
-    // Para obter mais informações, visite: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Executar Programa",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\node_modules\\expo\\AppEntry.js"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Executar Programa",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\node_modules\\expo\\AppEntry.js"
+    }
+  ]
 }
