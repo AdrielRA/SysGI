@@ -8,6 +8,7 @@ const Styles = StyleSheet.create({
     flex: 1,
     alignSelf: "stretch",
   },
+
   txtNormal: {
     fontFamily: "CenturyGothic",
   },
@@ -128,6 +129,7 @@ const Styles = StyleSheet.create({
     marginHorizontal: 2.5,
     marginTop: 10,
     flex: 1,
+
   },
   DescAnexo: {
     fontFamily: "CenturyGothic",
@@ -311,5 +313,7 @@ const Styles = StyleSheet.create({
     fontFamily: "CenturyGothic",
   },
 });
+
+
 
 export default Styles;

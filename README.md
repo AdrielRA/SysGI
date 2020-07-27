@@ -62,3 +62,7 @@ Para as mensagens de commit, siga o [padrão](https://gist.github.com/crissilvae
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Observação 
+
+Em data dessa última atualização(26/07/20) , o aplicativo ainda não se encontra totalmente funcional no sistema iOS , contentando alguns erros em sua execução , estamos na procura de uma solução o mais breve possível . 
