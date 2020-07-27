@@ -1,4 +1,6 @@
-# SysGI
+<p align="center">
+    <img src="/src/assets/icon.png" alt="SysGI" width="192" height="192" />
+</p>
 
 #### Sistema de Gerenciamento de Infratores
 
@@ -57,12 +59,12 @@ Em uma nova guia do terminal, execute `expo login` e informe suas credenciais Ex
 
 Pull requests são bem-vindos.
 
-Para as mensagens de commit, siga o [padrão](https://gist.github.com/crissilvaeng/dfb5b14f8eb2c25df4fd8a49f4f03252), para uma melhor experiência de desenvolviento.
+Para as mensagens de commit, siga o [padrão](https://gist.github.com/crissilvaeng/dfb5b14f8eb2c25df4fd8a49f4f03252), para uma melhor experiência de desenvolvimento.
 
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
 
-## Observação 
+## Observação
 
-Em data dessa última atualização(26/07/20) , o aplicativo ainda não se encontra totalmente funcional no sistema iOS , contentando alguns erros em sua execução , estamos na procura de uma solução o mais breve possível . 
+Em data dessa última atualização, o aplicativo ainda não se encontra totalmente funcional no sistema iOS, contentando alguns erros em sua execução, estamos na procura de uma solução o mais breve possível.
