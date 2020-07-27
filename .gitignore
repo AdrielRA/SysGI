@@ -71,6 +71,7 @@ captures/
 .cxx/
 
 # Google Services (e.g. APIs or Firebase)
+src/services/firebase.js
 google-services.json
 
 # Freeline

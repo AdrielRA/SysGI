@@ -5,10 +5,7 @@
     "description": "Sistema de Gerenciamento de Infratores",
     "privacy": "public",
     "sdkVersion": "36.0.0",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
     "primaryColor": "#DC143C",
@@ -26,9 +23,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.UNIFENAS.SysGI",
       "icon": "./src/assets/icon-ios.png",
