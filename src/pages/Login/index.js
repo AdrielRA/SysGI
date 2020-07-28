@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Button, TextInput } from "../../components";
+import { Button, TextInput, Unifenas } from "../../components";
 import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
@@ -355,9 +355,9 @@ function Login({ navigation }) {
             paddingHorizontal: 30,
             paddingBottom: 75,
           }}
-          behavior="padding"
+          //behavior="height"
           //enabled
-          keyboardVerticalOffset={100}
+          //keyboardVerticalOffset={100}
         >
           <TextInput
             placeholder="seuemail@email.com"
@@ -405,7 +405,13 @@ function Login({ navigation }) {
             onPress={() => navigation.navigate("Signup")}
           ></Button>
         </KeyboardAvoidingView>
-        <View style={{ flex: 0.9 }}></View>
+        <Unifenas
+          style={{
+            flex: 0.9,
+            justifyContent: "center",
+            marginBottom: 30,
+          }}
+        />
         <Text style={[Styles.lblRodape, { position: "absolute", bottom: 22 }]}>
           Todos os Direitos Reservados - {new Date().getFullYear()}
         </Text>

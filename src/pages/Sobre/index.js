@@ -11,6 +11,7 @@ import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { expo } from "../../../app.json";
+import { Unifenas } from "../../components";
 
 function Sobre({ navigation }) {
   return (
@@ -24,14 +25,15 @@ function Sobre({ navigation }) {
       >
         <View
           style={{
-            flex: 2,
+            flex: 1,
             alignItems: "center",
             alignSelf: "stretch",
             justifyContent: "center",
+            marginBottom: 50,
           }}
         >
           <Image
-            style={{ height: 200, width: 150, marginBottom: 10 }}
+            style={{ height: 200, width: 155, marginBottom: 10 }}
             source={require("../../assets/logo_white.png")}
           ></Image>
           <Text style={[Styles.txtNormal, Styles.txtWhite]}>
@@ -49,7 +51,7 @@ function Sobre({ navigation }) {
             style={[
               Styles.txtBold,
               Styles.txtWhite,
-              { marginBottom: 25, fontSize: 18 },
+              { marginBottom: 5, fontSize: 18 },
             ]}
           >
             CONHEÇA NOSSOS:
@@ -76,6 +78,16 @@ function Sobre({ navigation }) {
               Guia de Utilização
             </Text>
           </TouchableHighlight>
+          <Text
+            style={[
+              Styles.txtBold,
+              Styles.txtWhite,
+              { marginTop: 40, marginBottom: 15, fontSize: 18 },
+            ]}
+          >
+            REALIZAÇÃO:
+          </Text>
+          <Unifenas />
         </View>
         <Text
           style={[

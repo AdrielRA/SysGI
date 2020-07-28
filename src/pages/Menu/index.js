@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Button } from "../../components";
+import { Button, Unifenas } from "../../components";
 import { Credencial, Network } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
@@ -224,6 +224,7 @@ function MENU({ navigation }) {
           ) : (
             <></>
           )}
+          <Unifenas style={{ marginVertical: 10 }} />
         </View>
         <View
           style={{

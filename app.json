@@ -32,6 +32,9 @@
     "android": {
       "googleServicesFile": "./google-services.json",
       "package": "com.UNIFENAS.SysGI",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/icon-adaptive.png"
+      },
       "icon": "./src/assets/icon.png",
       "versionCode": 1
     }
