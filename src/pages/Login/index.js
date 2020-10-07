@@ -225,7 +225,7 @@ function Login({ navigation }) {
   function entrar(snapshot) {
     if (snapshot.val().Credencial > 0 && snapshot.val().Credencial <= 30) {
       if (snapshot.val().SessionId != undefined) {
-        if (Constants.sessionId != snapshot.val().SessionId) {
+        if (Constants.deviceId != snapshot.val().SessionId) {
           Alert.alert(
             "Conta em uso:",
             "Outro dispositivo conectado! Desconectar de todos?",
@@ -251,7 +251,7 @@ function Login({ navigation }) {
           return;
         }
       } else {
-        snapshot.ref.child("SessionId").set(Constants.sessionId);
+        snapshot.ref.child("SessionId").set(Constants.deviceId);
       }
 
       setEmail("");

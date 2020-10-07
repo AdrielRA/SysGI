@@ -34,7 +34,7 @@ function Cadastro({ navigation }) {
   const [favorito, setFavorito] = useState(undefined);
   const [dateNasc, setDateNas] = useState(new Date());
   const [dateInfra, setDateInfra] = useState(new Date());
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(true);
   const [estado, setEstado] = useState(undefined);
   const [cidades, setCidades] = useState([]);
   const [cidade, setCidade] = useState("");
@@ -187,7 +187,7 @@ function Cadastro({ navigation }) {
   const saveInfrator = (infrator) => {
     // console.log(infrator);
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -256,7 +256,7 @@ function Cadastro({ navigation }) {
 
   const saveInfração = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -294,7 +294,7 @@ function Cadastro({ navigation }) {
 
   const excluirInfrator = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -308,7 +308,7 @@ function Cadastro({ navigation }) {
         [
           {
             text: "Não",
-            onPress: () => {},
+            onPress: () => { },
             style: "cancel",
           },
           {
@@ -335,7 +335,7 @@ function Cadastro({ navigation }) {
 
   const favoritar = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
     setFavorito(!favorito);
@@ -401,7 +401,7 @@ function Cadastro({ navigation }) {
 
   const deleteItem = (item, index) => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
     if (
@@ -487,7 +487,7 @@ function Cadastro({ navigation }) {
   const NavigationToAttachment = (infração_) => {
     if (isSaved) {
       if (!Network.haveInternet) {
-        Network.alertOffline(() => {});
+        Network.alertOffline(() => { });
         return;
       }
       if (
@@ -539,41 +539,50 @@ function Cadastro({ navigation }) {
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
         style={{
-          flex: 1,
-          alignSelf: "stretch",
-          padding: 30,
-          paddingBottom: 10,
+          width: '100%',
+          height: '100%',
+          padding: 20
         }}
       >
-        <Text style={[Styles.lblSubtitle, { fontSize: 25, flex: 0.75 }]}>
-          CADASTRO DE INFRATOR
+        <ScrollView style={{maxHeight:'100%'}}>
+          <View style={{
+            width: '100%',
+            height: 45,
+            backgroundColor: 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Text style={[Styles.lblSubtitle, { fontSize: 25, flex: 0.75 }]}>
+              CADASTRO DE INFRATOR
         </Text>
-        <KeyboardAvoidingView style={{ flex: 14 }}
-                              behavior={Platform.OS == "ios" ? "padding" : "height"}
-        >
-          <View
-            style={{
-              marginTop:16,
-              backgroundColor: "#fff",
-              height: 400,
-              marginBottom: 5,
-              borderRadius: 10,
-              paddingHorizontal: 10,
-              paddingTop: 5,
-            }}
+          </View>
+
+          <KeyboardAvoidingView style={{ height: '100%' }}
+            behavior={'padding'}
           >
-            <Text
-              style={{
-                color: "#800000",
-                fontSize: 18,
-                marginStart: 10,
-                fontFamily: "CenturyGothicBold",
-              }}
-            >
-              Informações pessoais
+            <>
+              <View
+                style={{
+                  marginTop: 16,
+                  backgroundColor: "#fff",
+                  height: 425,
+                  marginBottom: 5,
+                  borderRadius: 10,
+                  paddingHorizontal: 10,
+                  paddingTop: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#800000",
+                    fontSize: 18,
+                    marginStart: 10,
+                    fontFamily: "CenturyGothicBold",
+                  }}
+                >
+                  Informações pessoais
             </Text>
-            <ScrollView>
-              <View style={{ flexDirection: "row" }}>
+
                 <TextInput
                   placeholder="Nome"
                   autoCapitalize="words"
@@ -589,417 +598,429 @@ function Cadastro({ navigation }) {
                     setInfrator({ ...infrator, Nome: nome })
                   }
                 />
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <TextInput
-                  placeholder="RG"
-                  returnKeyType="next"
-                  type="secondary"
-                  style={{ marginEnd: 3 }}
-                  value={infrator.Rg}
-                  maxLength={13}
-                  editable={isNew}
-                  keyboardType="number-pad"
-                  onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
-                  onEndEditing={() => {}}
-                />
-                <TextInput
-                  placeholder="CPF"
-                  returnKeyType="next"
-                  type="secondary"
-                  value={infrator.Cpf}
-                  maxLength={11}
-                  keyboardType="number-pad"
-                  onChangeText={(cpf) => setInfrator({ ...infrator, Cpf: cpf })}
-                />
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <DatePicker
-                  style={{ flex: 3.5, marginEnd: 3, marginTop: 5 }}
-                  format="DD/MM/YYYY"
-                  date={dateNasc}
-                  onDateChange={(dateNasc) => {
-                    setDateNas(dateNasc);
-                    var dt = dateNasc.split("/");
-                    setInfrator({
-                      ...infrator,
-                      Data_nascimento: new Date(
-                        `${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`
-                      ).toISOString(),
-                    });
-                  }}
-                  customStyles={{
-                    dateIcon: {
-                      width: 0,
-                      height: 0,
-                    },
-                    dateInput: {
-                      borderWidth: 0,
-                    },
-                    dateTouchBody: {
-                      borderRadius: 25,
-                      borderColor: "#DCDCDC",
-                      borderWidth: 1,
-                    },
-                  }}
-                />
-                <TextInput
-                  placeholder="Sexo"
-                  returnKeyType="next"
-                  type="secondary"
-                  style={{ flex: 1.5 }}
-                  value={infrator.Sexo}
-                  maxLength={1}
-                  onChangeText={(sexo) => {
-                    sexo = sexo.toUpperCase();
-                    if (sexo != "M" && sexo != "F" && sexo != "O") {
-                      sexo = "";
-                    }
-                    setInfrator({ ...infrator, Sexo: sexo });
-                  }}
-                />
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <TextInput
-                  placeholder="Nome da Mãe"
-                  returnKeyType="next"
-                  autoCapitalize="words"
-                  autoCompleteType="name"
-                  type="secondary"
-                  style={{ marginTop: 8, marginEnd: 3.5 }}
-                  value={infrator.Mãe}
-                  maxLength={60}
-                  onChangeText={(mãe) => setInfrator({ ...infrator, Mãe: mãe })}
-                />
-                <Picker_
-                  items={medidaItems}
-                  selectedValue={infrator.MedidaSE}
-                  style={{ minWidth: 100 }}
-                  mode="dropdown"
-                  onValueChange={(itemValue, itemIndex) => {
-                    if (itemIndex > 0) {
-                      if (itemValue !== infrator.MedidaSE)
-                        setInfrator({ ...infrator, MedidaSE: itemValue });
-                    }
-                  }}
-                />
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <TextInput
-                  placeholder="Logradouro"
-                  returnKeyType="next"
-                  textContentType="fullStreetAddress"
-                  autoCompleteType="street-address"
-                  type="secondary"
-                  style={{ flex: 1, marginEnd: 3 }}
-                  value={infrator.Logradouro}
-                  maxLength={120}
-                  onChangeText={(logradouro) =>
-                    setInfrator({ ...infrator, Logradouro: logradouro })
-                  }
-                />
-                <TextInput
-                  placeholder="Bairro"
-                  returnKeyType="next"
-                  autoCapitalize="words"
-                  textContentType="sublocality"
-                  type="secondary"
-                  value={infrator.Bairro}
-                  maxLength={60}
-                  onChangeText={(bairro) =>
-                    setInfrator({ ...infrator, Bairro: bairro })
-                  }
-                />
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    borderWidth: 1,
-                    borderRadius: 25,
-                    borderColor: "#DCDCDC",
-                    height: 40,
-                    marginVertical: 5,
-                    marginEnd: 3,
-                    paddingStart: 10,
-                  }}
-                >
-                  <Picker
-                    style={{
-                      fontFamily: "CenturyGothic",
-                      color: Colors.Secondary.Normal,
+
+                <View style={{ flexDirection: "row" }}>
+                  <TextInput
+                    placeholder="RG"
+                    returnKeyType="next"
+                    type="secondary"
+                    style={{ marginEnd: 3 }}
+                    value={infrator.Rg}
+                    maxLength={13}
+                    editable={isNew}
+                    keyboardType="number-pad"
+                    onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
+                    onEndEditing={() => { }}
+                  />
+                  <TextInput
+                    placeholder="CPF"
+                    returnKeyType="next"
+                    type="secondary"
+                    value={infrator.Cpf}
+                    maxLength={11}
+                    keyboardType="number-pad"
+                    onChangeText={(cpf) => setInfrator({ ...infrator, Cpf: cpf })}
+                  />
+                </View>
+
+                <View style={{ flexDirection: "row" }}>
+                  <DatePicker
+                    style={{ marginEnd: 3, marginTop: 8 }}
+                    format="DD/MM/YYYY"
+                    date={dateNasc}
+                    onDateChange={(dateNasc) => {
+                      setDateNas(dateNasc);
+                      var dt = dateNasc.split("/");
+                      setInfrator({
+                        ...infrator,
+                        Data_nascimento: new Date(
+                          `${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`
+                        ).toISOString(),
+                      });
                     }}
+                    customStyles={{
+                      dateIcon: {
+                        width: 0,
+                        height: 0,
+                      },
+                      dateInput: {
+                        borderWidth: 0,
+                      },
+                      dateTouchBody: {
+                        borderRadius: 25,
+                        borderColor: "#800000",
+                        borderWidth: 1,
+                        height: 40
+                      },
+                    }}
+                  />
+                  <TextInput
+                    placeholder="Sexo"
+                    returnKeyType="next"
+                    type="secondary"
+                    style={{ flex: 1.5 }}
+                    value={infrator.Sexo}
+                    maxLength={1}
+                    onChangeText={(sexo) => {
+                      sexo = sexo.toUpperCase();
+                      if (sexo != "M" && sexo != "F" && sexo != "O") {
+                        sexo = "";
+                      }
+                      setInfrator({ ...infrator, Sexo: sexo });
+                    }}
+                  />
+                </View>
+
+                <View style={{ flexDirection: "row" }}>
+                  <TextInput
+                    placeholder="Nome da Mãe"
+                    returnKeyType="next"
+                    autoCapitalize="words"
+                    autoCompleteType="name"
+                    type="secondary"
+                    style={{ marginTop: 8, marginEnd: 3.5 }}
+                    value={infrator.Mãe}
+                    maxLength={60}
+                    onChangeText={(mãe) => setInfrator({ ...infrator, Mãe: mãe })}
+                  />
+                  <Picker_
+                    items={medidaItems}
+                    selectedValue={infrator.MedidaSE}
+                    style={{ minWidth: 100 }}
                     mode="dropdown"
-                    selectedValue={infrator.Uf}
                     onValueChange={(itemValue, itemIndex) => {
                       if (itemIndex > 0) {
-                        setIdEstado(itemIndex);
-                        if (itemValue != infrator.Uf)
-                          setInfrator({ ...infrator, Uf: itemValue });
+                        if (itemValue !== infrator.MedidaSE)
+                          setInfrator({ ...infrator, MedidaSE: itemValue });
                       }
                     }}
-                  >
-                    {Estados.map((item, index) => {
-                      return (
-                        <Picker.Item
-                          label={item.sigla}
-                          value={item.sigla}
-                          key={index}
-                        />
-                      );
-                    })}
-                  </Picker>
+                  />
                 </View>
+
+                <View style={{ flexDirection: "row" }}>
+                  <TextInput
+                    placeholder="Logradouro"
+                    returnKeyType="next"
+                    textContentType="fullStreetAddress"
+                    autoCompleteType="street-address"
+                    type="secondary"
+                    style={{ marginEnd: 3 }}
+                    value={infrator.Logradouro}
+                    maxLength={120}
+                    onChangeText={(logradouro) =>
+                      setInfrator({ ...infrator, Logradouro: logradouro })
+                    }
+                  />
+                  <TextInput
+                    placeholder="Bairro"
+                    returnKeyType="next"
+                    autoCapitalize="words"
+                    textContentType="sublocality"
+                    type="secondary"
+                    value={infrator.Bairro}
+                    maxLength={60}
+                    onChangeText={(bairro) =>
+                      setInfrator({ ...infrator, Bairro: bairro })
+                    }
+                  />
+                </View>
+
+                <View style={{ flexDirection: "row" }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      borderColor: "#800000",
+                      height: 40,
+                      marginVertical: 5,
+                      marginEnd: 3,
+                      paddingStart: 10,
+                    }}
+                  >
+                    <Picker
+                      style={{
+                        fontFamily: "CenturyGothic",
+                        color: Colors.Secondary.Normal,
+                      }}
+                      mode="dropdown"
+                      selectedValue={infrator.Uf}
+                      onValueChange={(itemValue, itemIndex) => {
+                        if (itemIndex > 0) {
+                          setIdEstado(itemIndex);
+                          if (itemValue != infrator.Uf)
+                            setInfrator({ ...infrator, Uf: itemValue });
+                        }
+                      }}
+                    >
+                      {Estados.map((item, index) => {
+                        return (
+                          <Picker.Item
+                            label={item.sigla}
+                            value={item.sigla}
+                            key={index}
+                          />
+                        );
+                      })}
+                    </Picker>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      borderWidth: 1,
+                      justifyContent: "center",
+                      borderRadius: 25,
+                      borderColor: "#800000",
+                      height: 40,
+                      marginVertical: 5,
+                      marginEnd: 3,
+                      paddingStart: 10,
+                    }}
+                  >
+                    <Picker
+                      style={{
+                        fontFamily: "CenturyGothic",
+                        color: Colors.Secondary.Normal,
+                      }}
+                      mode="dropdown"
+                      selectedValue={infrator.Cidade}
+                      onValueChange={(itemValue, itenIndex) => {
+                        setInfrator({ ...infrator, Cidade: itemValue });
+                      }}
+                    >
+                      {cidades.map((item, index) => {
+                        return (
+                          <Picker.Item label={item} value={item} key={index} />
+                        );
+                      })}
+                    </Picker>
+                  </View>
+                  <TextInput
+                    placeholder="N°"
+                    style={{ flex: 0.5, marginTop: 5 }}
+                    type="secondary"
+                    value={infrator.Num_residência}
+                    keyboardType="number-pad"
+                    maxLength={10}
+                    onChangeText={(numero) =>
+                      setInfrator({ ...infrator, Num_residência: numero })
+                    }
+                  />
+                </View>
+
+                <View style={{ flexDirection: "row", alignSelf: "stretch" }}>
+                  <Button
+                    text="SALVAR"
+                    type="normal"
+                    style={{
+                      paddingHorizontal: isSaved ? "7%" : "36%",
+                      marginHorizontal: 0,
+                    }}
+                    onPress={() => saveInfrator(infrator)}
+                  />
+                  {isSaved ? (
+                    <View style={{ flexDirection: "row" }}>
+                      <TouchableHighlight
+                        style={[
+                          Styles.btnSecundary,
+                          {
+                            backgroundColor: "#800",
+                            marginHorizontal: 5,
+                            justifyContent: "center",
+                            paddingHorizontal: 15,
+                          },
+                        ]}
+                        underlayColor={Colors.Primary.Normal}
+                        onPress={() => favoritar()}
+                      >
+                        {favorito ? (
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_favorite_on.png")}
+                          ></Image>
+                        ) : (
+                            <Image
+                              style={{ height: 20, width: 20 }}
+                              source={require("../../assets/images/icon_favorite_off.png")}
+                            ></Image>
+                          )}
+                      </TouchableHighlight>
+                      <TouchableHighlight
+                        style={[
+                          Styles.btnSecundary,
+                          {
+                            backgroundColor: "#800",
+                            marginHorizontal: 0,
+                            justifyContent: "center",
+                            paddingHorizontal: 15,
+                          },
+                        ]}
+                        underlayColor={Colors.Primary.Normal}
+                        onPress={() => {
+                          if (!loadRelatorio) CreatePDF();
+                        }}
+                      >
+                        {loadRelatorio ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                            <Image
+                              style={{ height: 20, width: 20 }}
+                              source={require("../../assets/images/icon_relatory.png")}
+                            ></Image>
+                          )}
+                      </TouchableHighlight>
+                      <TouchableHighlight
+                        style={[
+                          Styles.btnSecundary,
+                          {
+                            backgroundColor: "#800",
+                            marginHorizontal: 5,
+                            justifyContent: "center",
+                            paddingHorizontal: 15,
+                          },
+                        ]}
+                        underlayColor={Colors.Primary.Normal}
+                        onPress={() => excluirInfrator()}
+                      >
+                        <Image
+                          style={{ height: 20, width: 20 }}
+                          source={require("../../assets/images/icon_lixeira_white.png")}
+                        ></Image>
+                      </TouchableHighlight>
+                    </View>
+                  ) : (
+                      <></>
+                    )}
+                </View>
+              </View>
+
+              {isSaved ? (
                 <View
                   style={{
-                    flex: 1,
-                    borderWidth: 1,
-                    justifyContent: "center",
-                    borderRadius: 25,
-                    borderColor: "#DCDCDC",
-                    height: 40,
-                    marginVertical: 5,
-                    marginEnd: 3,
-                    paddingStart: 10,
+                    width:'100%',
+                    height:220,
+                    backgroundColor: "#fff",
+                    borderRadius: 10,
+                    padding: 10,
+                    marginTop:8
                   }}
                 >
-                  <Picker
-                    style={{
-                      fontFamily: "CenturyGothic",
-                      color: Colors.Secondary.Normal,
-                    }}
-                    mode="dropdown"
-                    selectedValue={infrator.Cidade}
-                    onValueChange={(itemValue, itenIndex) => {
-                      setInfrator({ ...infrator, Cidade: itemValue });
-                    }}
-                  >
-                    {cidades.map((item, index) => {
-                      return (
-                        <Picker.Item label={item} value={item} key={index} />
-                      );
-                    })}
-                  </Picker>
-                </View>
-                <TextInput
-                  placeholder="N°"
-                  style={{ flex: 0.5 }}
-                  type="secondary"
-                  value={infrator.Num_residência}
-                  keyboardType="number-pad"
-                  maxLength={10}
-                  onChangeText={(numero) =>
-                    setInfrator({ ...infrator, Num_residência: numero })
-                  }
-                />
-              </View>
-            </ScrollView>
-            <View style={{ flexDirection: "row", alignSelf: "stretch" }}>
-              <Button
-                text="SALVAR"
-                type="normal"
-                style={{
-                  paddingHorizontal: isSaved ? "7%" : "36%",
-                  marginHorizontal: 0,
-                }}
-                onPress={() => saveInfrator(infrator)}
-              />
-              {isSaved ? (
-                <View style={{ flexDirection: "row" }}>
-                  <TouchableHighlight
-                    style={[
-                      Styles.btnSecundary,
-                      {
-                        backgroundColor: "#800",
-                        marginHorizontal: 5,
-                        justifyContent: "center",
-                        paddingHorizontal: 15,
-                      },
-                    ]}
-                    underlayColor={Colors.Primary.Normal}
-                    onPress={() => favoritar()}
-                  >
-                    {favorito ? (
-                      <Image
-                        style={{ height: 20, width: 20 }}
-                        source={require("../../assets/images/icon_favorite_on.png")}
-                      ></Image>
-                    ) : (
-                      <Image
-                        style={{ height: 20, width: 20 }}
-                        source={require("../../assets/images/icon_favorite_off.png")}
-                      ></Image>
-                    )}
-                  </TouchableHighlight>
-                  <TouchableHighlight
-                    style={[
-                      Styles.btnSecundary,
-                      {
-                        backgroundColor: "#800",
+                  <View style={{ height: 40 }}>
+                    <TextInput
+                      placeholder="Infração"
+                      type="secondary"
+                      style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
+                      multiline={true}
+                      value={infração.Descrição}
+                      textAlignVertical="top"
+                      onChangeText={(descrição) =>
+                        setInfração({ ...infração, Descrição: descrição })
+                      }
+                    />
+                  </View>
+                  <View style={{ height: 40, marginTop: 5 }}>
+                    <TextInput
+                      placeholder="REDS"
+                      style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
+                      type="secondary"
+                      value={infração.Reds}
+                      onChangeText={(reds) =>
+                        setInfração({ ...infração, Reds: reds })
+                      }
+                    />
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "center" }}>
+                    <DatePicker
+                      format="DD/MM/YYYY"
+                      style={{ flex: 1, marginEnd: 3, marginTop: 7 }}
+                      date={dateInfra}
+                      onDateChange={(dataOcorrencia) => {
+                        setDateInfra(dataOcorrencia);
+                        var dt = dataOcorrencia.split("/");
+                        setInfração({
+                          ...infração,
+                          Data_ocorrência: new Date(
+                            `${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`
+                          ).toISOString(),
+                        });
+                      }}
+                      customStyles={{
+                        dateIcon: {
+                          width: 0,
+                          height: 0,
+                        },
+                        dateInput: {
+                          borderWidth: 0,
+                        },
+                        dateTouchBody: {
+                          borderRadius: 25,
+                          borderColor: "#DCDCDC",
+                          borderWidth: 1,
+                          height: 39,
+                        },
+                      }}
+                    />
+                    <Button
+                      text="ADICIONAR"
+                      type="normal"
+                      style={{
                         marginHorizontal: 0,
-                        justifyContent: "center",
-                        paddingHorizontal: 15,
-                      },
-                    ]}
-                    underlayColor={Colors.Primary.Normal}
-                    onPress={() => {
-                      if (!loadRelatorio) CreatePDF();
-                    }}
-                  >
-                    {loadRelatorio ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Image
-                        style={{ height: 20, width: 20 }}
-                        source={require("../../assets/images/icon_relatory.png")}
-                      ></Image>
-                    )}
-                  </TouchableHighlight>
-                  <TouchableHighlight
-                    style={[
-                      Styles.btnSecundary,
-                      {
-                        backgroundColor: "#800",
-                        marginHorizontal: 5,
-                        justifyContent: "center",
-                        paddingHorizontal: 15,
-                      },
-                    ]}
-                    underlayColor={Colors.Primary.Normal}
-                    onPress={() => excluirInfrator()}
-                  >
-                    <Image
-                      style={{ height: 20, width: 20 }}
-                      source={require("../../assets/images/icon_lixeira_white.png")}
-                    ></Image>
-                  </TouchableHighlight>
-                </View>
-              ) : (
-                <></>
-              )}
-            </View>
-          </View>
-
-          {isSaved ? (
-            <View
-              style={{
-                backgroundColor: "#fff",
-                flex: 1,
-                borderRadius: 10,
-                padding: 10,
-              }}
-            >
-              <View style={{ height: 40 }}>
-                <TextInput
-                  placeholder="Infração"
-                  type="secondary"
-                  style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
-                  multiline={true}
-                  value={infração.Descrição}
-                  textAlignVertical="top"
-                  onChangeText={(descrição) =>
-                    setInfração({ ...infração, Descrição: descrição })
-                  }
-                />
-              </View>
-              <View style={{ height: 40, marginTop: 5 }}>
-                <TextInput
-                  placeholder="REDS"
-                  style={{ borderRadius: 25, paddingTop: 8, marginTop: 0 }}
-                  type="secondary"
-                  value={infração.Reds}
-                  onChangeText={(reds) =>
-                    setInfração({ ...infração, Reds: reds })
-                  }
-                />
-              </View>
-              <View style={{ flexDirection: "row", justifyContent: "center" }}>
-                <DatePicker
-                  format="DD/MM/YYYY"
-                  style={{ flex: 1, marginEnd: 3, marginTop: 7 }}
-                  date={dateInfra}
-                  onDateChange={(dataOcorrencia) => {
-                    setDateInfra(dataOcorrencia);
-                    var dt = dataOcorrencia.split("/");
-                    setInfração({
-                      ...infração,
-                      Data_ocorrência: new Date(
-                        `${dt[2]}-${dt[1]}-${dt[0]}T10:00:00`
-                      ).toISOString(),
-                    });
-                  }}
-                  customStyles={{
-                    dateIcon: {
-                      width: 0,
-                      height: 0,
-                    },
-                    dateInput: {
-                      borderWidth: 0,
-                    },
-                    dateTouchBody: {
+                        maxHeight: 40,
+                        minWidth: 100,
+                      }}
+                      textStyle={{ fontSize: 13 }}
+                      onPress={() => {
+                        let infra = infração;
+                        infra.Data_registro = new Date().toISOString();
+                        setInfração(infra);
+                        saveInfração();
+                      }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      alignSelf: "stretch",
+                      borderWidth: 1,
                       borderRadius: 25,
                       borderColor: "#DCDCDC",
-                      borderWidth: 1,
-                      height: 39,
-                    },
-                  }}
-                />
-                <Button
-                  text="ADICIONAR"
-                  type="normal"
-                  style={{
-                    marginHorizontal: 0,
-                    maxHeight: 40,
-                    minWidth: 100,
-                  }}
-                  textStyle={{ fontSize: 13 }}
-                  onPress={() => {
-                    let infra = infração;
-                    infra.Data_registro = new Date().toISOString();
-                    setInfração(infra);
-                    saveInfração();
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  alignSelf: "stretch",
-                  borderWidth: 1,
-                  borderRadius: 25,
-                  borderColor: "#DCDCDC",
-                  height: 60,
-                  padding: 10,
-                }}
-              >
-                <ScrollView style={{ height: 60, borderRadius: 15 }}>
-                  <SwipeListView
-                    data={infrator.Infrações}
-                    renderItem={({ item }) => (
-                      <Itens.Infração.idle
-                        data={item}
-                        onLongPress={() => {
-                          NavigationToAttachment(item);
-                        }}
+                      height: 60,
+                      padding: 10,
+                    }}
+                  >
+                    <ScrollView style={{ height: 60, borderRadius: 15 }}>
+                      <SwipeListView
+                        data={infrator.Infrações}
+                        renderItem={({ item }) => (
+                          <Itens.Infração.idle
+                            data={item}
+                            onLongPress={() => {
+                              NavigationToAttachment(item);
+                            }}
+                          />
+                        )}
+                        renderHiddenItem={({ item, index }) => (
+                          <Itens.Infração.swipe
+                            onDelete={() => {
+                              deleteItem(item, index);
+                            }}
+                          />
+                        )}
+                        leftOpenValue={30}
+                        disableLeftSwipe={true}
                       />
-                    )}
-                    renderHiddenItem={({ item, index }) => (
-                      <Itens.Infração.swipe
-                        onDelete={() => {
-                          deleteItem(item, index);
-                        }}
-                      />
-                    )}
-                    leftOpenValue={30}
-                    disableLeftSwipe={true}
-                  />
-                </ScrollView>
-              </View>
-            </View>
-          ) : (
-            <View style={{ flex: 1 }}></View>
-          )}
-        </KeyboardAvoidingView>
+                    </ScrollView>
+                  </View>
+                </View>
+              ) : (
+                  <></>
+                )}
+
+
+            </>
+          </KeyboardAvoidingView>
+        </ScrollView>
+
       </LinearGradient>
     </SafeAreaView>
   );

@@ -3,10 +3,8 @@ import Colors from "./colors";
 
 const Styles = StyleSheet.create({
   page: {
-    justifyContent: "space-between",
-    alignItems: "center",
-    flex: 1,
-    alignSelf: "stretch",
+    flex:1,
+    alignItems:'center',
   },
 
   txtNormal: {
