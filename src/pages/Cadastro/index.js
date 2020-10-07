@@ -548,9 +548,12 @@ function Cadastro({ navigation }) {
         <Text style={[Styles.lblSubtitle, { fontSize: 25, flex: 0.75 }]}>
           CADASTRO DE INFRATOR
         </Text>
-        <KeyboardAvoidingView style={{ flex: 14 }}>
+        <KeyboardAvoidingView style={{ flex: 14 }}
+                              behavior={Platform.OS == "ios" ? "padding" : "height"}
+        >
           <View
             style={{
+              marginTop:16,
               backgroundColor: "#fff",
               height: 400,
               marginBottom: 5,

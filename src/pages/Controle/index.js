@@ -111,7 +111,6 @@ function Controle({ navigation }) {
         style={{
           flex: 1,
           alignSelf: "stretch",
-          paddingTop: 30,
           alignItems: "center",
         }}
       >

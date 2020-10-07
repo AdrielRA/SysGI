@@ -149,11 +149,11 @@ function Consulta({ navigation }) {
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Secondary.Normal]}
         style={{
-          paddingTop: 30,
           width: "100%",
-          height: 150,
-          alignItems: "center",
-          justifyContent: "center",
+          height: 100,
+          justifyContent:'center',
+          alignItems: 'center', 
+          position:'relative'
         }}
       >
         <Text
@@ -165,9 +165,8 @@ function Consulta({ navigation }) {
         >
           CONSULTA
         </Text>
-      </LinearGradient>
-      <TouchableOpacity
-        style={[Styles.searchType, { top: 128 }]}
+        <TouchableOpacity
+        style={[Styles.searchType, {top:77,}]}
         onPress={() => {
           setSearchType(searchType < 3 ? searchType + 1 : 1);
         }}
@@ -176,14 +175,13 @@ function Consulta({ navigation }) {
           {searchType < 2 ? "RG" : searchType < 3 ? "Nome" : "Mãe"}
         </Text>
       </TouchableOpacity>
-
       <SearchBar
         lightTheme
         placeholder="Pesquisar Infrator"
         placeholderTextColor={Colors.Secondary.Normal}
         containerStyle={[
           Styles.searchContent,
-          { left: searchPadding, top: 128 },
+          { left: searchPadding, top: 77 },
         ]}
         inputStyle={Styles.searchInput}
         round={true}
@@ -197,6 +195,10 @@ function Consulta({ navigation }) {
           _consultarInfrator();
         }}
       ></SearchBar>
+      </LinearGradient>
+      
+
+      
       {Infrator != undefined ? (
         <View style={{ flex: 6, alignSelf: "stretch", marginTop: 20 }}>
           <View
