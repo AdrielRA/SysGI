@@ -34,7 +34,7 @@ function Cadastro({ navigation }) {
   const [favorito, setFavorito] = useState(undefined);
   const [dateNasc, setDateNas] = useState(new Date());
   const [dateInfra, setDateInfra] = useState(new Date());
-  const [isSaved, setIsSaved] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   const [estado, setEstado] = useState(undefined);
   const [cidades, setCidades] = useState([]);
   const [cidade, setCidade] = useState("");
@@ -187,7 +187,7 @@ function Cadastro({ navigation }) {
   const saveInfrator = (infrator) => {
     // console.log(infrator);
     if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+      Network.alertOffline(() => {});
       return;
     }
 
@@ -256,7 +256,7 @@ function Cadastro({ navigation }) {
 
   const saveInfração = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+      Network.alertOffline(() => {});
       return;
     }
 
@@ -294,7 +294,7 @@ function Cadastro({ navigation }) {
 
   const excluirInfrator = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+      Network.alertOffline(() => {});
       return;
     }
 
@@ -308,7 +308,7 @@ function Cadastro({ navigation }) {
         [
           {
             text: "Não",
-            onPress: () => { },
+            onPress: () => {},
             style: "cancel",
           },
           {
@@ -335,7 +335,7 @@ function Cadastro({ navigation }) {
 
   const favoritar = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+      Network.alertOffline(() => {});
       return;
     }
     setFavorito(!favorito);
@@ -401,7 +401,7 @@ function Cadastro({ navigation }) {
 
   const deleteItem = (item, index) => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+      Network.alertOffline(() => {});
       return;
     }
     if (
@@ -487,7 +487,7 @@ function Cadastro({ navigation }) {
   const NavigationToAttachment = (infração_) => {
     if (isSaved) {
       if (!Network.haveInternet) {
-        Network.alertOffline(() => { });
+        Network.alertOffline(() => {});
         return;
       }
       if (
@@ -539,27 +539,27 @@ function Cadastro({ navigation }) {
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
         style={{
-          width: '100%',
-          height: '100%',
-          padding: 20
+          width: "100%",
+          height: "100%",
+          padding: 20,
         }}
       >
-        <ScrollView style={{maxHeight:'100%'}}>
-          <View style={{
-            width: '100%',
-            height: 45,
-            backgroundColor: 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
+        <ScrollView style={{ maxHeight: "100%" }}>
+          <View
+            style={{
+              width: "100%",
+              height: 45,
+              backgroundColor: "transparent",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Text style={[Styles.lblSubtitle, { fontSize: 25, flex: 0.75 }]}>
               CADASTRO DE INFRATOR
-        </Text>
+            </Text>
           </View>
 
-          <KeyboardAvoidingView style={{ height: '100%' }}
-            behavior={'padding'}
-          >
+          <KeyboardAvoidingView style={{ height: "100%" }} behavior={"padding"}>
             <>
               <View
                 style={{
@@ -581,7 +581,7 @@ function Cadastro({ navigation }) {
                   }}
                 >
                   Informações pessoais
-            </Text>
+                </Text>
 
                 <TextInput
                   placeholder="Nome"
@@ -610,7 +610,7 @@ function Cadastro({ navigation }) {
                     editable={isNew}
                     keyboardType="number-pad"
                     onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
-                    onEndEditing={() => { }}
+                    onEndEditing={() => {}}
                   />
                   <TextInput
                     placeholder="CPF"
@@ -619,7 +619,9 @@ function Cadastro({ navigation }) {
                     value={infrator.Cpf}
                     maxLength={11}
                     keyboardType="number-pad"
-                    onChangeText={(cpf) => setInfrator({ ...infrator, Cpf: cpf })}
+                    onChangeText={(cpf) =>
+                      setInfrator({ ...infrator, Cpf: cpf })
+                    }
                   />
                 </View>
 
@@ -650,7 +652,7 @@ function Cadastro({ navigation }) {
                         borderRadius: 25,
                         borderColor: "#800000",
                         borderWidth: 1,
-                        height: 40
+                        height: 40,
                       },
                     }}
                   />
@@ -681,7 +683,9 @@ function Cadastro({ navigation }) {
                     style={{ marginTop: 8, marginEnd: 3.5 }}
                     value={infrator.Mãe}
                     maxLength={60}
-                    onChangeText={(mãe) => setInfrator({ ...infrator, Mãe: mãe })}
+                    onChangeText={(mãe) =>
+                      setInfrator({ ...infrator, Mãe: mãe })
+                    }
                   />
                   <Picker_
                     items={medidaItems}
@@ -840,11 +844,11 @@ function Cadastro({ navigation }) {
                             source={require("../../assets/images/icon_favorite_on.png")}
                           ></Image>
                         ) : (
-                            <Image
-                              style={{ height: 20, width: 20 }}
-                              source={require("../../assets/images/icon_favorite_off.png")}
-                            ></Image>
-                          )}
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_favorite_off.png")}
+                          ></Image>
+                        )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -864,11 +868,11 @@ function Cadastro({ navigation }) {
                         {loadRelatorio ? (
                           <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Image
-                              style={{ height: 20, width: 20 }}
-                              source={require("../../assets/images/icon_relatory.png")}
-                            ></Image>
-                          )}
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_relatory.png")}
+                          ></Image>
+                        )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -890,20 +894,20 @@ function Cadastro({ navigation }) {
                       </TouchableHighlight>
                     </View>
                   ) : (
-                      <></>
-                    )}
+                    <></>
+                  )}
                 </View>
               </View>
 
               {isSaved ? (
                 <View
                   style={{
-                    width:'100%',
-                    height:220,
+                    width: "100%",
+                    height: 220,
                     backgroundColor: "#fff",
                     borderRadius: 10,
                     padding: 10,
-                    marginTop:8
+                    marginTop: 8,
                   }}
                 >
                   <View style={{ height: 40 }}>
@@ -930,7 +934,9 @@ function Cadastro({ navigation }) {
                       }
                     />
                   </View>
-                  <View style={{ flexDirection: "row", justifyContent: "center" }}>
+                  <View
+                    style={{ flexDirection: "row", justifyContent: "center" }}
+                  >
                     <DatePicker
                       format="DD/MM/YYYY"
                       style={{ flex: 1, marginEnd: 3, marginTop: 7 }}
@@ -1013,14 +1019,11 @@ function Cadastro({ navigation }) {
                   </View>
                 </View>
               ) : (
-                  <></>
-                )}
-
-
+                <></>
+              )}
             </>
           </KeyboardAvoidingView>
         </ScrollView>
-
       </LinearGradient>
     </SafeAreaView>
   );

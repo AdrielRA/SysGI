@@ -71,7 +71,9 @@ function Sobre({ navigation }) {
             style={[Styles.campo, { marginVertical: 10 }]}
             underlayColor={"#00000000"}
             onPress={() => {
-              Linking.openURL("https://www.google.com");
+              Linking.openURL(
+                "https://firebasestorage.googleapis.com/v0/b/sysgi-210bd.appspot.com/o/manual.pdf?alt=media&token=59f1a3bd-9bce-4d90-997f-6943deb2e2b9"
+              );
             }}
           >
             <Text style={[Styles.txtNormal, Styles.txtCenter, Styles.txtWhite]}>
