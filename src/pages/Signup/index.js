@@ -12,10 +12,11 @@ import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Primary, Tertiary } from "../../styles/colors";
 import { Button, TextInput, Picker } from "../../components";
-import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import firebase from "../../services/firebase";
 import * as Crypto from "expo-crypto";
+import { Auth, Network } from "../../controllers";
+import { Strings } from "../../utils";
 
 function Signup({ navigation }) {
   const [nome, setNome] = useState("");
@@ -27,7 +28,15 @@ function Signup({ navigation }) {
   const [confSenha, setConfSenha] = useState("");
   const [categoria, setCategoria] = useState("");
 
-  const _camposOk = () => {
+  const { connected, alertOffline } = Network.useNetwork();
+
+  const { isLogged } = Auth.useAuth();
+
+  useEffect(() => {
+    if (isLogged) Auth.signOut();
+  }, [isLogged]);
+
+  const validateInputs = () => {
     if (categoria === "0") {
       Alert.alert("Atenção:", "Selecione uma categoria!");
       return false;
@@ -49,84 +58,48 @@ function Signup({ navigation }) {
     } else return true;
   };
 
-  const _saveUser = (user) => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+  const handleSignup = (userData) => {
+    if (!connected) {
+      alertOffline();
       return;
     }
 
-    firebase.auth().signOut();
+    if (!validateInputs()) return;
 
-    if (!_camposOk()) return;
-
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, senha)
-      .then(() => {
-        if (firebase.auth().currentUser) {
-          let fire_user = firebase.auth().currentUser;
-          let Recovery = "";
-          (async () => {
-            const digest = await Crypto.digestStringAsync(
-              Crypto.CryptoDigestAlgorithm.SHA256,
-              user.Inscrição
-            );
-            Recovery = digest.toString("hex").substring(0, 8);
-          })().then(() => {
-            user = { ...user, Recovery };
-            firebase.database().ref("users").child(fire_user.uid).set(user);
-            firebase
-              .database()
-              .ref("users")
-              .child(fire_user.uid)
-              .once("value")
-              .then((snapshot) => {
-                if (!fire_user.emailVerified) {
-                  fire_user
-                    .sendEmailVerification()
-                    .then(() => {
-                      Alert.alert(
-                        user.Recovery,
-                        `Salve este cód. de recuperação em local seguro! Em breve você receberá um e-mail de verificação!`
-                      );
-                    })
-                    .catch((err) => {
-                      Alert.alert("Falha: " + err.code, err.message);
-                    });
-                }
-              });
+    Auth.createUser(email, senha)
+      .then(({ user }) => {
+        if (user) {
+          Auth.generateRecoveryCode(userData.Inscrição).then((Recovery) => {
+            userData = { ...userData, Recovery };
+            Auth.setUserData(user.uid, userData).then(() => {
+              if (!user.emailVerified) {
+                Auth.sendEmailVerification(user)
+                  .then(() => {
+                    navigation.push("Recovery", { user, Recovery });
+                  })
+                  .catch((err) => {
+                    Alert.alert(
+                      "Falha:",
+                      Strings["ptBr"]["signInError"][
+                        "auth/verification-email-fail"
+                      ]
+                    );
+                  });
+              }
+            });
             navigation.goBack();
           });
         } else {
-          Alert.alert("Falha!", "Não foi possivel completar seu cadastro!");
+          Alert.alert(
+            "Falha:",
+            Strings["ptBr"]["signInError"]["auth/signup-fail"]
+          );
         }
-        firebase.auth().signOut();
       })
       .catch((e) => {
-        switch (e.code) {
-          case "auth/invalid-email":
-            Alert.alert("Atenção:", "Email informado é inválido!");
-            break;
-          case "auth/weak-password":
-            Alert.alert("Atenção:", "Senha deve conter ao menos 6 caracteres!");
-            break;
-          case "auth/email-already-in-use":
-            Alert.alert("Email inválido!", "Ele já está em uso.");
-            break;
-          case "auth/network-request-failed":
-            Alert.alert(
-              "Sem internet:",
-              "Verifique sua conexão e tente novamente!"
-            );
-            break;
-          default:
-            Alert.alert(
-              "Algo deu errado...",
-              "Por favor tente novamente mais tarde!"
-            );
-            //Alert.alert(`ERROR: ${e.code}`, e.message);
-            break;
-        }
+        let msg = Strings["ptBr"]["signInError"][e.code];
+        let errorMsg = !!msg ? msg : "Tente novamente mais tarde";
+        Alert.alert("Falha:", errorMsg);
       });
   };
 
@@ -161,9 +134,9 @@ function Signup({ navigation }) {
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <Picker
-               name="Categoria"
-               data={pickerItems}
-               setSelected={setCategoria}
+              name="Categoria"
+              data={pickerItems}
+              setSelected={setCategoria}
             />
             <TextInput
               placeholder="Nome de Usuário"
@@ -259,7 +232,7 @@ function Signup({ navigation }) {
               type="light"
               style={{ minWidth: 150 }}
               onPress={() =>
-                _saveUser({
+                handleSignup({
                   Nome: nome,
                   Inscrição: inscrição,
                   Telefone: telefone,
