@@ -17,6 +17,7 @@
     "expo-crypto": "~8.3.0",
     "expo-document-picker": "~8.4.0",
     "expo-linear-gradient": "~8.3.0",
+    "expo-notifications": "~0.7.2",
     "expo-permissions": "~9.3.0",
     "expo-print": "~9.1.0",
     "expo-sharing": "~8.4.1",

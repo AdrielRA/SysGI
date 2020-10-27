@@ -9,7 +9,7 @@ import {
   Alert,
   Image,
   AsyncStorage,
-  YellowBox,
+  LogBox,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
@@ -21,8 +21,8 @@ import { CheckBox } from "react-native-elements";
 import firebase from "../../services/firebase";
 import Constants from "expo-constants";
 
-YellowBox.ignoreWarnings(["Setting a timer"]);
-YellowBox.ignoreWarnings(["VirtualizedList"]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(["VirtualizedList"]);
 
 function Login({ navigation }) {
   const [keepLogin, setLoginState] = useState();
