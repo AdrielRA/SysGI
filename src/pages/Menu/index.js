@@ -17,7 +17,7 @@ import { Credencial, Network } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Permissions from "expo-permissions";
-import { Notifications } from "expo";
+import * as Notifications from "expo-notifications";
 import firebase from "../../services/firebase";
 
 function MENU({ navigation }) {
@@ -83,7 +83,7 @@ function MENU({ navigation }) {
               .child("users")
               .child(firebase.auth().currentUser.uid)
               .child("Device")
-              .set(token);
+              .set(token.data);
           } else {
             firebase
               .database()
