@@ -215,7 +215,7 @@ function MENU({ navigation }) {
         >
           <Image
             style={{ width: 200, height: 200 }}
-            source={require("../../assets/images/balança.png")}
+            source={require("../../assets/images/balanca.png")}
           />
           <Button text="CADASTRAR" type="light" onPress={handleCadastrar} />
           <Button text="CONSULTAR" type="light" onPress={handleConsultar} />
