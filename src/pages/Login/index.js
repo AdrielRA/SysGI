@@ -222,10 +222,12 @@ function Login({ navigation }) {
       });
   };
 
+  
   function entrar(snapshot) {
     if (snapshot.val().Credencial > 0 && snapshot.val().Credencial <= 30) {
       if (snapshot.val().SessionId != undefined) {
         if (Constants.deviceId != snapshot.val().SessionId) {
+          
           Alert.alert(
             "Conta em uso:",
             "Outro dispositivo conectado! Desconectar de todos?",
@@ -343,6 +345,7 @@ function Login({ navigation }) {
           style={{
             flex: 0.9,
             justifyContent: "center",
+            marginTop:30
           }}
         >
           <Text style={Styles.lblTitle}>SysGI</Text>

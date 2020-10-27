@@ -11,17 +11,13 @@ import {
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Primary, Tertiary } from "../../styles/colors";
-import { Button, Picker, TextInput } from "../../components";
+import { Button, TextInput, Picker } from "../../components";
 import { Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import firebase from "../../services/firebase";
 import * as Crypto from "expo-crypto";
 
 function Signup({ navigation }) {
-  const [categoria, setCategoria] = useState(0);
-  const CategoriaChanged = (categoria) => {
-    setCategoria(categoria);
-  };
   const [nome, setNome] = useState("");
   const [inscrição, setInscrição] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -29,6 +25,7 @@ function Signup({ navigation }) {
   const [confEmail, setConfEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confSenha, setConfSenha] = useState("");
+  const [categoria, setCategoria] = useState("");
 
   const _camposOk = () => {
     if (categoria === "0") {
@@ -164,10 +161,9 @@ function Signup({ navigation }) {
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <Picker
-              items={pickerItems}
-              type="light"
-              selectedValue={categoria}
-              onValueChange={(itemValue) => CategoriaChanged(itemValue)}
+               name="Categoria"
+               data={pickerItems}
+               setSelected={setCategoria}
             />
             <TextInput
               placeholder="Nome de Usuário"
