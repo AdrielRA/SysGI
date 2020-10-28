@@ -25,9 +25,8 @@ import firebase from "../../services/firebase";
 import { DropDownPicker } from "../../components";
 import axios from "axios";
 
-
 function Cadastro({ navigation }) {
-  const{connected, alertOffline} = Network.useNetwork();
+  const { connected, alertOffline } = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
   const infratores = firebase.database().ref("infratores");
 
@@ -37,12 +36,12 @@ function Cadastro({ navigation }) {
   const [favorito, setFavorito] = useState(undefined);
   const [dateNasc, setDateNas] = useState(new Date());
   const [dateInfra, setDateInfra] = useState(new Date());
-  const [isSaved, setIsSaved] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   const [estado, setEstado] = useState("");
   const [cidades, setCidades] = useState([]);
   const [ufs, setUfs] = useState([]);
   const [loadRelatorio, setLoadRelatorio] = useState(false);
-  const { connected, alertOffline } = Network.useNetwork();
+
 
   useEffect(() => {
     axios
@@ -59,26 +58,22 @@ function Cadastro({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (estado != "") {
-      getCidades(estado);
-    }
-  }, [estado]);
-
-  function getCidades(uf) {
-    axios
-      .get(
-        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`
-      )
-      .then((response) => {
-        let responseCities = response.data.map((city) => {
-          return {
-            label: city.nome,
-            value: city.nome,
-          };
+    if (estado != "" || infrator_) {
+      axios
+        .get(
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${infrator_.Uf}/municipios`
+        )
+        .then((response) => {
+          let responseCities = response.data.map((city) => {
+            return {
+              label: city.nome,
+              value: city.nome,
+            };
+          });
+          setCidades(responseCities);
         });
-        setCidades(responseCities);
-      });
-  }
+    }
+  }, [estado, infrator_]);
 
   const [infrator, setInfrator] = useState({
     Nome: "",
@@ -96,6 +91,7 @@ function Cadastro({ navigation }) {
     Data_registro: moment(new Date()).toISOString(),
     Infrações: [],
   });
+
   const [infração, setInfração] = useState({
     Descrição: "",
     Reds: "",
@@ -104,27 +100,26 @@ function Cadastro({ navigation }) {
   });
 
   useEffect(() => {
-    if (infrator_) {
-      setInfrator(infrator_);
-      let filteredCitys = getCidades(infrator_.Uf);
-      setCidades(filteredCitys);
-      setIsNew(false);
-      setIsSaved(true);
-      setDateNas(
-        moment(new Date(infrator_.Data_nascimento)).format("DD/MM/YYYY")
-      );
+      if (infrator_) {
+        setInfrator(infrator_);
+        setIsNew(false);
+        setIsSaved(true);
+        setDateNas(
+          moment(new Date(infrator_.Data_nascimento)).format("DD/MM/YYYY")
+        );
 
-      let query = infratores.orderByChild("Rg").equalTo(infrator_.Rg);
-      query.once("value", function (snapshot) {
-        if (snapshot.val() != null) {
-          snapshot.forEach(function (child) {
-            if (child.val()) {
-              setInfratorKey(child.key);
-            }
-          });
-        }
-      });
-    }
+        let query = infratores.orderByChild("Rg").equalTo(infrator_.Rg);
+        query.once("value", function (snapshot) {
+          if (snapshot.val() != null) {
+            snapshot.forEach(function (child) {
+              if (child.val()) {
+                setInfratorKey(child.key);
+              }
+            });
+          }
+        });
+      }
+    
   }, []);
 
   useEffect(() => {
@@ -340,7 +335,7 @@ function Cadastro({ navigation }) {
         [
           {
             text: "Não",
-            onPress: () => {},
+            onPress: () => { },
             style: "cancel",
           },
           {
@@ -367,11 +362,7 @@ function Cadastro({ navigation }) {
 
   const favoritar = () => {
     if (!connected) {
-<<<<<<< HEAD
-      alertOffline();
-=======
-      alertOffline(() => {});
->>>>>>> b05fb810d5811515ac4c370c95386286d51d50bb
+      alertOffline(() => { });
       return;
     }
     setFavorito(!favorito);
@@ -437,11 +428,7 @@ function Cadastro({ navigation }) {
 
   const deleteItem = (item, index) => {
     if (!connected) {
-<<<<<<< HEAD
       alertOffline();
-=======
-      alertOffline(() => {});
->>>>>>> b05fb810d5811515ac4c370c95386286d51d50bb
       return;
     }
     if (
@@ -505,16 +492,13 @@ function Cadastro({ navigation }) {
       .listAll()
       .then((dir) => {
         dir.items.forEach((fileRef) => {
-          console.log("Files: " + fileRef.name);
           deleteFile(ref.fullPath, fileRef.name);
         });
         dir.prefixes.forEach((folderRef) => {
-          console.log("Folders: " + folderRef.fullPath);
           deleteRecursiveFiles(folderRef.fullPath.replace("anexos/", ""));
         });
       })
       .catch((error) => {
-        console.log(error);
       });
   };
 
@@ -650,7 +634,7 @@ function Cadastro({ navigation }) {
                     editable={isNew}
                     keyboardType="number-pad"
                     onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
-                    onEndEditing={() => {}}
+                    onEndEditing={() => { }}
                   />
                   <TextInput
                     placeholder="CPF"
@@ -774,7 +758,7 @@ function Cadastro({ navigation }) {
                 >
                   <DropDownPicker
                     items={ufs ? ufs : [{}]}
-                    placeholder="Uf"
+                    placeholder={infrator.Uf != "" ? infrator.Uf : "Uf"}
                     placeholderStyle={{ color: Colors.Secondary.Normal }}
                     onChangeItem={(item) => {
                       setInfrator({ ...infrator, Uf: item.value });
@@ -805,7 +789,7 @@ function Cadastro({ navigation }) {
 
                   <DropDownPicker
                     items={cidades ? cidades : [{}]}
-                    placeholder="Cidade"
+                    placeholder={infrator.Cidade != "" ? infrator.Cidade: "Cidade"}
                     placeholderStyle={{ color: Colors.Secondary.Normal }}
                     onChangeItem={(item, index) => {
                       setInfrator({ ...infrator, Cidade: item.value });
@@ -877,11 +861,11 @@ function Cadastro({ navigation }) {
                             source={require("../../assets/images/icon_favorite_on.png")}
                           ></Image>
                         ) : (
-                          <Image
-                            style={{ height: 20, width: 20 }}
-                            source={require("../../assets/images/icon_favorite_off.png")}
-                          ></Image>
-                        )}
+                            <Image
+                              style={{ height: 20, width: 20 }}
+                              source={require("../../assets/images/icon_favorite_off.png")}
+                            ></Image>
+                          )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -901,11 +885,11 @@ function Cadastro({ navigation }) {
                         {loadRelatorio ? (
                           <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                          <Image
-                            style={{ height: 20, width: 20 }}
-                            source={require("../../assets/images/icon_relatory.png")}
-                          ></Image>
-                        )}
+                            <Image
+                              style={{ height: 20, width: 20 }}
+                              source={require("../../assets/images/icon_relatory.png")}
+                            ></Image>
+                          )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -927,8 +911,8 @@ function Cadastro({ navigation }) {
                       </TouchableHighlight>
                     </View>
                   ) : (
-                    <></>
-                  )}
+                      <></>
+                    )}
                 </View>
               </View>
 
@@ -1052,8 +1036,8 @@ function Cadastro({ navigation }) {
                   </View>
                 </View>
               ) : (
-                <></>
-              )}
+                  <></>
+                )}
             </>
           </KeyboardAvoidingView>
         </ScrollView>
