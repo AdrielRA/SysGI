@@ -13,9 +13,13 @@ const useAuth = () => {
     getPersistence().then((persistence) => {
       setPersiste(persistence);
       if (!persistence) signOut();
+
+      const timer = setTimeout(() => {
+        handleAuthChange();
+      }, 1000);
+
+      return clearTimeout(() => timer());
     });
-    handleAuthChange;
-    return handleAuthChange();
   }, []);
 
   useEffect(() => setIsLogged(!!user), [user]);

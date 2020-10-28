@@ -35,13 +35,6 @@ function Login({ navigation }) {
   const { connected, alertOffline } = Network.useNetwork();
   const [loading, setLoading] = useState(false);
 
-  /*useEffect(() => {
-    Auth.getPersistence().then((persistence) => {
-      setKeepLogin(persistence);
-      if (!persistence) Auth.signOut();
-    });
-  }, []);*/
-
   useEffect(() => {
     if (isLogged) {
       setEntrando(true);
@@ -50,12 +43,6 @@ function Login({ navigation }) {
     }
     setLoadLogin(false);
   }, [isLogged]);
-
-  /*const handlePersistence = () => {
-    Auth.setPersistence(!keepLogin).then(() =>
-      Auth.getPersistence().then(setKeepLogin)
-    );
-  };*/
 
   const handleLogin = () => {
     if (!connected) {
