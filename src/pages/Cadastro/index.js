@@ -16,7 +16,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Credencial, Network, Relatory } from "../../controllers";
+import { Network, Credencial, Relatory } from "../../controllers";
 import { Button, Itens, Picker, TextInput } from "../../components";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
@@ -25,7 +25,9 @@ import firebase from "../../services/firebase";
 import { DropDownPicker } from '../../components';
 import axios from 'axios';
 
+
 function Cadastro({ navigation }) {
+  const{connected, alertOffline} = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
   const infratores = firebase.database().ref("infratores");
 
@@ -215,8 +217,8 @@ function Cadastro({ navigation }) {
 
   const saveInfrator = (infrator) => {
     // console.log(infrator);
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -284,8 +286,8 @@ function Cadastro({ navigation }) {
   };
 
   const saveInfração = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -322,8 +324,8 @@ function Cadastro({ navigation }) {
   };
 
   const excluirInfrator = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -363,8 +365,8 @@ function Cadastro({ navigation }) {
   };
 
   const favoritar = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
     setFavorito(!favorito);
@@ -429,8 +431,8 @@ function Cadastro({ navigation }) {
   }, [favorito]);
 
   const deleteItem = (item, index) => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
     if (
@@ -515,8 +517,8 @@ function Cadastro({ navigation }) {
 
   const NavigationToAttachment = (infração_) => {
     if (isSaved) {
-      if (!Network.haveInternet) {
-        Network.alertOffline(() => { });
+      if (!connected) {
+        alertOffline();
         return;
       }
       if (

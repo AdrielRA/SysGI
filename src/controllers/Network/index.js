@@ -16,6 +16,7 @@ const useNetwork = () => {
   }, []);
 
   useEffect(() => {
+    console.log(connected);
     setPreventAlert(false);
   }, [connected]);
 
