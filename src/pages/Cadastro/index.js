@@ -7,9 +7,9 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Alert,
-  Picker,
   Image,
   ActivityIndicator,
+  Dimensions
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Print from "expo-print";
@@ -17,12 +17,13 @@ import * as Sharing from "expo-sharing";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Credencial, Network, Relatory } from "../../controllers";
-import { Button, Itens, Picker as Picker_, TextInput } from "../../components";
-import { Cidades, Estados } from "../../utils";
+import { Button, Itens, Picker, TextInput } from "../../components";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
 import { SwipeListView } from "react-native-swipe-list-view";
 import firebase from "../../services/firebase";
+import { DropDownPicker } from '../../components';
+import axios from 'axios';
 
 function Cadastro({ navigation }) {
   const infrator_ = navigation.getParam("Infrator");
@@ -34,19 +35,47 @@ function Cadastro({ navigation }) {
   const [favorito, setFavorito] = useState(undefined);
   const [dateNasc, setDateNas] = useState(new Date());
   const [dateInfra, setDateInfra] = useState(new Date());
-  const [isSaved, setIsSaved] = useState(false);
-  const [estado, setEstado] = useState(undefined);
+  const [isSaved, setIsSaved] = useState(true);
+  const [estado, setEstado] = useState("");
   const [cidades, setCidades] = useState([]);
-  const [cidade, setCidade] = useState("");
-  const [idEstado, setIdEstado] = useState(-1);
+  const [ufs, setUfs] = useState([]);
   const [loadRelatorio, setLoadRelatorio] = useState(false);
 
+
   useEffect(() => {
-    if (idEstado > -1) {
-      let filtro = Object.values(Cidades)[idEstado];
-      if (filtro) setCidades(filtro.cidades);
+    axios
+      .get("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
+      .then((response) => {
+
+        let responseUfs = response.data.map(uf => {
+          return {
+            label: uf.sigla,
+            value: uf.sigla
+          }
+        })
+        setUfs(responseUfs);
+      })
+  }, [])
+
+  useEffect(() => {
+    if (estado != "") {
+      getCidades(estado)
     }
-  }, [idEstado]);
+  }, [estado])
+
+  function getCidades(uf) {
+    axios
+      .get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
+      .then((response) => {
+        let responseCities = response.data.map(city => {
+          return {
+            label: city.nome,
+            value: city.nome
+          }
+        });
+        setCidades(responseCities);
+      })
+  }
 
   const [infrator, setInfrator] = useState({
     Nome: "",
@@ -74,8 +103,8 @@ function Cadastro({ navigation }) {
   useEffect(() => {
     if (infrator_) {
       setInfrator(infrator_);
-      let filteredCitys = Cidades.filter((c) => c.sigla == infrator_.Uf);
-      setCidades(filteredCitys[0].cidades);
+      let filteredCitys = getCidades(infrator_.Uf);
+      setCidades(filteredCitys);
       setIsNew(false);
       setIsSaved(true);
       setDateNas(
@@ -187,7 +216,7 @@ function Cadastro({ navigation }) {
   const saveInfrator = (infrator) => {
     // console.log(infrator);
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -256,7 +285,7 @@ function Cadastro({ navigation }) {
 
   const saveInfração = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -294,7 +323,7 @@ function Cadastro({ navigation }) {
 
   const excluirInfrator = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -308,7 +337,7 @@ function Cadastro({ navigation }) {
         [
           {
             text: "Não",
-            onPress: () => {},
+            onPress: () => { },
             style: "cancel",
           },
           {
@@ -335,7 +364,7 @@ function Cadastro({ navigation }) {
 
   const favoritar = () => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
     setFavorito(!favorito);
@@ -401,7 +430,7 @@ function Cadastro({ navigation }) {
 
   const deleteItem = (item, index) => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
     if (
@@ -487,7 +516,7 @@ function Cadastro({ navigation }) {
   const NavigationToAttachment = (infração_) => {
     if (isSaved) {
       if (!Network.haveInternet) {
-        Network.alertOffline(() => {});
+        Network.alertOffline(() => { });
         return;
       }
       if (
@@ -544,7 +573,7 @@ function Cadastro({ navigation }) {
           padding: 20,
         }}
       >
-        <ScrollView style={{ maxHeight: "100%" }}>
+        <ScrollView>
           <View
             style={{
               width: "100%",
@@ -610,7 +639,7 @@ function Cadastro({ navigation }) {
                     editable={isNew}
                     keyboardType="number-pad"
                     onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
-                    onEndEditing={() => {}}
+                    onEndEditing={() => { }}
                   />
                   <TextInput
                     placeholder="CPF"
@@ -673,7 +702,7 @@ function Cadastro({ navigation }) {
                   />
                 </View>
 
-                <View style={{ flexDirection: "row" }}>
+                <View style={{ flexDirection: "row", width: "100%" }}>
                   <TextInput
                     placeholder="Nome da Mãe"
                     returnKeyType="next"
@@ -687,17 +716,14 @@ function Cadastro({ navigation }) {
                       setInfrator({ ...infrator, Mãe: mãe })
                     }
                   />
-                  <Picker_
-                    items={medidaItems}
-                    selectedValue={infrator.MedidaSE}
-                    style={{ minWidth: 100 }}
-                    mode="dropdown"
-                    onValueChange={(itemValue, itemIndex) => {
-                      if (itemIndex > 0) {
-                        if (itemValue !== infrator.MedidaSE)
-                          setInfrator({ ...infrator, MedidaSE: itemValue });
-                      }
-                    }}
+                  <Picker
+                    width={120}
+                    heigth={40}
+                    color={Colors.Secondary.Normal}
+                    name="MedidaSE"
+                    data={medidaItems}
+                    auxData={infrator}
+                    setSelected={setInfrator}
                   />
                 </View>
 
@@ -729,80 +755,66 @@ function Cadastro({ navigation }) {
                   />
                 </View>
 
-                <View style={{ flexDirection: "row" }}>
-                  <View
-                    style={{
-                      flex: 1,
-                      justifyContent: "center",
-                      borderWidth: 1,
-                      borderRadius: 25,
-                      borderColor: "#800000",
-                      height: 40,
-                      marginVertical: 5,
-                      marginEnd: 3,
-                      paddingStart: 10,
+                <View style={{ flexDirection: "row", width: Dimensions.get("window").width - 30 }}>
+
+                  <DropDownPicker
+                    items={ufs ? ufs : [{}]}
+                    placeholder="Uf"
+                    placeholderStyle={{ color: Colors.Secondary.Normal }}
+                    onChangeItem={(item) => {
+                      setInfrator({ ...infrator, Uf: item.value });
+                      setEstado(item.value);
                     }}
-                  >
-                    <Picker
-                      style={{
-                        fontFamily: "CenturyGothic",
-                        color: Colors.Secondary.Normal,
-                      }}
-                      mode="dropdown"
-                      selectedValue={infrator.Uf}
-                      onValueChange={(itemValue, itemIndex) => {
-                        if (itemIndex > 0) {
-                          setIdEstado(itemIndex);
-                          if (itemValue != infrator.Uf)
-                            setInfrator({ ...infrator, Uf: itemValue });
-                        }
-                      }}
-                    >
-                      {Estados.map((item, index) => {
-                        return (
-                          <Picker.Item
-                            label={item.sigla}
-                            value={item.sigla}
-                            key={index}
-                          />
-                        );
-                      })}
-                    </Picker>
-                  </View>
-                  <View
                     style={{
-                      flex: 1,
-                      borderWidth: 1,
-                      justifyContent: "center",
-                      borderRadius: 25,
-                      borderColor: "#800000",
-                      height: 40,
-                      marginVertical: 5,
-                      marginEnd: 3,
-                      paddingStart: 10,
+                      width: (Dimensions.get("window").width - 30) * 0.25,
+                      maxHeight: 40,
+                      marginTop: 5,
+                      marginRight: 3,
+                      borderColor: Colors.Secondary.Normal,
+                      backgroundColor: "transparent",
+                      borderTopLeftRadius: 25,
+                      borderTopRightRadius: 25,
+                      borderBottomLeftRadius: 25,
+                      borderBottomRightRadius: 25
                     }}
-                  >
-                    <Picker
-                      style={{
-                        fontFamily: "CenturyGothic",
-                        color: Colors.Secondary.Normal,
-                      }}
-                      mode="dropdown"
-                      selectedValue={infrator.Cidade}
-                      onValueChange={(itemValue, itenIndex) => {
-                        setInfrator({ ...infrator, Cidade: itemValue });
-                      }}
-                    >
-                      {cidades.map((item, index) => {
-                        return (
-                          <Picker.Item label={item} value={item} key={index} />
-                        );
-                      })}
-                    </Picker>
-                  </View>
+                    labelStyle={{ fontFamily: "CenturyGothic", color: Colors.Secondary.Normal }}
+                    itemStyle={{
+                      justifyContent: 'flex-start',
+                    }}
+                    dropDownStyle={{ borderColor: Colors.Secondary.Normal }}
+                    arrowColor={Colors.Secondary.Normal}
+                  />
+
+                  <DropDownPicker
+                    items={cidades ? cidades : [{}]}
+                    placeholder="Cidade"
+                    placeholderStyle={{ color: Colors.Secondary.Normal }}
+                    onChangeItem={(item, index) => {
+                      setInfrator({ ...infrator, Cidade: item.value })
+                    }}
+                    style={{
+                      width: (Dimensions.get("window").width - 30) * 0.45,
+                      maxHeight: 40,
+                      marginTop: 5,
+                      marginRight: 3,
+                      borderColor: Colors.Secondary.Normal,
+                      backgroundColor: "transparent",
+                      borderTopLeftRadius: 25,
+                      borderTopRightRadius: 25,
+                      borderBottomLeftRadius: 25,
+                      borderBottomRightRadius: 25
+                    }}
+                    labelStyle={{ fontFamily: "CenturyGothic", color: Colors.Secondary.Normal }}
+                    itemStyle={{
+                      justifyContent: 'flex-start',
+                    }}
+                    dropDownStyle={{ borderColor: Colors.Secondary.Normal }}
+                    arrowColor={Colors.Secondary.Normal}
+                  />
+
                   <TextInput
                     placeholder="N°"
-                    style={{ flex: 0.5, marginTop: 5 }}
+                    style={{ flex: 0.5, marginTop: 5, width: "20%" }}
                     type="secondary"
                     value={infrator.Num_residência}
                     keyboardType="number-pad"
@@ -844,11 +856,11 @@ function Cadastro({ navigation }) {
                             source={require("../../assets/images/icon_favorite_on.png")}
                           ></Image>
                         ) : (
-                          <Image
-                            style={{ height: 20, width: 20 }}
-                            source={require("../../assets/images/icon_favorite_off.png")}
-                          ></Image>
-                        )}
+                            <Image
+                              style={{ height: 20, width: 20 }}
+                              source={require("../../assets/images/icon_favorite_off.png")}
+                            ></Image>
+                          )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -868,11 +880,11 @@ function Cadastro({ navigation }) {
                         {loadRelatorio ? (
                           <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                          <Image
-                            style={{ height: 20, width: 20 }}
-                            source={require("../../assets/images/icon_relatory.png")}
-                          ></Image>
-                        )}
+                            <Image
+                              style={{ height: 20, width: 20 }}
+                              source={require("../../assets/images/icon_relatory.png")}
+                            ></Image>
+                          )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -894,8 +906,8 @@ function Cadastro({ navigation }) {
                       </TouchableHighlight>
                     </View>
                   ) : (
-                    <></>
-                  )}
+                      <></>
+                    )}
                 </View>
               </View>
 
@@ -1019,8 +1031,8 @@ function Cadastro({ navigation }) {
                   </View>
                 </View>
               ) : (
-                <></>
-              )}
+                  <></>
+                )}
             </>
           </KeyboardAvoidingView>
         </ScrollView>
