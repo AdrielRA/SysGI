@@ -58,15 +58,9 @@ function Signup({ navigation }) {
     } else return true;
   };
 
-<<<<<<< HEAD
-  const _saveUser = (user) => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
-=======
   const handleSignup = (userData) => {
     if (!connected) {
       alertOffline();
->>>>>>> 2c6acc1fbb3dc41a81eeba938fe93d1287e497a5
       return;
     }
 
