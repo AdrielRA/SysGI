@@ -1,29 +1,45 @@
 import NetInfo from "@react-native-community/netinfo";
+import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-class Network {
-  haveInternet = undefined;
-  removeListener = undefined;
 
-  addListener = () => {
-    try {
-      this.removeListener = NetInfo.addEventListener((state) => {
-        //alert("Type: " + state.type  + ", isOK: " + state.isInternetReachable);
-        this.haveInternet =
-          state.isConnected && state.isInternetReachable && state.type != "vpn";
-      });
-    } catch (err) {
-      console.log(err);
+const useNetwork = () => {
+  const [connected, setConnected] = useState(true);
+  const [preventAlert, setPreventAlert] = useState(false);
+
+  useEffect(() => {
+    const listener = NetInfo.addEventListener((state) => {
+      setConnected(
+        state.isConnected && state.isInternetReachable && state.type != "vpn"
+      );
+    });
+    return listener;
+  }, []);
+
+  useEffect(() => {
+    setPreventAlert(false);
+  }, [connected]);
+
+  alertOffline = (callback) => {
+    if (!preventAlert) {
+      setPreventAlert(true);
+      Alert.alert(
+        "Sem internet!",
+        "Verifique sua conexão e tente novamente!",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              setPreventAlert(false);
+              if (callback) callback();
+            },
+          },
+        ],
+        { cancelable: false }
+      );
     }
   };
 
-  alertOffline = (onPress) => {
-    Alert.alert(
-      "Sem internet!",
-      "Verifique sua conexão e tente novamente!",
-      [{ text: "OK", onPress: onPress }],
-      { cancelable: false }
-    );
-  };
-}
+  return { connected, alertOffline };
+};
 
-export default new Network();
+export { useNetwork };

@@ -8,13 +8,12 @@ import {
   TouchableHighlight,
   Alert,
   Image,
-  AsyncStorage,
   LogBox,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Button, TextInput, Unifenas } from "../../components";
-import { Network } from "../../controllers";
+import { Auth, Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
 import { CheckBox } from "react-native-elements";
@@ -25,7 +24,7 @@ LogBox.ignoreLogs(["Setting a timer"]);
 LogBox.ignoreLogs(["VirtualizedList"]);
 
 function Login({ navigation }) {
-  const [keepLogin, setLoginState] = useState();
+  const [keepLogin, setKeepLogin] = useState();
   const [loadLogin, setLoadLogin] = useState(true);
   const [entrando, setEntrando] = useState(false);
   const [netAlert, setNetAlert] = useState(false);
@@ -33,76 +32,42 @@ function Login({ navigation }) {
   const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState("");
   const [Senha, setSenha] = useState("");
+  const { isLogged, user } = Auth.useAuth();
+  const { connected, alertOffline } = Network.useNetwork();
 
   useEffect(() => {
-    Network.addListener();
-    async function _loadKeepLogin() {
-      try {
-        let value = await AsyncStorage.getItem("keep");
-        if (value != null) {
-          setLoginState(value == "true");
-        } else {
-          await AsyncStorage.setItem("keep", keepLogin.toString());
-        }
-      } catch {
-        console.log("Falha ao manipular variavel keepLogin...");
-      }
-    }
-    _loadKeepLogin();
+    Auth.getPersistence().then((persistence) => {
+      setKeepLogin(persistence);
+      if (!persistence) Auth.signOut();
+    });
   }, []);
 
-  useEffect(() => {
-    async function _saveKeepLogin() {
-      try {
-        if (keepLogin != undefined)
-          await AsyncStorage.setItem("keep", keepLogin.toString());
-      } catch (err) {
-        console.log("Falha ao salvar keepLogin..." + err.message);
-      }
-    }
-    _saveKeepLogin();
-    //console.log("Keep:" + keepLogin);
-
-    if (keepLogin == false && loadLogin) {
-      firebase.auth().signOut();
-      //console.log("Desconectou! Keep: " + keepLogin + " | load: " + loadLogin);
-      setLoadLogin(false);
-    }
-  }, [keepLogin]);
-
-  firebase.auth().onAuthStateChanged(function (user) {
-    if (user) {
-      if (keepLogin && loadLogin) {
-        setEntrando(true);
-        if (user.emailVerified) {
-          firebase
-            .database()
-            .ref("users")
-            .child(user.uid)
-            .once("value")
-            .then((snapshot) => {
-              entrar(snapshot);
-            });
-        } else setEntrando(false);
-      }
-    } else {
-      if (!netAlert && !Network.haveInternet) {
-        setNetAlert(true);
-        Network.alertOffline(() => setNetAlert(false));
-        /*Alert.alert("Sem internet!", "Verifique sua conexão e tente novamente!",
-        [ {text: 'OK', onPress:  }, ], {cancelable: false}, );   */
-      }
-    }
-    setLoadLogin(false);
-  });
-
-  const KeepLoginChange = () => {
-    if (!entrando) setLoginState(!keepLogin);
+  const handlePersistence = () => {
+    Auth.setPersistence(!keepLogin).then(() =>
+      Auth.getPersistence().then(setKeepLogin)
+    );
   };
 
+  useEffect(() => {
+    if (isLogged) {
+      setEntrando(true);
+      if (user.emailVerified) {
+        firebase
+          .database()
+          .ref("users")
+          .child(user.uid)
+          .once("value")
+          .then((snapshot) => {
+            entrar(snapshot);
+          });
+      } else setEntrando(false);
+    }
+    setLoadLogin(false);
+  }, [isLogged]);
+
   const _logar = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -222,12 +187,10 @@ function Login({ navigation }) {
       });
   };
 
-  
   function entrar(snapshot) {
     if (snapshot.val().Credencial > 0 && snapshot.val().Credencial <= 30) {
       if (snapshot.val().SessionId != undefined) {
         if (Constants.deviceId != snapshot.val().SessionId) {
-          
           Alert.alert(
             "Conta em uso:",
             "Outro dispositivo conectado! Desconectar de todos?",
@@ -345,7 +308,7 @@ function Login({ navigation }) {
           style={{
             flex: 0.9,
             justifyContent: "center",
-            marginTop:30
+            marginTop: 30,
           }}
         >
           <Text style={Styles.lblTitle}>SysGI</Text>
@@ -398,7 +361,7 @@ function Login({ navigation }) {
             containerStyle={Styles.checkbox}
             textStyle={{ color: Colors.Primary.White }}
             checked={keepLogin}
-            onPress={KeepLoginChange}
+            onPress={handlePersistence}
           />
           {loadLogin ? btn_Carregando : entrando ? btn_Entrando : btn_Logar}
           <Button

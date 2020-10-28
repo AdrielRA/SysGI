@@ -1,0 +1,12 @@
+{
+  "ptBr": {
+    "signInError": {
+      "auth/invalid-email": "Email informado é inválido",
+      "auth/weak-password": "Senha deve conter ao menos 6 caracteres",
+      "auth/email-already-in-use": "O email já está em uso",
+      "auth/network-request-failed": "Falha de conexão coma internet",
+      "auth/signup-fail": "Não foi possível completar seu cadastro",
+      "auth/verification-email-fail": "Não foi possível enviar o email de verificação"
+    }
+  }
+}

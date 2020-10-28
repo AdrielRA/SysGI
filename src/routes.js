@@ -8,6 +8,7 @@ import {
   Controle,
   Login,
   MENU,
+  Recovery,
   Signup,
   Sobre,
 } from "./pages";
@@ -17,6 +18,7 @@ const Routes = createAppContainer(
     {
       Login,
       Signup,
+      Recovery,
       Sobre,
       MENU,
       Cadastro,
