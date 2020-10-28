@@ -1,6 +1,6 @@
 import { Dark, Light, Primary, Secondary } from "../../styles/colors";
 import React, { useState, useEffect } from "react";
-import { Text, TouchableHighlight } from "react-native";
+import { Text, TouchableHighlight, View } from "react-native";
 import styles from "./styles";
 
 export default function Button(props) {
@@ -39,7 +39,10 @@ export default function Button(props) {
       underlayColor={underlayColor}
       onPress={props.onPress}
     >
-      <Text style={[txtStyle, props.textStyle]}>{props.text}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "center" }}>
+        <Text style={[txtStyle, props.textStyle]}>{props.text}</Text>
+        {props.children}
+      </View>
     </TouchableHighlight>
   );
 }

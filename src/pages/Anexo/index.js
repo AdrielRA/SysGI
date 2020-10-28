@@ -26,6 +26,7 @@ function Anexo({ navigation }) {
   const [nomeAnexo, setNomeAnexo] = useState("");
   const [Anexo, setAnexo] = useState(undefined);
   const [showDialogNovoNome, setShowDiagNomeAnexo] = useState(false);
+  const { connected, alertOffline } = Network.useNetwork();
 
   const anexos_db = firebase.database().ref().child("anexos");
   const anexos_st = firebase.storage().ref().child("anexos");
@@ -112,8 +113,8 @@ function Anexo({ navigation }) {
   }, [Anexo]);
 
   const getAnexo = async () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+    if (!connected) {
+      alertOffline();
       return;
     }
     if (
@@ -182,8 +183,8 @@ function Anexo({ navigation }) {
   }
 
   function removeAnexo(item) {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+    if (!connected) {
+      alertOffline();
       return;
     }
     const index = lista.indexOf(item);

@@ -27,6 +27,7 @@ function Consulta({ navigation }) {
   const [searchType, setSearchType] = useState(1);
   const [searchPadding, setSearchPadding] = useState(55);
   const [observerQuery, setObserver] = useState(undefined);
+  const { connected, alertOffline } = Network.useNetwork();
 
   useEffect(() => {
     switch (searchType) {
@@ -86,8 +87,8 @@ function Consulta({ navigation }) {
       setTermoAnterior(TermoPesquisa);
     }
 
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -151,9 +152,9 @@ function Consulta({ navigation }) {
         style={{
           width: "100%",
           height: 100,
-          justifyContent:'center',
-          alignItems: 'center', 
-          position:'relative'
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
         }}
       >
         <Text
@@ -166,39 +167,37 @@ function Consulta({ navigation }) {
           CONSULTA
         </Text>
         <TouchableOpacity
-        style={[Styles.searchType, {top:77,}]}
-        onPress={() => {
-          setSearchType(searchType < 3 ? searchType + 1 : 1);
-        }}
-      >
-        <Text style={Styles.searchText}>
-          {searchType < 2 ? "RG" : searchType < 3 ? "Nome" : "Mãe"}
-        </Text>
-      </TouchableOpacity>
-      <SearchBar
-        lightTheme
-        placeholder="Pesquisar Infrator"
-        placeholderTextColor={Colors.Secondary.Normal}
-        containerStyle={[
-          Styles.searchContent,
-          { left: searchPadding, top: 77 },
-        ]}
-        inputStyle={Styles.searchInput}
-        round={true}
-        inputContainerStyle={{ backgroundColor: "transparent" }}
-        searchIcon={{ iconStyle: { color: Colors.Primary.Normal } }}
-        clearIcon={{ iconStyle: { color: Colors.Primary.Normal } }}
-        value={TermoPesquisa}
-        keyboardType={searchType < 2 ? "numeric" : "default"}
-        onChangeText={(termo) => maskTermo(termo)}
-        onEndEditing={() => {
-          _consultarInfrator();
-        }}
-      ></SearchBar>
+          style={[Styles.searchType, { top: 77 }]}
+          onPress={() => {
+            setSearchType(searchType < 3 ? searchType + 1 : 1);
+          }}
+        >
+          <Text style={Styles.searchText}>
+            {searchType < 2 ? "RG" : searchType < 3 ? "Nome" : "Mãe"}
+          </Text>
+        </TouchableOpacity>
+        <SearchBar
+          lightTheme
+          placeholder="Pesquisar Infrator"
+          placeholderTextColor={Colors.Secondary.Normal}
+          containerStyle={[
+            Styles.searchContent,
+            { left: searchPadding, top: 77 },
+          ]}
+          inputStyle={Styles.searchInput}
+          round={true}
+          inputContainerStyle={{ backgroundColor: "transparent" }}
+          searchIcon={{ iconStyle: { color: Colors.Primary.Normal } }}
+          clearIcon={{ iconStyle: { color: Colors.Primary.Normal } }}
+          value={TermoPesquisa}
+          keyboardType={searchType < 2 ? "numeric" : "default"}
+          onChangeText={(termo) => maskTermo(termo)}
+          onEndEditing={() => {
+            _consultarInfrator();
+          }}
+        ></SearchBar>
       </LinearGradient>
-      
 
-      
       {Infrator != undefined ? (
         <View style={{ flex: 6, alignSelf: "stretch", marginTop: 20 }}>
           <View
@@ -279,8 +278,8 @@ function Consulta({ navigation }) {
               </View>
               <TouchableOpacity
                 onPress={() => {
-                  if (!Network.haveInternet) {
-                    Network.alertOffline(() => {});
+                  if (!connected) {
+                    alertOffline();
                     return;
                   }
                   if (
@@ -338,8 +337,8 @@ function Consulta({ navigation }) {
                       key={i}
                       infração={infração_}
                       onClick={() => {
-                        if (!Network.haveInternet) {
-                          Network.alertOffline(() => {});
+                        if (!connected) {
+                          alertOffline();
                           return;
                         }
                         if (
