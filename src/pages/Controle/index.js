@@ -18,6 +18,7 @@ import firebase from "../../services/firebase";
 
 function Controle({ navigation }) {
   const [lista, setLista] = useState([]);
+  const { connected, alertOffline } = Network.useNetwork();
   let query = undefined;
   const users = firebase.database().ref().child("users");
   if (Credencial.loggedCred == 30) {
@@ -50,8 +51,8 @@ function Controle({ navigation }) {
   });
 
   function confirmar(item) {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+    if (!connected) {
+      alertOffline();
       return;
     }
     if (Credencial.isAdimin(Credencial.loggedCred)) {
@@ -76,8 +77,8 @@ function Controle({ navigation }) {
   }
 
   function remover(item) {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+    if (!connected) {
+      alertOffline();
       return;
     }
     if (Credencial.isAdimin(Credencial.loggedCred)) {

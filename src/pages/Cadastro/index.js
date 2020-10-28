@@ -9,7 +9,7 @@ import {
   Alert,
   Image,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Print from "expo-print";
@@ -22,8 +22,8 @@ import DatePicker from "react-native-datepicker";
 import moment from "moment";
 import { SwipeListView } from "react-native-swipe-list-view";
 import firebase from "../../services/firebase";
-import { DropDownPicker } from '../../components';
-import axios from 'axios';
+import { DropDownPicker } from "../../components";
+import axios from "axios";
 
 function Cadastro({ navigation }) {
   const infrator_ = navigation.getParam("Infrator");
@@ -40,41 +40,42 @@ function Cadastro({ navigation }) {
   const [cidades, setCidades] = useState([]);
   const [ufs, setUfs] = useState([]);
   const [loadRelatorio, setLoadRelatorio] = useState(false);
-
+  const { connected, alertOffline } = Network.useNetwork();
 
   useEffect(() => {
     axios
       .get("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
       .then((response) => {
-
-        let responseUfs = response.data.map(uf => {
+        let responseUfs = response.data.map((uf) => {
           return {
             label: uf.sigla,
-            value: uf.sigla
-          }
-        })
+            value: uf.sigla,
+          };
+        });
         setUfs(responseUfs);
-      })
-  }, [])
+      });
+  }, []);
 
   useEffect(() => {
     if (estado != "") {
-      getCidades(estado)
+      getCidades(estado);
     }
-  }, [estado])
+  }, [estado]);
 
   function getCidades(uf) {
     axios
-      .get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
+      .get(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`
+      )
       .then((response) => {
-        let responseCities = response.data.map(city => {
+        let responseCities = response.data.map((city) => {
           return {
             label: city.nome,
-            value: city.nome
-          }
+            value: city.nome,
+          };
         });
         setCidades(responseCities);
-      })
+      });
   }
 
   const [infrator, setInfrator] = useState({
@@ -215,8 +216,8 @@ function Cadastro({ navigation }) {
 
   const saveInfrator = (infrator) => {
     // console.log(infrator);
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -284,8 +285,8 @@ function Cadastro({ navigation }) {
   };
 
   const saveInfração = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -322,8 +323,8 @@ function Cadastro({ navigation }) {
   };
 
   const excluirInfrator = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline();
       return;
     }
 
@@ -337,7 +338,7 @@ function Cadastro({ navigation }) {
         [
           {
             text: "Não",
-            onPress: () => { },
+            onPress: () => {},
             style: "cancel",
           },
           {
@@ -363,8 +364,8 @@ function Cadastro({ navigation }) {
   };
 
   const favoritar = () => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline(() => {});
       return;
     }
     setFavorito(!favorito);
@@ -429,8 +430,8 @@ function Cadastro({ navigation }) {
   }, [favorito]);
 
   const deleteItem = (item, index) => {
-    if (!Network.haveInternet) {
-      Network.alertOffline(() => { });
+    if (!connected) {
+      alertOffline(() => {});
       return;
     }
     if (
@@ -515,8 +516,8 @@ function Cadastro({ navigation }) {
 
   const NavigationToAttachment = (infração_) => {
     if (isSaved) {
-      if (!Network.haveInternet) {
-        Network.alertOffline(() => { });
+      if (!connected) {
+        alertOffline();
         return;
       }
       if (
@@ -639,7 +640,7 @@ function Cadastro({ navigation }) {
                     editable={isNew}
                     keyboardType="number-pad"
                     onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
-                    onEndEditing={() => { }}
+                    onEndEditing={() => {}}
                   />
                   <TextInput
                     placeholder="CPF"
@@ -755,8 +756,12 @@ function Cadastro({ navigation }) {
                   />
                 </View>
 
-                <View style={{ flexDirection: "row", width: Dimensions.get("window").width - 30 }}>
-
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: Dimensions.get("window").width - 30,
+                  }}
+                >
                   <DropDownPicker
                     items={ufs ? ufs : [{}]}
                     placeholder="Uf"
@@ -775,11 +780,14 @@ function Cadastro({ navigation }) {
                       borderTopLeftRadius: 25,
                       borderTopRightRadius: 25,
                       borderBottomLeftRadius: 25,
-                      borderBottomRightRadius: 25
+                      borderBottomRightRadius: 25,
                     }}
-                    labelStyle={{ fontFamily: "CenturyGothic", color: Colors.Secondary.Normal }}
+                    labelStyle={{
+                      fontFamily: "CenturyGothic",
+                      color: Colors.Secondary.Normal,
+                    }}
                     itemStyle={{
-                      justifyContent: 'flex-start',
+                      justifyContent: "flex-start",
                     }}
                     dropDownStyle={{ borderColor: Colors.Secondary.Normal }}
                     arrowColor={Colors.Secondary.Normal}
@@ -790,7 +798,7 @@ function Cadastro({ navigation }) {
                     placeholder="Cidade"
                     placeholderStyle={{ color: Colors.Secondary.Normal }}
                     onChangeItem={(item, index) => {
-                      setInfrator({ ...infrator, Cidade: item.value })
+                      setInfrator({ ...infrator, Cidade: item.value });
                     }}
                     style={{
                       width: (Dimensions.get("window").width - 30) * 0.45,
@@ -802,11 +810,14 @@ function Cadastro({ navigation }) {
                       borderTopLeftRadius: 25,
                       borderTopRightRadius: 25,
                       borderBottomLeftRadius: 25,
-                      borderBottomRightRadius: 25
+                      borderBottomRightRadius: 25,
                     }}
-                    labelStyle={{ fontFamily: "CenturyGothic", color: Colors.Secondary.Normal }}
+                    labelStyle={{
+                      fontFamily: "CenturyGothic",
+                      color: Colors.Secondary.Normal,
+                    }}
                     itemStyle={{
-                      justifyContent: 'flex-start',
+                      justifyContent: "flex-start",
                     }}
                     dropDownStyle={{ borderColor: Colors.Secondary.Normal }}
                     arrowColor={Colors.Secondary.Normal}
@@ -856,11 +867,11 @@ function Cadastro({ navigation }) {
                             source={require("../../assets/images/icon_favorite_on.png")}
                           ></Image>
                         ) : (
-                            <Image
-                              style={{ height: 20, width: 20 }}
-                              source={require("../../assets/images/icon_favorite_off.png")}
-                            ></Image>
-                          )}
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_favorite_off.png")}
+                          ></Image>
+                        )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -880,11 +891,11 @@ function Cadastro({ navigation }) {
                         {loadRelatorio ? (
                           <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Image
-                              style={{ height: 20, width: 20 }}
-                              source={require("../../assets/images/icon_relatory.png")}
-                            ></Image>
-                          )}
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_relatory.png")}
+                          ></Image>
+                        )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -906,8 +917,8 @@ function Cadastro({ navigation }) {
                       </TouchableHighlight>
                     </View>
                   ) : (
-                      <></>
-                    )}
+                    <></>
+                  )}
                 </View>
               </View>
 
@@ -1031,8 +1042,8 @@ function Cadastro({ navigation }) {
                   </View>
                 </View>
               ) : (
-                  <></>
-                )}
+                <></>
+              )}
             </>
           </KeyboardAvoidingView>
         </ScrollView>

@@ -19,7 +19,7 @@ const useNetwork = () => {
     setPreventAlert(false);
   }, [connected]);
 
-  alertOffline = (callback) => {
+  const alertOffline = (callback) => {
     if (!preventAlert) {
       setPreventAlert(true);
       Alert.alert(

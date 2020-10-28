@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 import * as Crypto from "expo-crypto";
 
 const useAuth = () => {
-  const [isLogged, setIsLogged] = useState(false);
+  const [isLogged, setIsLogged] = useState();
   const [user, setUser] = useState();
   const [credential, setCredential] = useState();
   const [persistence, setPersiste] = useState();
@@ -15,7 +15,8 @@ const useAuth = () => {
       if (!persistence) signOut();
 
       const timer = setTimeout(() => {
-        handleAuthChange();
+        handleAuthChange;
+        return handleAuthChange();
       }, 1000);
 
       return clearTimeout(() => timer());
@@ -31,11 +32,7 @@ const useAuth = () => {
   const handleAuthChange = () => {
     return auth().onAuthStateChanged((user) => {
       if (user) {
-        setUser({
-          uid: user.uid,
-          email: user.email,
-          emailVerified: user.emailVerified,
-        });
+        setUser(user);
       } else setUser(undefined);
     });
   };
@@ -88,6 +85,20 @@ const createUser = (email, senha, callback) => {
   return auth().createUserWithEmailAndPassword(email, senha);
 };
 
+const deleteUser = (user) => {
+  return new Promise((resolve, reject) => {
+    db()
+      .ref()
+      .child("users")
+      .child(user.uid)
+      .remove()
+      .then(() => {
+        user.delete().then(resolve).catch(reject);
+      })
+      .catch(reject);
+  });
+};
+
 const setUserData = (uid, userData) => {
   return db().ref("users").child(uid).set(userData);
 };
@@ -113,10 +124,31 @@ const generateRecoveryCode = (baseToCreate) => {
   });
 };
 
+const disconnectDevices = (cod) => {
+  return new Promise((resolve, reject) => {
+    db()
+      .ref("users")
+      .child(firebase.auth().currentUser.uid)
+      .once("value")
+      .then((snapshot) => {
+        if (snapshot.val().Recovery != undefined) {
+          if (snapshot.val().Recovery === cod) {
+            snapshot.ref
+              .child("SessionId")
+              .remove()
+              .then(() => resolve());
+          } else reject();
+        }
+      });
+  });
+};
+
 export {
   createUser,
+  deleteUser,
   generateRecoveryCode,
   getUserData,
+  disconnectDevices,
   sendEmailVerification,
   setUserData,
   signIn,

@@ -25,6 +25,7 @@ function MENU({ navigation }) {
   const userLoggedId = navigation.getParam("userLoggedId");
   const [allowNotify, setAllowNotify] = useState(false);
   const [credencial, setCredencial] = useState(undefined);
+  const { connected, alertOffline } = Network.useNetwork();
 
   useEffect(() => {
     async function _loadNotify() {
@@ -159,7 +160,7 @@ function MENU({ navigation }) {
   };
 
   const handleCadastrar = () => {
-    if (!Network.haveInternet) Network.alertOffline(() => {});
+    if (!connected) alertOffline();
     else {
       if (
         Credencial.haveAccess(credencial, Credencial.AccessToCadastro) ||
@@ -171,7 +172,7 @@ function MENU({ navigation }) {
   };
 
   const handleConsultar = () => {
-    if (!Network.haveInternet) Network.alertOffline(() => {});
+    if (!connected) alertOffline();
     else {
       if (
         Credencial.haveAccess(credencial, Credencial.AccessToConsulta) ||
@@ -183,7 +184,7 @@ function MENU({ navigation }) {
   };
 
   const handleControle = () => {
-    if (!Network.haveInternet) Network.alertOffline(() => {});
+    if (!connected) alertOffline();
     else {
       if (
         (credencial > 10 && credencial < 20) ||

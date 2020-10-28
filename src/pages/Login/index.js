@@ -9,6 +9,7 @@ import {
   Alert,
   Image,
   LogBox,
+  ActivityIndicator,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
@@ -24,7 +25,6 @@ LogBox.ignoreLogs(["Setting a timer"]);
 LogBox.ignoreLogs(["VirtualizedList"]);
 
 function Login({ navigation }) {
-  //const [keepLogin, setKeepLogin] = useState();
   const [loadLogin, setLoadLogin] = useState(true);
   const [entrando, setEntrando] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -36,10 +36,14 @@ function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(isLogged !== false);
     if (isLogged) {
       setEntrando(true);
       if (user.emailVerified) Auth.getUserData(user.uid).then(entrar);
-      else setEntrando(false);
+      else {
+        setEntrando(false);
+        setLoading(false);
+      }
     }
     setLoadLogin(false);
   }, [isLogged]);
@@ -53,6 +57,7 @@ function Login({ navigation }) {
     Auth.signIn(Email, Senha)
       .then((user) => entrar(user))
       .catch((error) => {
+        setLoading(false);
         setEntrando(false);
         switch (error) {
           case "auth/invalid-email":
@@ -120,35 +125,19 @@ function Login({ navigation }) {
     }
   };
 
-  const desconnect_all = (cod) => {
-    firebase
-      .database()
-      .ref("users")
-      .child(firebase.auth().currentUser.uid)
-      .once("value")
-      .then((snapshot) => {
-        if (snapshot.val().Recovery != undefined) {
-          if (snapshot.val().Recovery === cod) {
-            snapshot.ref
-              .child("SessionId")
-              .remove()
-              .then(() => {
-                Alert.alert(
-                  "Dispositivos desconectados:",
-                  "Realize seu login normalmente!"
-                );
-              });
-          } else {
-            Alert.alert("Falha:", "Código informado está incorreto!");
-          }
-        }
-        firebase.auth().signOut();
-        /*else{
-            let new_recovery_cod = "afc2d258";
-            snapshot.ref().child('SessionId').set(new_recovery_cod).once("value", () => {
-              Alert.alert(`Seu novo código: ${new_recovery_cod}`, "Salve-o e use-o para recuperar o acesso sempre que necessário!")
-            });
-          }*/
+  const handleDisconnect = (cod) => {
+    Auth.disconnectDevices(cod)
+      .then(() => {
+        Alert.alert(
+          "Dispositivos desconectados:",
+          "Realize seu login normalmente!"
+        );
+      })
+      .catch(() => {
+        Alert.alert("Falha:", "Código informado está incorreto!");
+      })
+      .finally(() => {
+        Auth.signOut();
       });
   };
 
@@ -176,7 +165,7 @@ function Login({ navigation }) {
             ],
             { cancelable: false }
           );
-
+          setLoading(false);
           setEntrando(false);
           return;
         }
@@ -186,6 +175,7 @@ function Login({ navigation }) {
 
       setEmail("");
       setSenha("");
+      setLoading(false);
       setEntrando(false);
       let userName = snapshot.val().Nome;
       const resetAction = StackActions.reset({
@@ -203,47 +193,23 @@ function Login({ navigation }) {
       navigation.dispatch(resetAction);
       //navigation.navigate('MENU', { userLogged: userName});
     } else if (snapshot.val().Credencial == 99) {
-      delete_user(firebase.auth().currentUser);
+      handleDelete(user);
       firebase.auth().signOut();
+      setLoading(false);
       setEntrando(false);
     } else {
       Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
       //firebase.auth().signOut();
+      setLoading(false);
       setEntrando(false);
     }
   }
 
-  function delete_user(user) {
-    firebase
-      .database()
-      .ref()
-      .child("users")
-      .child(user.uid)
-      .remove()
-      .then(() => {
-        user.delete().then(() => {
-          Alert.alert("Acesso negado!", "Seu usuário não foi validado!");
-        });
-      });
-  }
-
-  const btn_Logar = (
-    <Button text="LOGAR" type="light" onPress={handleLogin}></Button>
-  );
-  const btn_Carregando = (
-    <Button
-      text="CARREGANDO..."
-      type="light"
-      onPress={() => Alert.alert("Aguarde...", "Carregando login!")}
-    ></Button>
-  );
-  const btn_Entrando = (
-    <Button
-      text="ENTRANDO..."
-      type="light"
-      onPress={() => Alert.alert("Aguarde...", "Carregando MENU!")}
-    ></Button>
-  );
+  const handleDelete = (user) => {
+    Auth.deleteUser(user).then(() =>
+      Alert.alert("Acesso negado!", "Seu usuário não foi validado!")
+    );
+  };
 
   return (
     <SafeAreaView style={Styles.page}>
@@ -254,7 +220,7 @@ function Login({ navigation }) {
         hintInput={"Código aqui"}
         submitInput={(cod) => {
           setShowDialog(false);
-          desconnect_all(cod);
+          handleDisconnect(cod);
         }}
         submitText={"Confirmar"}
         cancelText={"Cancelar"}
@@ -328,7 +294,18 @@ function Login({ navigation }) {
             checked={persistence}
             onPress={handlePersistence}
           />
-          {loadLogin ? btn_Carregando : entrando ? btn_Entrando : btn_Logar}
+          <Button
+            text="LOGAR"
+            type="light"
+            onPress={() => !loading && handleLogin()}
+          >
+            {loading && (
+              <ActivityIndicator
+                style={{ marginLeft: 10 }}
+                color={Colors.Secondary.Normal}
+              />
+            )}
+          </Button>
           <Button
             text="Solicitar acesso!"
             type="transparent"
