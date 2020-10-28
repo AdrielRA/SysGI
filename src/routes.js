@@ -29,6 +29,7 @@ const Routes = createAppContainer(
     {
       defaultNavigationOptions: {
         headerShown: false,
+        initialRouteName: "Login",
       },
     }
   )

@@ -24,114 +24,50 @@ LogBox.ignoreLogs(["Setting a timer"]);
 LogBox.ignoreLogs(["VirtualizedList"]);
 
 function Login({ navigation }) {
-  const [keepLogin, setKeepLogin] = useState();
+  //const [keepLogin, setKeepLogin] = useState();
   const [loadLogin, setLoadLogin] = useState(true);
   const [entrando, setEntrando] = useState(false);
-  const [netAlert, setNetAlert] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState("");
   const [Senha, setSenha] = useState("");
-  const { isLogged, user } = Auth.useAuth();
+  const { handlePersistence, isLogged, persistence, user } = Auth.useAuth();
   const { connected, alertOffline } = Network.useNetwork();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  /*useEffect(() => {
     Auth.getPersistence().then((persistence) => {
       setKeepLogin(persistence);
       if (!persistence) Auth.signOut();
     });
-  }, []);
-
-  const handlePersistence = () => {
-    Auth.setPersistence(!keepLogin).then(() =>
-      Auth.getPersistence().then(setKeepLogin)
-    );
-  };
+  }, []);*/
 
   useEffect(() => {
     if (isLogged) {
       setEntrando(true);
-      if (user.emailVerified) {
-        firebase
-          .database()
-          .ref("users")
-          .child(user.uid)
-          .once("value")
-          .then((snapshot) => {
-            entrar(snapshot);
-          });
-      } else setEntrando(false);
+      if (user.emailVerified) Auth.getUserData(user.uid).then(entrar);
+      else setEntrando(false);
     }
     setLoadLogin(false);
   }, [isLogged]);
 
-  const _logar = () => {
+  /*const handlePersistence = () => {
+    Auth.setPersistence(!keepLogin).then(() =>
+      Auth.getPersistence().then(setKeepLogin)
+    );
+  };*/
+
+  const handleLogin = () => {
     if (!connected) {
       alertOffline();
       return;
     }
-
-    firebase.auth().signOut();
-    setEntrando(true);
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(Email, Senha)
-      .then(() => {
-        let fire_user = firebase.auth().currentUser;
-        if (fire_user.emailVerified) {
-          firebase
-            .database()
-            .ref("users")
-            .child(fire_user.uid)
-            .once("value")
-            .then((snapshot) => {
-              entrar(snapshot);
-            });
-        } else {
-          setEntrando(false);
-          if (!showReSendEmail) {
-            Alert.alert("Atenção: ", "Verifique seu e-mail primeiro!");
-            setShowReSendEmail(true);
-          } else {
-            Alert.alert(
-              "Atenção: ",
-              "Verifique sua conta! Deseja receber um novo email verificação?",
-              [
-                {
-                  text: "Não",
-                  onPress: () => console.log("Cancel Pressed"),
-                  style: "cancel",
-                },
-                {
-                  text: "Sim",
-                  onPress: () => {
-                    fire_user
-                      .sendEmailVerification()
-                      .then(() => {
-                        Alert.alert(
-                          "Email enviado!",
-                          "Verifique sua caixa de entrada!"
-                        );
-                        setShowReSendEmail(false);
-                      })
-                      .catch(() => {
-                        Alert.alert(
-                          "Falha de Verificação!",
-                          "Não foi possivel enviar o email de verificação, tente mais tarde!"
-                        );
-                      });
-                  },
-                },
-              ],
-              { cancelable: false }
-            );
-          }
-          firebase.auth().signOut();
-        }
-      })
+    setLoading(true);
+    Auth.signIn(Email, Senha)
+      .then((user) => entrar(user))
       .catch((error) => {
         setEntrando(false);
-        switch (error.code) {
+        switch (error) {
           case "auth/invalid-email":
             Alert.alert("Atenção:", "Email informado é inválido!");
             break;
@@ -147,12 +83,54 @@ function Login({ navigation }) {
               "Verifique sua conexão e tente novamente!"
             );
             break;
+          case "email-verification-fail":
+            alertEmailVerificationError(user);
+            break;
           default:
-            //Alert.alert("Algo deu errado...", "Por favor tente novamente mais tarde!");
-            Alert.alert("Falha: " + error.code, "Ocorreu um erro!");
+            Alert.alert("Falha: " + error, "Ocorreu um erro!");
             break;
         }
+        Auth.signOut();
       });
+  };
+
+  const alertEmailVerificationError = (user) => {
+    if (!showReSendEmail) {
+      Alert.alert("Atenção: ", "Verifique seu e-mail primeiro!");
+      setShowReSendEmail(true);
+    } else {
+      Alert.alert(
+        "Atenção: ",
+        "Verifique sua conta! Deseja receber um novo email verificação?",
+        [
+          {
+            text: "Não",
+            onPress: () => {},
+            style: "cancel",
+          },
+          {
+            text: "Sim",
+            onPress: () => {
+              Auth.sendEmailVerification(user)
+                .then(() => {
+                  Alert.alert(
+                    "Email enviado!",
+                    "Verifique sua caixa de entrada!"
+                  );
+                  setShowReSendEmail(false);
+                })
+                .catch(() => {
+                  Alert.alert(
+                    "Falha de Verificação!",
+                    "Não foi possível enviar o email de verificação, tente mais tarde!"
+                  );
+                });
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   const desconnect_all = (cod) => {
@@ -263,7 +241,7 @@ function Login({ navigation }) {
   }
 
   const btn_Logar = (
-    <Button text="LOGAR" type="light" onPress={_logar}></Button>
+    <Button text="LOGAR" type="light" onPress={handleLogin}></Button>
   );
   const btn_Carregando = (
     <Button
@@ -360,7 +338,7 @@ function Login({ navigation }) {
             checkedColor={Colors.Primary.White}
             containerStyle={Styles.checkbox}
             textStyle={{ color: Colors.Primary.White }}
-            checked={keepLogin}
+            checked={persistence}
             onPress={handlePersistence}
           />
           {loadLogin ? btn_Carregando : entrando ? btn_Entrando : btn_Logar}
