@@ -25,9 +25,7 @@ import firebase from "../../services/firebase";
 import { DropDownPicker } from "../../components";
 import axios from "axios";
 
-
 function Cadastro({ navigation }) {
-  const{connected, alertOffline} = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
   const infratores = firebase.database().ref("infratores");
 
@@ -367,11 +365,7 @@ function Cadastro({ navigation }) {
 
   const favoritar = () => {
     if (!connected) {
-<<<<<<< HEAD
       alertOffline();
-=======
-      alertOffline(() => {});
->>>>>>> b05fb810d5811515ac4c370c95386286d51d50bb
       return;
     }
     setFavorito(!favorito);
@@ -437,11 +431,7 @@ function Cadastro({ navigation }) {
 
   const deleteItem = (item, index) => {
     if (!connected) {
-<<<<<<< HEAD
       alertOffline();
-=======
-      alertOffline(() => {});
->>>>>>> b05fb810d5811515ac4c370c95386286d51d50bb
       return;
     }
     if (

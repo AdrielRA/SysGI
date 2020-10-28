@@ -19,33 +19,34 @@ import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
 import { CheckBox } from "react-native-elements";
 import firebase from "../../services/firebase";
-import Constants from "expo-constants";
+import { Strings } from "../../utils";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 LogBox.ignoreLogs(["VirtualizedList"]);
 
 function Login({ navigation }) {
-  const [loadLogin, setLoadLogin] = useState(true);
-  const [entrando, setEntrando] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState("");
   const [Senha, setSenha] = useState("");
-  const { handlePersistence, isLogged, persistence, user } = Auth.useAuth();
+  const {
+    accessDenied,
+    handlePersistence,
+    isLogged,
+    isValidCredential,
+    persistence,
+    user,
+    validateSession,
+  } = Auth.useAuth();
   const { connected, alertOffline } = Network.useNetwork();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(isLogged !== false);
     if (isLogged) {
-      setEntrando(true);
       if (user.emailVerified) Auth.getUserData(user.uid).then(entrar);
-      else {
-        setEntrando(false);
-        setLoading(false);
-      }
+      else setLoading(false);
     }
-    setLoadLogin(false);
   }, [isLogged]);
 
   const handleLogin = () => {
@@ -58,28 +59,16 @@ function Login({ navigation }) {
       .then((user) => entrar(user))
       .catch((error) => {
         setLoading(false);
-        setEntrando(false);
         switch (error) {
-          case "auth/invalid-email":
-            Alert.alert("Atenção:", "Email informado é inválido!");
-            break;
-          case "auth/user-not-found":
-            Alert.alert("Atenção:", "Usuário não cadastrado!");
-            break;
-          case "auth/wrong-password":
-            Alert.alert("Atenção:", "Senha incorreta!");
-            break;
-          case "auth/network-request-failed":
-            Alert.alert(
-              "Sem internet:",
-              "Verifique sua conexão e tente novamente!"
-            );
-            break;
           case "email-verification-fail":
             alertEmailVerificationError(user);
             break;
           default:
-            Alert.alert("Falha: " + error, "Ocorreu um erro!");
+            if (!error.includes("undefined")) {
+              let msg = Strings["ptBr"]["signInError"][error];
+              let errorMsg = !!msg ? msg : "Tente novamente mais tarde";
+              Alert.alert("Falha:", errorMsg);
+            }
             break;
         }
         Auth.signOut();
@@ -141,43 +130,35 @@ function Login({ navigation }) {
       });
   };
 
-  function entrar(snapshot) {
-    if (snapshot.val().Credencial > 0 && snapshot.val().Credencial <= 30) {
-      if (snapshot.val().SessionId != undefined) {
-        if (Constants.deviceId != snapshot.val().SessionId) {
-          Alert.alert(
-            "Conta em uso:",
-            "Outro dispositivo conectado! Desconectar de todos?",
-            [
-              {
-                text: "Não",
-                onPress: () => {
-                  firebase.auth().signOut();
-                },
-                style: "cancel",
+  function entrar(snap) {
+    if (isValidCredential(snap.val().Credencial)) {
+      if (!validateSession(snap.val().SessionId)) {
+        Alert.alert(
+          "Conta em uso:",
+          "Outro dispositivo conectado! Desconectar de todos?",
+          [
+            {
+              text: "Não",
+              onPress: () => Auth.signOut(),
+              style: "cancel",
+            },
+            {
+              text: "Sim",
+              onPress: () => {
+                setShowDialog(true);
               },
-              {
-                text: "Sim",
-                onPress: () => {
-                  setShowDialog(true);
-                },
-              },
-            ],
-            { cancelable: false }
-          );
-          setLoading(false);
-          setEntrando(false);
-          return;
-        }
-      } else {
-        snapshot.ref.child("SessionId").set(Constants.deviceId);
+            },
+          ],
+          { cancelable: false }
+        );
+        setLoading(false);
+        return;
       }
 
       setEmail("");
       setSenha("");
       setLoading(false);
-      setEntrando(false);
-      let userName = snapshot.val().Nome;
+      let userName = snap.val().Nome;
       const resetAction = StackActions.reset({
         index: 0,
         actions: [
@@ -191,24 +172,18 @@ function Login({ navigation }) {
         ],
       });
       navigation.dispatch(resetAction);
-      //navigation.navigate('MENU', { userLogged: userName});
-    } else if (snapshot.val().Credencial == 99) {
-      handleDelete(user);
-      firebase.auth().signOut();
-      setLoading(false);
-      setEntrando(false);
     } else {
-      Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
-      //firebase.auth().signOut();
+      if (accessDenied(snap.val().Credencial)) handleDelete(user);
+      else Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
       setLoading(false);
-      setEntrando(false);
     }
   }
 
   const handleDelete = (user) => {
-    Auth.deleteUser(user).then(() =>
-      Alert.alert("Acesso negado!", "Seu usuário não foi validado!")
-    );
+    Auth.deleteUser(user).then(() => {
+      Alert.alert("Acesso negado!", "Seu usuário não foi validado!");
+      Auth.signOut();
+    });
   };
 
   return (
@@ -252,15 +227,12 @@ function Login({ navigation }) {
             paddingHorizontal: 30,
             paddingBottom: 75,
           }}
-          //behavior="height"
-          //enabled
-          //keyboardVerticalOffset={100}
         >
           <TextInput
             placeholder="seuemail@email.com"
             keyboardType={"email-address"}
             autoCapitalize="none"
-            editable={!loadLogin && !entrando}
+            editable={!loading}
             autoCorrect={false}
             value={Email}
             autoCompleteType="email"
@@ -272,7 +244,7 @@ function Login({ navigation }) {
           <TextInput
             placeholder="Senha"
             autoCapitalize="none"
-            editable={!loadLogin && !entrando}
+            editable={!loading}
             autoCorrect={false}
             value={Senha}
             autoCompleteType="password"

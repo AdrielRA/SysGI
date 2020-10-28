@@ -2,6 +2,7 @@ import { db, auth } from "../../services/firebase";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-community/async-storage";
 import * as Crypto from "expo-crypto";
+import Constants from "expo-constants";
 
 const useAuth = () => {
   const [isLogged, setIsLogged] = useState();
@@ -61,7 +62,35 @@ const useAuth = () => {
     }
   };
 
-  return { handlePersistence, isLogged, credential, persistence, user };
+  const accessDenied = (Credential) => {
+    return Credential === 99;
+  };
+
+  const isValidCredential = (Credential) => {
+    return Credential > 0 && Credential <= 30;
+  };
+  const validateSession = (sessionId) => {
+    if (!sessionId) {
+      db()
+        .ref("users")
+        .child(user.uid)
+        .child("SessionId")
+        .set(Constants.deviceId);
+      return true;
+    }
+    return Constants.deviceId === sessionId;
+  };
+
+  return {
+    accessDenied,
+    handlePersistence,
+    isLogged,
+    isValidCredential,
+    credential,
+    persistence,
+    user,
+    validateSession,
+  };
 };
 
 const signIn = (email, senha) => {
@@ -128,7 +157,7 @@ const disconnectDevices = (cod) => {
   return new Promise((resolve, reject) => {
     db()
       .ref("users")
-      .child(firebase.auth().currentUser.uid)
+      .child(auth().currentUser.uid)
       .once("value")
       .then((snapshot) => {
         if (snapshot.val().Recovery != undefined) {
