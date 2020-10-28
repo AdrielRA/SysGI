@@ -51,7 +51,7 @@ function Signup({ navigation }) {
 
   const _saveUser = (user) => {
     if (!Network.haveInternet) {
-      Network.alertOffline(() => {});
+      Network.alertOffline(() => { });
       return;
     }
 
@@ -157,13 +157,16 @@ function Signup({ navigation }) {
         </Text>
         <KeyboardAvoidingView
           style={{ flex: 5, alignSelf: "stretch" }}
-          //keyboardVerticalOffset={50}
+        //keyboardVerticalOffset={50}
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <Picker
-               name="Categoria"
-               data={pickerItems}
-               setSelected={setCategoria}
+              width="100%"
+              heigth={40}
+              color="white"
+              name="Categoria"
+              data={pickerItems}
+              setSelected={setCategoria}
             />
             <TextInput
               placeholder="Nome de Usuário"

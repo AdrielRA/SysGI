@@ -1,4 +1,4 @@
-import Cidades from "./Cidades";
-import Estados from "./Cidades";
+import Cidades from "./Cidades/Cidades";
+import Estados from "./Estados/Estados";
 
 export { Cidades, Estados };

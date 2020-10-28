@@ -1,27 +1,39 @@
 import React from "react";
-import DropDownPicker from 'react-native-dropdown-picker';
+import DropDownPicker from '../DropDownPicker';
 
-export default function Picker({ name, data, setSelected }) {
+export default function Picker({ width, heigth, color, name, data,auxData, setSelected }) {
   return (
     <DropDownPicker
       items={data ? data : [{}]}
       placeholder={name}
-      placeholderStyle={{color:"white"}}
-      onChangeItem={item => setSelected(item.value)}
+      placeholderStyle={{color:color}}
+      onChangeItem={item => {
+        if(name == "Categoria")
+        {
+          setSelected(item.value)
+          
+        }
+        else if(name == "MedidaSE"){
+          setSelected({...auxData, "MedidaSE": item.value})
+        }
+      }}
       style={{
-        height: 40,
+        width: width,
+        maxHeight: heigth,
+        marginTop: name == "MedidaSE" ? 7:0,
+        borderColor:color,
         backgroundColor: "transparent",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         borderBottomLeftRadius: 25,
         borderBottomRightRadius: 25
       }}
-      labelStyle={{ fontFamily: "CenturyGothic", color: "#000" }}
+      labelStyle={{fontFamily: "CenturyGothic", color: name != "Categoria"? color: "#000" }}
       itemStyle={{
         justifyContent: 'flex-start',
       }}
-      dropDownStyle={{borderColor: "#f00"}}
-      arrowColor="white"
+      dropDownStyle={{borderColor: color}}
+      arrowColor={color}
     />
   )
 
