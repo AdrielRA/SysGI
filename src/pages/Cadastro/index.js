@@ -25,6 +25,8 @@ import firebase from "../../services/firebase";
 import { DropDownPicker } from "../../components";
 import axios from "axios";
 
+import{ Infrator } from '../../controllers'
+
 function Cadastro({ navigation }) {
   const { connected, alertOffline } = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
@@ -108,16 +110,9 @@ function Cadastro({ navigation }) {
           moment(new Date(infrator_.Data_nascimento)).format("DD/MM/YYYY")
         );
 
-        let query = infratores.orderByChild("Rg").equalTo(infrator_.Rg);
-        query.once("value", function (snapshot) {
-          if (snapshot.val() != null) {
-            snapshot.forEach(function (child) {
-              if (child.val()) {
-                setInfratorKey(child.key);
-              }
-            });
-          }
-        });
+        Infrator.setDataEdit(infrator_.Rg, (key) =>{
+          setInfratorKey(key);
+        })
       }
     
   }, []);
