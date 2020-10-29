@@ -9,6 +9,7 @@ const useAuth = () => {
   const [user, setUser] = useState();
   const [credential, setCredential] = useState();
   const [persistence, setPersiste] = useState();
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     getPersistence().then((persistence) => {
@@ -27,6 +28,10 @@ const useAuth = () => {
   useEffect(() => setIsLogged(!!user), [user]);
 
   useEffect(() => {
+    if (!!user) return handleSessionChange(user.uid);
+  }, [user]);
+
+  useEffect(() => {
     if (isLogged) getCredencial(user.uid);
   }, [isLogged]);
 
@@ -36,6 +41,17 @@ const useAuth = () => {
         setUser(user);
       } else setUser(undefined);
     });
+  };
+
+  const handleSessionChange = (uid) => {
+    return db()
+      .ref("users")
+      .child(uid)
+      .on("value", (snapshot) => {
+        try {
+          setSession(snapshot.val().SessionId);
+        } catch {}
+      });
   };
 
   const handlePersistence = () => {
@@ -69,8 +85,8 @@ const useAuth = () => {
   const isValidCredential = (Credential) => {
     return Credential > 0 && Credential <= 30;
   };
-  const validateSession = (sessionId) => {
-    if (!sessionId) {
+  const validateSession = (sessionId, create) => {
+    if (!sessionId && create) {
       db()
         .ref("users")
         .child(user.uid)
@@ -88,6 +104,7 @@ const useAuth = () => {
     isValidCredential,
     credential,
     persistence,
+    session,
     user,
     validateSession,
   };

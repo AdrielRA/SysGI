@@ -13,7 +13,7 @@ import {
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Button, Unifenas } from "../../components";
-import { Credencial, Network } from "../../controllers";
+import { Auth, Credencial, Network } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Permissions from "expo-permissions";
@@ -21,10 +21,10 @@ import * as Notifications from "expo-notifications";
 import firebase from "../../services/firebase";
 
 function MENU({ navigation }) {
-  const userLogged = navigation.getParam("userLogged");
-  const userLoggedId = navigation.getParam("userLoggedId");
+  const userData = navigation.getParam("userData");
   const [allowNotify, setAllowNotify] = useState(false);
   const [credencial, setCredencial] = useState(undefined);
+  const { isLogged, user, session, validateSession } = Auth.useAuth();
   const { connected, alertOffline } = Network.useNetwork();
 
   useEffect(() => {
@@ -44,23 +44,12 @@ function MENU({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (userLoggedId) {
-      firebase
-        .database()
-        .ref("users")
-        .child(userLoggedId)
-        .on("value", (snapshot) => {
-          if (snapshot.val().SessionId === undefined) {
-            Alert.alert(
-              "Atenção:",
-              "Sua conta foi desconectada deste dispositivo!"
-            );
-            firebase.auth().signOut();
-            return_login();
-          }
-        });
+    if (session !== null && !validateSession(session)) {
+      Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
+      Auth.signOut();
+      return_login();
     }
-  }, []);
+  }, [session]);
 
   // Código quando a tela perde o foco
   /*useEffect(() => {
@@ -71,6 +60,10 @@ function MENU({ navigation }) {
       }
     });
   }, [navigation])*/
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   useEffect(() => {
     async function _saveNotify() {
@@ -205,7 +198,7 @@ function MENU({ navigation }) {
         style={[Styles.page, { alignSelf: "stretch" }]}
       >
         <Text style={[Styles.lblMENU, { paddingTop: 40 }]}>MENU</Text>
-        <Text style={Styles.lblMsg}>Bem-vindo, {userLogged}</Text>
+        <Text style={Styles.lblMsg}>Bem-vindo, {userData.Nome}</Text>
         <View
           style={{
             flex: 6,

@@ -18,7 +18,6 @@ import { Auth, Network } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
 import { CheckBox } from "react-native-elements";
-import firebase from "../../services/firebase";
 import { Strings } from "../../utils";
 
 LogBox.ignoreLogs(["Setting a timer"]);
@@ -132,7 +131,7 @@ function Login({ navigation }) {
 
   function entrar(snap) {
     if (isValidCredential(snap.val().Credencial)) {
-      if (!validateSession(snap.val().SessionId)) {
+      if (!validateSession(snap.val().SessionId, true)) {
         Alert.alert(
           "Conta em uso:",
           "Outro dispositivo conectado! Desconectar de todos?",
@@ -158,20 +157,20 @@ function Login({ navigation }) {
       setEmail("");
       setSenha("");
       setLoading(false);
-      let userName = snap.val().Nome;
-      const resetAction = StackActions.reset({
-        index: 0,
-        actions: [
-          NavigationActions.navigate({
-            routeName: "MENU",
-            params: {
-              userLogged: userName,
-              userLoggedId: firebase.auth().currentUser.uid,
-            },
-          }),
-        ],
-      });
-      navigation.dispatch(resetAction);
+
+      navigation.dispatch(
+        StackActions.reset({
+          index: 0,
+          actions: [
+            NavigationActions.navigate({
+              routeName: "MENU",
+              params: {
+                userData: snap.val(),
+              },
+            }),
+          ],
+        })
+      );
     } else {
       if (accessDenied(snap.val().Credencial)) handleDelete(user);
       else Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
