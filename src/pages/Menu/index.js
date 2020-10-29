@@ -16,12 +16,16 @@ import { Button, Unifenas } from "../../components";
 import { Auth, Credencial, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
-import firebase from "../../services/firebase";
 
 function MENU({ navigation }) {
   const userData = navigation.getParam("userData");
-  const [credencial, setCredencial] = useState(undefined);
-  const { isLogged, user, session, validateSession } = Auth.useAuth();
+  const {
+    clearSession,
+    credential,
+    session,
+    user,
+    validateSession,
+  } = Auth.useAuth();
   const { connected, alertOffline } = Network.useNetwork();
   const { enabled, handleNotification } = Notifications.useNotifications();
 
@@ -29,48 +33,16 @@ function MENU({ navigation }) {
     if (session !== null && !validateSession(session)) {
       Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
       Auth.signOut();
-      return_login();
+      goOut();
     }
   }, [session]);
 
-  // Código quando a tela perde o foco
-  /*useEffect(() => {
-
-    navigation.addListener("didBlur", (e) => {
-      if(!e.state){
-        BackHandler.exitApp();
-      }
-    });
-  }, [navigation])*/
-
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      Credencial._getCredencial(user, setCredencial);
-    } else {
-      //Alert.alert("Atenção:","Seu usuário foi desconectado!");
-      //return_login();
-    }
-  });
-
-  logOff = () => {
-    if (!firebase.auth().currentUser) {
-      return_login();
-    } else {
-      firebase
-        .database()
-        .ref("users")
-        .child(firebase.auth().currentUser.uid)
-        .once("value")
-        .then((snapshot) => {
-          if (snapshot.val().Recovery != undefined) {
-            snapshot.ref.child("SessionId").remove();
-          }
-        });
-    }
+  handleSignOut = () => {
+    if (!user) goOut();
+    else clearSession();
   };
 
-  const return_login = () => {
-    console.log("retornou...");
+  const goOut = () => {
     const resetAction = StackActions.reset({
       index: 0,
       actions: [NavigationActions.navigate({ routeName: "Login" })],
@@ -82,8 +54,8 @@ function MENU({ navigation }) {
     if (!connected) alertOffline();
     else {
       if (
-        Credencial.haveAccess(credencial, Credencial.AccessToCadastro) ||
-        Credencial.isAdimin(credencial)
+        Credencial.haveAccess(credential, Credencial.AccessToCadastro) ||
+        Credencial.isAdimin(credential)
       )
         navigation.navigate("Cadastro");
       else Credencial.accessDenied();
@@ -94,8 +66,8 @@ function MENU({ navigation }) {
     if (!connected) alertOffline();
     else {
       if (
-        Credencial.haveAccess(credencial, Credencial.AccessToConsulta) ||
-        Credencial.isAdimin(credencial)
+        Credencial.haveAccess(credential, Credencial.AccessToConsulta) ||
+        Credencial.isAdimin(credential)
       )
         navigation.navigate("Consulta");
       else Credencial.accessDenied();
@@ -106,8 +78,8 @@ function MENU({ navigation }) {
     if (!connected) alertOffline();
     else {
       if (
-        (credencial > 10 && credencial < 20) ||
-        Credencial.isAdimin(credencial)
+        (credential > 10 && credential < 20) ||
+        Credencial.isAdimin(credential)
       )
         navigation.navigate("Controle");
       else Credencial.accessDenied();
@@ -139,7 +111,7 @@ function MENU({ navigation }) {
           />
           <Button text="CADASTRAR" type="light" onPress={handleCadastrar} />
           <Button text="CONSULTAR" type="light" onPress={handleConsultar} />
-          {(credencial > 10 && credencial < 20) || credencial == 30 ? (
+          {(credential > 10 && credential < 20) || credential == 30 ? (
             <Button text="CONTROLE" type="light" onPress={handleControle} />
           ) : (
             <></>
@@ -167,7 +139,7 @@ function MENU({ navigation }) {
           style={{ position: "absolute", bottom: 25, right: 15 }}
           underlayColor={"#00000000"}
           onPress={() => {
-            logOff();
+            handleSignOut();
           }}
         >
           <Image

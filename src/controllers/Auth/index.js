@@ -97,8 +97,13 @@ const useAuth = () => {
     return Constants.deviceId === sessionId;
   };
 
+  const clearSession = () => {
+    db().ref("users").child(user.uid).child("SessionId").remove();
+  };
+
   return {
     accessDenied,
+    clearSession,
     handlePersistence,
     isLogged,
     isValidCredential,
