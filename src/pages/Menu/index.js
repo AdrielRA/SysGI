@@ -13,35 +13,17 @@ import {
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Button, Unifenas } from "../../components";
-import { Auth, Credencial, Network } from "../../controllers";
+import { Auth, Credencial, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Permissions from "expo-permissions";
-import * as Notifications from "expo-notifications";
 import firebase from "../../services/firebase";
 
 function MENU({ navigation }) {
   const userData = navigation.getParam("userData");
-  const [allowNotify, setAllowNotify] = useState(false);
   const [credencial, setCredencial] = useState(undefined);
   const { isLogged, user, session, validateSession } = Auth.useAuth();
   const { connected, alertOffline } = Network.useNetwork();
-
-  useEffect(() => {
-    async function _loadNotify() {
-      try {
-        let value = await AsyncStorage.getItem("notify");
-        if (value != null) {
-          setAllowNotify(value == "true");
-        } else {
-          await AsyncStorage.setItem("notify", allowNotify.toString());
-        }
-      } catch {
-        console.log("Falha ao manipular variavel allowNotify...");
-      }
-    }
-    _loadNotify();
-  }, []);
+  const { enabled, handleNotification } = Notifications.useNotifications();
 
   useEffect(() => {
     if (session !== null && !validateSession(session)) {
@@ -60,62 +42,6 @@ function MENU({ navigation }) {
       }
     });
   }, [navigation])*/
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
-  useEffect(() => {
-    async function _saveNotify() {
-      try {
-        if (allowNotify != undefined) {
-          if (allowNotify) {
-            let token = await Notifications.getExpoPushTokenAsync();
-            firebase
-              .database()
-              .ref()
-              .child("users")
-              .child(firebase.auth().currentUser.uid)
-              .child("Device")
-              .set(token.data);
-          } else {
-            firebase
-              .database()
-              .ref()
-              .child("users")
-              .child(firebase.auth().currentUser.uid)
-              .child("Device")
-              .remove();
-          }
-
-          await AsyncStorage.setItem("notify", allowNotify.toString());
-        }
-      } catch (err) {
-        console.log("Falha ao salvar allowNotify..." + err.message);
-      }
-    }
-    async function _requestNotifyPermission() {
-      const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-      if (status !== "granted") {
-        const { status } = await Permissions.askAsync(
-          Permissions.NOTIFICATIONS
-        );
-        if (status === "granted") {
-          _saveNotify();
-        } else {
-          setAllowNotify(false);
-        }
-      } else {
-        _saveNotify();
-      }
-    }
-
-    if (allowNotify) {
-      _requestNotifyPermission();
-    } else {
-      _saveNotify();
-    }
-  }, [allowNotify]);
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
@@ -233,10 +159,8 @@ function MENU({ navigation }) {
           <Switch
             trackColor={{ true: Colors.Primary.Normal, false: "grey" }}
             thumbColor={Colors.Primary.White}
-            onValueChange={() => {
-              setAllowNotify(!allowNotify);
-            }}
-            value={allowNotify}
+            onValueChange={handleNotification}
+            value={enabled}
           ></Switch>
         </View>
         <TouchableHighlight
