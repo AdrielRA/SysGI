@@ -14,7 +14,7 @@ import {
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Button, TextInput, Unifenas } from "../../components";
-import { Auth, Network } from "../../controllers";
+import { Auth, Network, Credential } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
 import { CheckBox } from "react-native-elements";
@@ -29,14 +29,13 @@ function Login({ navigation }) {
   const [Email, setEmail] = useState("");
   const [Senha, setSenha] = useState("");
   const {
-    accessDenied,
     handlePersistence,
     isLogged,
-    isValidCredential,
     persistence,
     user,
     validateSession,
   } = Auth.useAuth();
+  const { blockedAccess, isValidCredential } = Credential.useCredential();
   const { connected, alertOffline } = Network.useNetwork();
   const [loading, setLoading] = useState(false);
 
@@ -172,7 +171,7 @@ function Login({ navigation }) {
         })
       );
     } else {
-      if (accessDenied(snap.val().Credencial)) handleDelete(user);
+      if (blockedAccess(snap.val().Credencial)) handleDelete(user);
       else Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
       setLoading(false);
     }

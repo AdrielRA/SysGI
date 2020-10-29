@@ -5,27 +5,25 @@ import {
   TouchableHighlight,
   Image,
   Switch,
-  AsyncStorage,
   Alert,
   SafeAreaView,
-  BackHandler,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Button, Unifenas } from "../../components";
-import { Auth, Credencial, Network, Notifications } from "../../controllers";
+import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 
 function MENU({ navigation }) {
   const userData = navigation.getParam("userData");
+  const { clearSession, session, user, validateSession } = Auth.useAuth();
   const {
-    clearSession,
-    credential,
-    session,
-    user,
-    validateSession,
-  } = Auth.useAuth();
+    haveAccess,
+    haveAccessToUserControl,
+    isAdmin,
+    accessDeniedAlert,
+  } = Credential.useCredential();
   const { connected, alertOffline } = Network.useNetwork();
   const { enabled, handleNotification } = Notifications.useNotifications();
 
@@ -53,36 +51,25 @@ function MENU({ navigation }) {
   const handleCadastrar = () => {
     if (!connected) alertOffline();
     else {
-      if (
-        Credencial.haveAccess(credential, Credencial.AccessToCadastro) ||
-        Credencial.isAdimin(credential)
-      )
-        navigation.navigate("Cadastro");
-      else Credencial.accessDenied();
+      if (haveAccess("AccessToCadastro")) navigation.navigate("Cadastro");
+      else accessDeniedAlert();
     }
   };
 
   const handleConsultar = () => {
     if (!connected) alertOffline();
     else {
-      if (
-        Credencial.haveAccess(credential, Credencial.AccessToConsulta) ||
-        Credencial.isAdimin(credential)
-      )
-        navigation.navigate("Consulta");
-      else Credencial.accessDenied();
+      if (haveAccess("AccessToConsulta")) navigation.navigate("Consulta");
+      else accessDeniedAlert();
     }
   };
 
   const handleControle = () => {
     if (!connected) alertOffline();
     else {
-      if (
-        (credential > 10 && credential < 20) ||
-        Credencial.isAdimin(credential)
-      )
+      if (haveAccessToUserControl() || isAdmin())
         navigation.navigate("Controle");
-      else Credencial.accessDenied();
+      else accessDeniedAlert();
     }
   };
 
@@ -111,7 +98,7 @@ function MENU({ navigation }) {
           />
           <Button text="CADASTRAR" type="light" onPress={handleCadastrar} />
           <Button text="CONSULTAR" type="light" onPress={handleConsultar} />
-          {(credential > 10 && credential < 20) || credential == 30 ? (
+          {haveAccessToUserControl() || isAdmin() ? (
             <Button text="CONTROLE" type="light" onPress={handleControle} />
           ) : (
             <></>

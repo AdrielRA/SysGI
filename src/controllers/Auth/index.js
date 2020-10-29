@@ -7,7 +7,6 @@ import Constants from "expo-constants";
 const useAuth = () => {
   const [isLogged, setIsLogged] = useState();
   const [user, setUser] = useState();
-  const [credential, setCredential] = useState();
   const [persistence, setPersiste] = useState();
   const [session, setSession] = useState(null);
 
@@ -30,10 +29,6 @@ const useAuth = () => {
   useEffect(() => {
     if (!!user) return handleSessionChange(user.uid);
   }, [user]);
-
-  useEffect(() => {
-    if (isLogged) getCredencial(user.uid);
-  }, [isLogged]);
 
   const handleAuthChange = () => {
     return auth().onAuthStateChanged((user) => {
@@ -67,24 +62,6 @@ const useAuth = () => {
     return JSON.parse(persistence);
   };
 
-  getCredencial = (uid) => {
-    if (!!credential) return;
-    else {
-      db()
-        .ref("users")
-        .child(uid)
-        .once("value")
-        .then((snapshot) => setCredential(snapshot.val().Credencial));
-    }
-  };
-
-  const accessDenied = (Credential) => {
-    return Credential === 99;
-  };
-
-  const isValidCredential = (Credential) => {
-    return Credential > 0 && Credential <= 30;
-  };
   const validateSession = (sessionId, create) => {
     if (!sessionId && create) {
       db()
@@ -102,12 +79,9 @@ const useAuth = () => {
   };
 
   return {
-    accessDenied,
     clearSession,
     handlePersistence,
     isLogged,
-    isValidCredential,
-    credential,
     persistence,
     session,
     user,

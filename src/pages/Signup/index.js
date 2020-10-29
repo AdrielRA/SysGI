@@ -13,8 +13,6 @@ import Colors from "../../styles/colors";
 import { Primary, Tertiary } from "../../styles/colors";
 import { Button, TextInput, Picker } from "../../components";
 import { LinearGradient } from "expo-linear-gradient";
-import firebase from "../../services/firebase";
-import * as Crypto from "expo-crypto";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";
 
@@ -130,7 +128,7 @@ function Signup({ navigation }) {
         </Text>
         <KeyboardAvoidingView
           style={{ flex: 5, alignSelf: "stretch" }}
-        //keyboardVerticalOffset={50}
+          //keyboardVerticalOffset={50}
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <Picker

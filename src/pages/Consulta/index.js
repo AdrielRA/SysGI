@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Credencial, Network } from "../../controllers";
+import { Credential, Network } from "../../controllers";
 import { Consulta as Item } from "../../components/Itens";
 import { LinearGradient } from "expo-linear-gradient";
 import { SearchBar } from "react-native-elements";
@@ -28,6 +28,7 @@ function Consulta({ navigation }) {
   const [searchPadding, setSearchPadding] = useState(55);
   const [observerQuery, setObserver] = useState(undefined);
   const { connected, alertOffline } = Network.useNetwork();
+  const { accessDeniedAlert, haveAccess } = Credential.useCredential();
 
   useEffect(() => {
     switch (searchType) {
@@ -282,15 +283,9 @@ function Consulta({ navigation }) {
                     alertOffline();
                     return;
                   }
-                  if (
-                    Credencial.haveAccess(
-                      Credencial.loggedCred,
-                      Credencial.AccessToDetalhes
-                    ) ||
-                    Credencial.isAdimin(Credencial.loggedCred)
-                  )
+                  if (haveAccess("AccessToDetalhes"))
                     navigation.navigate("Cadastro", { Infrator });
-                  else Credencial.accessDenied();
+                  else accessDeniedAlert();
                 }}
               >
                 <Image
@@ -341,17 +336,11 @@ function Consulta({ navigation }) {
                           alertOffline();
                           return;
                         }
-                        if (
-                          Credencial.haveAccess(
-                            Credencial.loggedCred,
-                            Credencial.AccessToAnexar
-                          ) ||
-                          Credencial.isAdimin(Credencial.loggedCred)
-                        )
+                        if (haveAccess("AccessToAnexar"))
                           navigation.navigate("Anexo", {
                             item: { ...infração_, infratorKey },
                           });
-                        else Credencial.accessDenied();
+                        else accessDeniedAlert();
                       }}
                     />
                   );

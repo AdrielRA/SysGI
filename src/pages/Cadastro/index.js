@@ -16,7 +16,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Network, Credencial, Relatory } from "../../controllers";
+import { Network, Credential, Relatory } from "../../controllers";
 import { Button, Itens, Picker, TextInput } from "../../components";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
@@ -41,6 +41,7 @@ function Cadastro({ navigation }) {
   const [cidades, setCidades] = useState([]);
   const [ufs, setUfs] = useState([]);
   const [loadRelatorio, setLoadRelatorio] = useState(false);
+  const { accessDeniedAlert, haveAccess } = Credential.useCredential();
 
   useEffect(() => {
     axios
@@ -224,13 +225,7 @@ function Cadastro({ navigation }) {
       dadosOk(infrator).then((ok) => {
         if (!ok) return;
         else {
-          if (
-            Credencial.haveAccess(
-              Credencial.loggedCred,
-              Credencial.AccessToCadastro
-            ) ||
-            Credencial.isAdimin(Credencial.loggedCred)
-          ) {
+          if (haveAccess("AccessToCadastro")) {
             if (!infrator.Data_registro) {
               setInfrator({
                 ...infrator,
@@ -251,17 +246,11 @@ function Cadastro({ navigation }) {
               .catch((err) => {
                 Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
               });
-          } else Credencial.accessDenied();
+          } else accessDeniedAlert();
         }
       });
     } else {
-      if (
-        Credencial.haveAccess(
-          Credencial.loggedCred,
-          Credencial.AccessToEditar
-        ) ||
-        Credencial.isAdimin(Credencial.loggedCred)
-      ) {
+      if (haveAccess("AccessToEditar")) {
         infratores
           .child(infratorKey)
           .set(
@@ -275,7 +264,7 @@ function Cadastro({ navigation }) {
           .catch((err) => {
             Alert.alert("Falha:", "Infrator não foi atualizado!");
           });
-      } else Credencial.accessDenied();
+      } else accessDeniedAlert();
     }
   };
 
@@ -285,13 +274,7 @@ function Cadastro({ navigation }) {
       return;
     }
 
-    if (
-      Credencial.haveAccess(
-        Credencial.loggedCred,
-        Credencial.AccessToInfração
-      ) ||
-      Credencial.isAdimin(Credencial.loggedCred)
-    ) {
+    if (haveAccess("AccessToInfração")) {
       if (infração.Descrição == "") {
         Alert.alert("Atenção:", "Adicione uma descrição primeiro!");
         return;
@@ -314,7 +297,7 @@ function Cadastro({ navigation }) {
         .catch((err) => {
           Alert.alert("Falha:", "Infração não foi adicionada!");
         });
-    } else Credencial.accessDenied();
+    } else accessDeniedAlert();
   };
 
   const excluirInfrator = () => {
@@ -323,10 +306,7 @@ function Cadastro({ navigation }) {
       return;
     }
 
-    if (
-      Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToDelete) ||
-      Credencial.isAdimin(Credencial.loggedCred)
-    ) {
+    if (haveAccess("AccessToDelete")) {
       Alert.alert(
         "Tem certeza?",
         "Os dados deste infrator serão perdidos para sempre!",
@@ -355,7 +335,7 @@ function Cadastro({ navigation }) {
         ],
         { cancelable: false }
       );
-    } else Credencial.accessDenied();
+    } else accessDeniedAlert();
   };
 
   const favoritar = () => {
@@ -429,13 +409,7 @@ function Cadastro({ navigation }) {
       alertOffline();
       return;
     }
-    if (
-      Credencial.haveAccess(
-        Credencial.loggedCred,
-        Credencial.AccessToInfração
-      ) ||
-      Credencial.isAdimin(Credencial.loggedCred)
-    ) {
+    if (haveAccess("AccessToInfração")) {
       const infrações = infratores.child(infratorKey).child("Infrações");
 
       let query = infrações
@@ -456,7 +430,7 @@ function Cadastro({ navigation }) {
             });
         }
       });
-    } else Credencial.accessDenied();
+    } else accessDeniedAlert();
   };
 
   const removeAnexos = (title, msg, infra_key, del_all) => {
@@ -511,15 +485,9 @@ function Cadastro({ navigation }) {
         alertOffline();
         return;
       }
-      if (
-        Credencial.haveAccess(
-          Credencial.loggedCred,
-          Credencial.AccessToAnexar
-        ) ||
-        Credencial.isAdimin(Credencial.loggedCred)
-      )
+      if (haveAccess("AccessToAnexar"))
         navigation.navigate("Anexo", { item: { ...infração_, infratorKey } });
-      else Credencial.accessDenied();
+      else accessDeniedAlert();
     } else {
       Alert.alert("Atenção:", "Salve suas alterações primeiro!");
     }
