@@ -26,6 +26,7 @@ import { DropDownPicker } from "../../components";
 import axios from "axios";
 
 function Cadastro({ navigation }) {
+  const { connected, alertOffline } = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
   const infratores = firebase.database().ref("infratores");
 
@@ -35,12 +36,11 @@ function Cadastro({ navigation }) {
   const [favorito, setFavorito] = useState(undefined);
   const [dateNasc, setDateNas] = useState(new Date());
   const [dateInfra, setDateInfra] = useState(new Date());
-  const [isSaved, setIsSaved] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   const [estado, setEstado] = useState("");
   const [cidades, setCidades] = useState([]);
   const [ufs, setUfs] = useState([]);
   const [loadRelatorio, setLoadRelatorio] = useState(false);
-  const { connected, alertOffline } = Network.useNetwork();
 
   useEffect(() => {
     axios
@@ -57,26 +57,22 @@ function Cadastro({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (estado != "") {
-      getCidades(estado);
-    }
-  }, [estado]);
-
-  function getCidades(uf) {
-    axios
-      .get(
-        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`
-      )
-      .then((response) => {
-        let responseCities = response.data.map((city) => {
-          return {
-            label: city.nome,
-            value: city.nome,
-          };
+    if (estado != "" || infrator_) {
+      axios
+        .get(
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${infrator_.Uf}/municipios`
+        )
+        .then((response) => {
+          let responseCities = response.data.map((city) => {
+            return {
+              label: city.nome,
+              value: city.nome,
+            };
+          });
+          setCidades(responseCities);
         });
-        setCidades(responseCities);
-      });
-  }
+    }
+  }, [estado, infrator_]);
 
   const [infrator, setInfrator] = useState({
     Nome: "",
@@ -94,6 +90,7 @@ function Cadastro({ navigation }) {
     Data_registro: moment(new Date()).toISOString(),
     Infrações: [],
   });
+
   const [infração, setInfração] = useState({
     Descrição: "",
     Reds: "",
@@ -104,8 +101,6 @@ function Cadastro({ navigation }) {
   useEffect(() => {
     if (infrator_) {
       setInfrator(infrator_);
-      let filteredCitys = getCidades(infrator_.Uf);
-      setCidades(filteredCitys);
       setIsNew(false);
       setIsSaved(true);
       setDateNas(
@@ -495,17 +490,13 @@ function Cadastro({ navigation }) {
       .listAll()
       .then((dir) => {
         dir.items.forEach((fileRef) => {
-          console.log("Files: " + fileRef.name);
           deleteFile(ref.fullPath, fileRef.name);
         });
         dir.prefixes.forEach((folderRef) => {
-          console.log("Folders: " + folderRef.fullPath);
           deleteRecursiveFiles(folderRef.fullPath.replace("anexos/", ""));
         });
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch((error) => {});
   };
 
   const deleteFile = (pathToFile, fileName) => {
@@ -764,7 +755,7 @@ function Cadastro({ navigation }) {
                 >
                   <DropDownPicker
                     items={ufs ? ufs : [{}]}
-                    placeholder="Uf"
+                    placeholder={infrator.Uf != "" ? infrator.Uf : "Uf"}
                     placeholderStyle={{ color: Colors.Secondary.Normal }}
                     onChangeItem={(item) => {
                       setInfrator({ ...infrator, Uf: item.value });
@@ -795,7 +786,9 @@ function Cadastro({ navigation }) {
 
                   <DropDownPicker
                     items={cidades ? cidades : [{}]}
-                    placeholder="Cidade"
+                    placeholder={
+                      infrator.Cidade != "" ? infrator.Cidade : "Cidade"
+                    }
                     placeholderStyle={{ color: Colors.Secondary.Normal }}
                     onChangeItem={(item, index) => {
                       setInfrator({ ...infrator, Cidade: item.value });
