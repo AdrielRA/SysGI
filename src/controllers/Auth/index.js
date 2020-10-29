@@ -133,7 +133,7 @@ const getUserData = (uid) => {
 };
 
 const sendEmailVerification = (user) => {
-  user.sendEmailVerification();
+  return user.sendEmailVerification();
 };
 
 const generateRecoveryCode = (baseToCreate) => {

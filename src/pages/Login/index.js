@@ -61,6 +61,8 @@ function Login({ navigation }) {
           case "email-verification-fail":
             alertEmailVerificationError(user);
             break;
+          case undefined:
+            break;
           default:
             if (!error.includes("undefined")) {
               let msg = Strings["ptBr"]["signInError"][error];

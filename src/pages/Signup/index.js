@@ -85,7 +85,6 @@ function Signup({ navigation }) {
                   });
               }
             });
-            navigation.goBack();
           });
         } else {
           Alert.alert(

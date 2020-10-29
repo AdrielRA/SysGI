@@ -1,7 +1,7 @@
 import { db } from "../../services/firebase";
 import { useEffect, useState } from "react";
 import Credentials from "../../utils/Credentials.json";
-import { Auth } from "../index";
+import * as Auth from "../Auth";
 
 const useCredential = () => {
   const [credential, setCredential] = useState();
