@@ -5,153 +5,42 @@ import {
   TouchableHighlight,
   Image,
   Switch,
-  AsyncStorage,
   Alert,
   SafeAreaView,
-  BackHandler,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Button, Unifenas } from "../../components";
-import { Credencial, Network } from "../../controllers";
+import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Permissions from "expo-permissions";
-import * as Notifications from "expo-notifications";
-import firebase from "../../services/firebase";
 
 function MENU({ navigation }) {
-  const userLogged = navigation.getParam("userLogged");
-  const userLoggedId = navigation.getParam("userLoggedId");
-  const [allowNotify, setAllowNotify] = useState(false);
-  const [credencial, setCredencial] = useState(undefined);
+  const userData = navigation.getParam("userData");
+  const { clearSession, session, user, validateSession } = Auth.useAuth();
+  const {
+    haveAccess,
+    haveAccessToUserControl,
+    isAdmin,
+    accessDeniedAlert,
+  } = Credential.useCredential();
   const { connected, alertOffline } = Network.useNetwork();
+  const { enabled, handleNotification } = Notifications.useNotifications();
 
   useEffect(() => {
-    async function _loadNotify() {
-      try {
-        let value = await AsyncStorage.getItem("notify");
-        if (value != null) {
-          setAllowNotify(value == "true");
-        } else {
-          await AsyncStorage.setItem("notify", allowNotify.toString());
-        }
-      } catch {
-        console.log("Falha ao manipular variavel allowNotify...");
-      }
+    if (session !== null && !validateSession(session)) {
+      Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
+      Auth.signOut();
+      goOut();
     }
-    _loadNotify();
-  }, []);
+  }, [session]);
 
-  useEffect(() => {
-    if (userLoggedId) {
-      firebase
-        .database()
-        .ref("users")
-        .child(userLoggedId)
-        .on("value", (snapshot) => {
-          if (snapshot.val().SessionId === undefined) {
-            Alert.alert(
-              "Atenção:",
-              "Sua conta foi desconectada deste dispositivo!"
-            );
-            firebase.auth().signOut();
-            return_login();
-          }
-        });
-    }
-  }, []);
-
-  // Código quando a tela perde o foco
-  /*useEffect(() => {
-
-    navigation.addListener("didBlur", (e) => {
-      if(!e.state){
-        BackHandler.exitApp();
-      }
-    });
-  }, [navigation])*/
-
-  useEffect(() => {
-    async function _saveNotify() {
-      try {
-        if (allowNotify != undefined) {
-          if (allowNotify) {
-            let token = await Notifications.getExpoPushTokenAsync();
-            firebase
-              .database()
-              .ref()
-              .child("users")
-              .child(firebase.auth().currentUser.uid)
-              .child("Device")
-              .set(token.data);
-          } else {
-            firebase
-              .database()
-              .ref()
-              .child("users")
-              .child(firebase.auth().currentUser.uid)
-              .child("Device")
-              .remove();
-          }
-
-          await AsyncStorage.setItem("notify", allowNotify.toString());
-        }
-      } catch (err) {
-        console.log("Falha ao salvar allowNotify..." + err.message);
-      }
-    }
-    async function _requestNotifyPermission() {
-      const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-      if (status !== "granted") {
-        const { status } = await Permissions.askAsync(
-          Permissions.NOTIFICATIONS
-        );
-        if (status === "granted") {
-          _saveNotify();
-        } else {
-          setAllowNotify(false);
-        }
-      } else {
-        _saveNotify();
-      }
-    }
-
-    if (allowNotify) {
-      _requestNotifyPermission();
-    } else {
-      _saveNotify();
-    }
-  }, [allowNotify]);
-
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      Credencial._getCredencial(user, setCredencial);
-    } else {
-      //Alert.alert("Atenção:","Seu usuário foi desconectado!");
-      //return_login();
-    }
-  });
-
-  logOff = () => {
-    if (!firebase.auth().currentUser) {
-      return_login();
-    } else {
-      firebase
-        .database()
-        .ref("users")
-        .child(firebase.auth().currentUser.uid)
-        .once("value")
-        .then((snapshot) => {
-          if (snapshot.val().Recovery != undefined) {
-            snapshot.ref.child("SessionId").remove();
-          }
-        });
-    }
+  handleSignOut = () => {
+    if (!user) goOut();
+    else clearSession();
   };
 
-  const return_login = () => {
-    console.log("retornou...");
+  const goOut = () => {
     const resetAction = StackActions.reset({
       index: 0,
       actions: [NavigationActions.navigate({ routeName: "Login" })],
@@ -162,36 +51,25 @@ function MENU({ navigation }) {
   const handleCadastrar = () => {
     if (!connected) alertOffline();
     else {
-      if (
-        Credencial.haveAccess(credencial, Credencial.AccessToCadastro) ||
-        Credencial.isAdimin(credencial)
-      )
-        navigation.navigate("Cadastro");
-      else Credencial.accessDenied();
+      if (haveAccess("AccessToCadastro")) navigation.navigate("Cadastro");
+      else accessDeniedAlert();
     }
   };
 
   const handleConsultar = () => {
     if (!connected) alertOffline();
     else {
-      if (
-        Credencial.haveAccess(credencial, Credencial.AccessToConsulta) ||
-        Credencial.isAdimin(credencial)
-      )
-        navigation.navigate("Consulta");
-      else Credencial.accessDenied();
+      if (haveAccess("AccessToConsulta")) navigation.navigate("Consulta");
+      else accessDeniedAlert();
     }
   };
 
   const handleControle = () => {
     if (!connected) alertOffline();
     else {
-      if (
-        (credencial > 10 && credencial < 20) ||
-        Credencial.isAdimin(credencial)
-      )
+      if (haveAccessToUserControl() || isAdmin())
         navigation.navigate("Controle");
-      else Credencial.accessDenied();
+      else accessDeniedAlert();
     }
   };
 
@@ -205,7 +83,7 @@ function MENU({ navigation }) {
         style={[Styles.page, { alignSelf: "stretch" }]}
       >
         <Text style={[Styles.lblMENU, { paddingTop: 40 }]}>MENU</Text>
-        <Text style={Styles.lblMsg}>Bem-vindo, {userLogged}</Text>
+        <Text style={Styles.lblMsg}>Bem-vindo, {userData.Nome}</Text>
         <View
           style={{
             flex: 6,
@@ -220,7 +98,7 @@ function MENU({ navigation }) {
           />
           <Button text="CADASTRAR" type="light" onPress={handleCadastrar} />
           <Button text="CONSULTAR" type="light" onPress={handleConsultar} />
-          {(credencial > 10 && credencial < 20) || credencial == 30 ? (
+          {haveAccessToUserControl() || isAdmin() ? (
             <Button text="CONTROLE" type="light" onPress={handleControle} />
           ) : (
             <></>
@@ -240,17 +118,15 @@ function MENU({ navigation }) {
           <Switch
             trackColor={{ true: Colors.Primary.Normal, false: "grey" }}
             thumbColor={Colors.Primary.White}
-            onValueChange={() => {
-              setAllowNotify(!allowNotify);
-            }}
-            value={allowNotify}
+            onValueChange={handleNotification}
+            value={enabled}
           ></Switch>
         </View>
         <TouchableHighlight
           style={{ position: "absolute", bottom: 25, right: 15 }}
           underlayColor={"#00000000"}
           onPress={() => {
-            logOff();
+            handleSignOut();
           }}
         >
           <Image

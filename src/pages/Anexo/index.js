@@ -14,7 +14,7 @@ import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import moment from "moment";
 import firebase from "../../services/firebase";
-import { Credencial, Network, Uploader } from "../../controllers";
+import { Credential, Network, Uploader } from "../../controllers";
 import * as DocumentPicker from "expo-document-picker";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Anexo as Item } from "../../components/Itens";
@@ -26,6 +26,7 @@ function Anexo({ navigation }) {
   const [nomeAnexo, setNomeAnexo] = useState("");
   const [Anexo, setAnexo] = useState(undefined);
   const [showDialogNovoNome, setShowDiagNomeAnexo] = useState(false);
+  const { accessDeniedAlert, haveAccess } = Credential.useCredential();
   const { connected, alertOffline } = Network.useNetwork();
 
   const anexos_db = firebase.database().ref().child("anexos");
@@ -117,10 +118,7 @@ function Anexo({ navigation }) {
       alertOffline();
       return;
     }
-    if (
-      Credencial.haveAccess(Credencial.loggedCred, Credencial.AccessToAnexar) ||
-      Credencial.isAdimin(Credencial.loggedCred)
-    ) {
+    if (haveAccess("AccessToAnexar")) {
       let file = await DocumentPicker.getDocumentAsync({
         copyToCacheDirectory: false,
         type: "application/pdf",
@@ -129,7 +127,7 @@ function Anexo({ navigation }) {
         return;
       }
       setAnexo(file);
-    } else Credencial.accessDenied();
+    } else accessDeniedAlert();
   };
 
   function changeNomeAnexo(anexo) {

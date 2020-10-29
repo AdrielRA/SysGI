@@ -2,12 +2,13 @@ import { db, auth } from "../../services/firebase";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-community/async-storage";
 import * as Crypto from "expo-crypto";
+import Constants from "expo-constants";
 
 const useAuth = () => {
   const [isLogged, setIsLogged] = useState();
   const [user, setUser] = useState();
-  const [credential, setCredential] = useState();
   const [persistence, setPersiste] = useState();
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     getPersistence().then((persistence) => {
@@ -26,8 +27,8 @@ const useAuth = () => {
   useEffect(() => setIsLogged(!!user), [user]);
 
   useEffect(() => {
-    if (isLogged) getCredencial(user.uid);
-  }, [isLogged]);
+    if (!!user) return handleSessionChange(user.uid);
+  }, [user]);
 
   const handleAuthChange = () => {
     return auth().onAuthStateChanged((user) => {
@@ -35,6 +36,17 @@ const useAuth = () => {
         setUser(user);
       } else setUser(undefined);
     });
+  };
+
+  const handleSessionChange = (uid) => {
+    return db()
+      .ref("users")
+      .child(uid)
+      .on("value", (snapshot) => {
+        try {
+          setSession(snapshot.val().SessionId);
+        } catch {}
+      });
   };
 
   const handlePersistence = () => {
@@ -50,18 +62,31 @@ const useAuth = () => {
     return JSON.parse(persistence);
   };
 
-  getCredencial = (uid) => {
-    if (!!credential) return;
-    else {
+  const validateSession = (sessionId, create) => {
+    if (!sessionId && create) {
       db()
         .ref("users")
-        .child(uid)
-        .once("value")
-        .then((snapshot) => setCredential(snapshot.val().Credencial));
+        .child(user.uid)
+        .child("SessionId")
+        .set(Constants.deviceId);
+      return true;
     }
+    return Constants.deviceId === sessionId;
   };
 
-  return { handlePersistence, isLogged, credential, persistence, user };
+  const clearSession = () => {
+    db().ref("users").child(user.uid).child("SessionId").remove();
+  };
+
+  return {
+    clearSession,
+    handlePersistence,
+    isLogged,
+    persistence,
+    session,
+    user,
+    validateSession,
+  };
 };
 
 const signIn = (email, senha) => {
@@ -108,7 +133,7 @@ const getUserData = (uid) => {
 };
 
 const sendEmailVerification = (user) => {
-  user.sendEmailVerification();
+  return user.sendEmailVerification();
 };
 
 const generateRecoveryCode = (baseToCreate) => {
@@ -128,7 +153,7 @@ const disconnectDevices = (cod) => {
   return new Promise((resolve, reject) => {
     db()
       .ref("users")
-      .child(firebase.auth().currentUser.uid)
+      .child(auth().currentUser.uid)
       .once("value")
       .then((snapshot) => {
         if (snapshot.val().Recovery != undefined) {

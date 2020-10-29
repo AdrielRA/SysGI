@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Credencial, Network } from "../../controllers";
+import { Credential, Credencial, Network } from "../../controllers";
 import { Button } from "../../components";
 import { Controle as Item } from "../../components/Itens";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,90 +17,63 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import firebase from "../../services/firebase";
 
 function Controle({ navigation }) {
-  const [lista, setLista] = useState([]);
+  const { accessDeniedAlert, credential, isAdmin } = Credential.useCredential();
   const { connected, alertOffline } = Network.useNetwork();
-  let query = undefined;
-  const users = firebase.database().ref().child("users");
-  if (Credencial.loggedCred == 30) {
-    query = users.orderByChild("Credencial").endAt(0);
-  } else {
-    query = users
-      .orderByChild("Credencial")
-      .equalTo((Credencial.loggedCred % 10) * -1);
-  }
+  const [lista, setLista] = useState([]);
 
   useEffect(() => {
-    if (query != undefined) {
-      query.on("value", function (snapshot) {
-        let users_res = [];
-        if (snapshot.val() != null) {
-          snapshot.forEach(function (child) {
-            users_res = [...users_res, { ...child.val(), key: child.key }];
-          });
-        }
-        setLista(users_res);
-      });
+    if (!!credential) {
+      const unsubscribe = Credential.onNewUserWithCredential(
+        credential,
+        isAdmin(),
+        handleUserList
+      );
+      return unsubscribe();
     }
-  }, []);
+  }, [credential]);
 
-  firebase.auth().onAuthStateChanged((user) => {
+  handleUserList = (snap) => {
+    if (!!snap) {
+      let users = [];
+      snap.forEach((user) => {
+        users.push({ ...user.val(), key: user.key });
+      });
+      setLista(users);
+    }
+  };
+
+  /*firebase.auth().onAuthStateChanged((user) => {
     if (!user) {
       Alert.alert("Atenção:", "Seu usuário foi desconectado!");
       navigation.navigate("Login");
     }
-  });
+  });*/
 
-  function confirmar(item) {
+  handleAccess = (item, removed) => {
     if (!connected) {
       alertOffline();
       return;
     }
-    if (Credencial.isAdimin(Credencial.loggedCred)) {
-      const users = firebase.database().ref().child("users");
-      users
-        .child(item.key)
-        .child("Credencial")
-        .set(Math.abs(item.Credencial))
+    if (isAdmin()) {
+      Credential.setCredential(
+        item.key,
+        removed ? 99 : Math.abs(item.Credencial)
+      )
         .then(() => {
-          Alert.alert("Sucesso:", "Usuário confirmado!");
+          if (removed) Alert.alert("Sucesso:", "Usuário removido!");
+          else Alert.alert("Sucesso:", "Usuário confirmado!");
         })
-        .catch(() => {
+        .catch(() =>
           Alert.alert(
             "Falha:",
-            "Não foi possivel liberar este usuário no momento!"
-          );
-        });
+            "Não foi possível atualizar a credencial deste usuário!"
+          )
+        );
     } else {
-      Credencial.accessDenied();
+      accessDeniedAlert();
       navigation.goBack();
     }
-  }
-
-  function remover(item) {
-    if (!connected) {
-      alertOffline();
-      return;
-    }
-    if (Credencial.isAdimin(Credencial.loggedCred)) {
-      const users = firebase.database().ref().child("users");
-      users
-        .child(item.key)
-        .child("Credencial")
-        .set(99)
-        .then(() => {
-          Alert.alert("Sucesso:", "Usuário removido!");
-        })
-        .catch(() => {
-          Alert.alert(
-            "Falha:",
-            "Não foi possivel remover este usuário no momento!"
-          );
-        });
-    } else {
-      Credencial.accessDenied();
-      navigation.goBack();
-    }
-  }
+  };
 
   return (
     <SafeAreaView style={Styles.page}>
@@ -138,10 +111,10 @@ function Controle({ navigation }) {
               renderHiddenItem={({ item, index }) => (
                 <Item.swipe
                   onDelete={() => {
-                    remover(item);
+                    handleAccess(item, true);
                   }}
                   onConfirm={() => {
-                    confirmar(item);
+                    handleAccess(item);
                   }}
                 />
               )}

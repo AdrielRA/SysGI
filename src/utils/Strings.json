@@ -2,6 +2,8 @@
   "ptBr": {
     "signInError": {
       "auth/invalid-email": "Email informado é inválido",
+      "auth/user-not-found": "Usuário não cadastrado",
+      "auth/wrong-password": "Senha incorreta",
       "auth/weak-password": "Senha deve conter ao menos 6 caracteres",
       "auth/email-already-in-use": "O email já está em uso",
       "auth/network-request-failed": "Falha de conexão coma internet",
