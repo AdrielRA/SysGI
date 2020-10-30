@@ -21,6 +21,7 @@ const useNotifications = () => {
   }, [enabled]);
 
   const handleToken = (token) => {
+    if (!auth().currentUser) return;
     const userRef = db()
       .ref()
       .child("users")

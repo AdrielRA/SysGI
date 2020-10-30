@@ -5,8 +5,8 @@ import * as Crypto from "expo-crypto";
 import Constants from "expo-constants";
 
 const useAuth = () => {
-  const [isLogged, setIsLogged] = useState();
-  const [user, setUser] = useState();
+  const [isLogged, setIsLogged] = useState(!!auth().currentUser);
+  const [user, setUser] = useState(auth().currentUser);
   const [persistence, setPersiste] = useState();
   const [session, setSession] = useState(null);
 
@@ -103,7 +103,9 @@ const signIn = (email, senha) => {
 };
 
 const signOut = () => {
-  return auth().signOut();
+  if (!!auth().currentUser) {
+    return auth().signOut();
+  }
 };
 
 const createUser = (email, senha, callback) => {

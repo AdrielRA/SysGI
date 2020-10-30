@@ -25,7 +25,7 @@ import firebase from "../../services/firebase";
 import { DropDownPicker } from "../../components";
 import axios from "axios";
 
-import { Infrator } from '../../controllers'
+import { Infrator } from "../../controllers";
 
 function Cadastro({ navigation }) {
   const { connected, alertOffline } = Network.useNetwork();
@@ -62,7 +62,9 @@ function Cadastro({ navigation }) {
     if (estado != "" || infrator_) {
       axios
         .get(
-          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado != "" ? estado : infrator_.Uf}/municipios`
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${
+            estado != "" ? estado : infrator_.Uf
+          }/municipios`
         )
         .then((response) => {
           let responseCities = response.data.map((city) => {
@@ -111,14 +113,18 @@ function Cadastro({ navigation }) {
 
       Infrator.setDataEdit(infrator_.Rg, (key) => {
         setInfratorKey(key);
-      })
+      });
     }
-
   }, []);
 
   useEffect(() => {
     if (infratorKey) {
-      Infrator.setDataInfracoes(infratorKey, setFireInfrações, setInfrator, setFavorito);
+      Infrator.setDataInfracoes(
+        infratorKey,
+        setFireInfrações,
+        setInfrator,
+        setFavorito
+      );
     }
   }, [infratorKey]);
 
@@ -156,7 +162,7 @@ function Cadastro({ navigation }) {
   const dadosOk = async (infrator) => {
     let res = false;
 
-    let snapshot = await Infrator.getRGInfratorWithKey(infrator.Rg)
+    let snapshot = await Infrator.getRGInfratorWithKey(infrator.Rg);
 
     if (snapshot.exists()) {
       Alert.alert(
@@ -164,8 +170,7 @@ function Cadastro({ navigation }) {
         "RG fornecido já foi cadastrado em outro infrator!"
       );
       res = false;
-    }
-    else {
+    } else {
       snapshot = await Infrator.getCPFInfratorWithKey(infrator.Cpf);
 
       if (snapshot.exists())
@@ -190,39 +195,34 @@ function Cadastro({ navigation }) {
     }
 
     if (isNew) {
-      dadosOk(infrator)
-        .then((ok) => {
-          if (!ok) return;
-          else {
-            if (haveAccess("AccessToCadastro")) {
-              if (!infrator.Data_registro) {
-                setInfrator({
-                  ...infrator,
-                  Data_registro: new Date().toISOString(),
-                });
-              }
+      dadosOk(infrator).then((ok) => {
+        if (!ok) return;
+        else {
+          if (haveAccess("AccessToCadastro")) {
+            if (!infrator.Data_registro) {
+              setInfrator({
+                ...infrator,
+                Data_registro: new Date().toISOString(),
+              });
+            }
 
-              Infrator
-                .saveInfrator(infrator)
-                .then((key) => {
-                  console.log(key);
-                  Alert.alert("Sucesso:", "Infrator salvo!");
-                  setInfratorKey(key);
-                  setIsNew(false);
-                  setIsSaved(true);
-                })
-                .catch((err) => {
-                  Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
-                });
-
-            } else accessDeniedAlert();
-          }
-        });
-    }
-    else {
+            Infrator.saveInfrator(infrator)
+              .then((key) => {
+                console.log(key);
+                Alert.alert("Sucesso:", "Infrator salvo!");
+                setInfratorKey(key);
+                setIsNew(false);
+                setIsSaved(true);
+              })
+              .catch((err) => {
+                Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
+              });
+          } else accessDeniedAlert();
+        }
+      });
+    } else {
       if (haveAccess("AccessToEditar")) {
-        Infrator
-          .saveDataToEdit(infratorKey, infrator, fireInfrações)
+        Infrator.saveDataToEdit(infratorKey, infrator, fireInfrações)
           .then(() => {
             Alert.alert("Sucesso:", "Infrator atualizado!");
           })
@@ -249,8 +249,7 @@ function Cadastro({ navigation }) {
         return;
       }
 
-      Infrator
-        .saveInfracao(infratorKey, infração)
+      Infrator.saveInfracao(infratorKey, infração)
         .then(() => {
           setInfração({ ...infração, Descrição: "", Reds: "" });
           Alert.alert("Sucesso:", "Infração adicionada!");
@@ -274,16 +273,20 @@ function Cadastro({ navigation }) {
         [
           {
             text: "Não",
-            onPress: () => { },
+            onPress: () => {},
             style: "cancel",
           },
           {
             text: "Sim",
             onPress: () => {
-              Infrator
-                .deleteInfrator(infratorKey)
+              Infrator.deleteInfrator(infratorKey)
                 .then(async () => {
-                  await removeAnexos("Sucesso:", "Infrator removido!", "", true);
+                  await removeAnexos(
+                    "Sucesso:",
+                    "Infrator removido!",
+                    "",
+                    true
+                  );
                   setFavorito(false);
                   await removeAllFavorites(infratorKey);
                 })
@@ -322,8 +325,7 @@ function Cadastro({ navigation }) {
 
     if (favorito) {
       Infrator.setBDFavorites(favoritos, infratorKey);
-    }
-    else {
+    } else {
       Infrator.verificUserToFavoriteInfrator(favoritos, infratorKey);
     }
   }, [favorito]);
@@ -338,37 +340,35 @@ function Cadastro({ navigation }) {
 
       let query = Infrator.filterInfracaoToUser(infracoes, item.Data_registro);
 
-      Infrator
-      .deleteInfracoes(query, infracoes)
-      .then(async (infra_key) => {
-        await removeAnexos("Sucesso:", "Infração removida!", infra_key, false);
-      })
-      .catch((err) => {
-        Alert.alert("Falha:", "Infração não foi removida!");
-      });
-
+      Infrator.deleteInfracoes(query, infracoes)
+        .then(async (infra_key) => {
+          await removeAnexos(
+            "Sucesso:",
+            "Infração removida!",
+            infra_key,
+            false
+          );
+        })
+        .catch((err) => {
+          Alert.alert("Falha:", "Infração não foi removida!");
+        });
     } else accessDeniedAlert();
   };
 
   const removeAnexos = async (title, msg, infra_key, del_all) => {
     if (del_all) {
-      await Infrator
-      .removeAllAnexosToInfrator(infratorKey)
-      .then(() => {
+      await Infrator.removeAllAnexosToInfrator(infratorKey).then(() => {
         deleteRecursiveFiles(infratorKey + "/");
       });
     } else {
-        Infrator
-        .removeOneAnexoToInfrator(infratorKey, infra_key)
-        .then(() => {
-          deleteRecursiveFiles(infratorKey + "/" + infra_key);
-        });
+      Infrator.removeOneAnexoToInfrator(infratorKey, infra_key).then(() => {
+        deleteRecursiveFiles(infratorKey + "/" + infra_key);
+      });
     }
   };
 
   const deleteRecursiveFiles = (path) => {
-      Infrator
-      .createRefFiles(path)
+    Infrator.createRefFiles(path)
       .then((dir) => {
         dir.items.forEach((fileRef) => {
           deleteFile(ref.fullPath, fileRef.name);
@@ -377,11 +377,11 @@ function Cadastro({ navigation }) {
           deleteRecursiveFiles(folderRef.fullPath.replace("anexos/", ""));
         });
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const deleteFile = (pathToFile, fileName) => {
-     Infrator.deleteOneFile(pathToFile, fileName);
+    Infrator.deleteOneFile(pathToFile, fileName);
   };
 
   const NavigationToAttachment = (infração_) => {
@@ -504,7 +504,7 @@ function Cadastro({ navigation }) {
                     editable={isNew}
                     keyboardType="number-pad"
                     onChangeText={(rg) => setInfrator({ ...infrator, Rg: rg })}
-                    onEndEditing={() => { }}
+                    onEndEditing={() => {}}
                   />
                   <TextInput
                     placeholder="CPF"
@@ -733,11 +733,11 @@ function Cadastro({ navigation }) {
                             source={require("../../assets/images/icon_favorite_on.png")}
                           ></Image>
                         ) : (
-                            <Image
-                              style={{ height: 20, width: 20 }}
-                              source={require("../../assets/images/icon_favorite_off.png")}
-                            ></Image>
-                          )}
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_favorite_off.png")}
+                          ></Image>
+                        )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -757,11 +757,11 @@ function Cadastro({ navigation }) {
                         {loadRelatorio ? (
                           <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Image
-                              style={{ height: 20, width: 20 }}
-                              source={require("../../assets/images/icon_relatory.png")}
-                            ></Image>
-                          )}
+                          <Image
+                            style={{ height: 20, width: 20 }}
+                            source={require("../../assets/images/icon_relatory.png")}
+                          ></Image>
+                        )}
                       </TouchableHighlight>
                       <TouchableHighlight
                         style={[
@@ -783,8 +783,8 @@ function Cadastro({ navigation }) {
                       </TouchableHighlight>
                     </View>
                   ) : (
-                      <></>
-                    )}
+                    <></>
+                  )}
                 </View>
               </View>
 
@@ -908,8 +908,8 @@ function Cadastro({ navigation }) {
                   </View>
                 </View>
               ) : (
-                  <></>
-                )}
+                <></>
+              )}
             </>
           </KeyboardAvoidingView>
         </ScrollView>
