@@ -242,7 +242,7 @@ function Anexo({ navigation }) {
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
-        style={[Styles.page, { alignSelf: "stretch", paddingTop: 30 }]}
+        style={[Styles.page, {width:"100%", justifyContent: "center"}]}
       >
         <Text
           style={{

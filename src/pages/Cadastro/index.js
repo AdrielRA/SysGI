@@ -63,7 +63,9 @@ function Cadastro({ navigation }) {
     if (estado != "" || infrator_) {
       axios
         .get(
-          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${infrator_.Uf}/municipios`
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${
+            estado != "" ? estado : infrator_.Uf
+          }/municipios`
         )
         .then((response) => {
           let responseCities = response.data.map((city) => {
@@ -118,30 +120,12 @@ function Cadastro({ navigation }) {
 
   useEffect(() => {
     if (infratorKey) {
-      infratores.child(infratorKey).on("value", (snapshot) => {
-        if (snapshot.val() != null) {
-          let infrator = snapshot.val();
-          let infras = [];
-          setFireInfrações(snapshot.val().Infrações);
-          if (snapshot.val().Infrações) {
-            infras = Object.values(snapshot.val().Infrações);
-          }
-          infrator.Infrações = infras;
-          setInfrator(infrator);
-        } else {
-          if (!favorito) {
-            return navigation.goBack();
-          } else {
-            infratores.child(infratorKey).off("value");
-            Alert.alert(
-              "Infrator não Encontrado!",
-              "Provavelmente ele foi removido por alguém!"
-            );
-            navigation.goBack();
-          }
-        }
-      });
-      setFavorito(null);
+      Infrator.setDataInfracoes(
+        infratorKey,
+        setFireInfrações,
+        setInfrator,
+        setFavorito
+      );
     }
   }, [infratorKey]);
 
@@ -179,10 +163,8 @@ function Cadastro({ navigation }) {
   const dadosOk = async (infrator) => {
     let res = false;
 
-    let snapshot = await infratores
-      .orderByChild("Rg")
-      .equalTo(infrator.Rg)
-      .once("value");
+    let snapshot = await Infrator.getRGInfratorWithKey(infrator.Rg);
+
     if (snapshot.exists()) {
       Alert.alert(
         "Verifique os dados:",
@@ -190,10 +172,8 @@ function Cadastro({ navigation }) {
       );
       res = false;
     } else {
-      snapshot = await infratores
-        .orderByChild("Cpf")
-        .equalTo(infrator.Cpf)
-        .once("value");
+      snapshot = await Infrator.getCPFInfratorWithKey(infrator.Cpf);
+
       if (snapshot.exists())
         Alert.alert(
           "Verifique os dados:",
@@ -206,7 +186,6 @@ function Cadastro({ navigation }) {
   };
 
   const saveInfrator = (infrator) => {
-    // console.log(infrator);
     if (!connected) {
       alertOffline();
       return;
@@ -228,11 +207,9 @@ function Cadastro({ navigation }) {
               });
             }
 
-            let key = infratores.push().key;
-            infratores
-              .child(key)
-              .set(infrator)
-              .then(() => {
+            Infrator.saveInfrator(infrator)
+              .then((key) => {
+                console.log(key);
                 Alert.alert("Sucesso:", "Infrator salvo!");
                 setInfratorKey(key);
                 setIsNew(false);
@@ -246,13 +223,7 @@ function Cadastro({ navigation }) {
       });
     } else {
       if (haveAccess("AccessToEditar")) {
-        infratores
-          .child(infratorKey)
-          .set(
-            JSON.parse(
-              JSON.stringify({ ...infrator, Infrações: fireInfrações })
-            )
-          )
+        Infrator.saveDataToEdit(infratorKey, infrator, fireInfrações)
           .then(() => {
             Alert.alert("Sucesso:", "Infrator atualizado!");
           })
@@ -279,12 +250,7 @@ function Cadastro({ navigation }) {
         return;
       }
 
-      const infrações = infratores.child(infratorKey).child("Infrações");
-
-      let key = infrações.push().key;
-      infrações
-        .child(key)
-        .set({ ...infração })
+      Infrator.saveInfracao(infratorKey, infração)
         .then(() => {
           setInfração({ ...infração, Descrição: "", Reds: "" });
           Alert.alert("Sucesso:", "Infração adicionada!");
@@ -314,13 +280,16 @@ function Cadastro({ navigation }) {
           {
             text: "Sim",
             onPress: () => {
-              infratores
-                .child(infratorKey)
-                .remove()
-                .then(() => {
-                  removeAnexos("Sucesso:", "Infrator removido!", "", true);
+              Infrator.deleteInfrator(infratorKey)
+                .then(async () => {
+                  await removeAnexos(
+                    "Sucesso:",
+                    "Infrator removido!",
+                    "",
+                    true
+                  );
                   setFavorito(false);
-                  removeAllFavorites(infratorKey);
+                  await removeAllFavorites(infratorKey);
                 })
                 .catch((err) => {
                   Alert.alert("Falha:", "Infrator não foi removido!");
@@ -341,61 +310,24 @@ function Cadastro({ navigation }) {
     setFavorito(!favorito);
   };
 
-  const removeAllFavorites = (key) => {
-    firebase
-      .database()
-      .ref()
-      .child("users")
-      .orderByChild("Infratores_favoritados")
-      .startAt("")
-      .once("value", (snapshot) => {
-        snapshot.forEach((user) => {
-          user.ref
-            .child("Infratores_favoritados")
-            .set(user.val().Infratores_favoritados.filter((e) => e != key));
-        });
-      });
+  const removeAllFavorites = async (key) => {
+    await Infrator.removeAllFavorites(key);
   };
 
   useEffect(() => {
     if (favorito === undefined) return;
 
-    let userId = firebase.auth().currentUser.uid;
-    let user = firebase.database().ref().child("users").child(userId);
-    let favoritos = user.child("Infratores_favoritados");
+    const favoritos = Infrator.getDataUser();
 
     if (favorito === null) {
-      favoritos.once("value", (snapshot) => {
-        let favs = [];
-        if (snapshot.val()) {
-          favs = snapshot.val();
-        }
-        setFavorito(favs.includes(infratorKey.toString()));
-      });
+      Infrator.setFavorites(favoritos, setFavorito, infratorKey);
       return;
     }
 
     if (favorito) {
-      favoritos.once("value", (snapshot) => {
-        let favs = [];
-        if (snapshot.val()) {
-          favs = snapshot.val();
-        }
-        if (!favs.includes(infratorKey)) favs.push(infratorKey);
-        favoritos.set(favs);
-      });
+      Infrator.setBDFavorites(favoritos, infratorKey);
     } else {
-      favoritos.once("value", (snapshot) => {
-        let favs = [];
-        if (snapshot.val()) {
-          favs = snapshot.val();
-        }
-        if (favs.includes(infratorKey))
-          favs = favs.filter((infra_) => {
-            infra_ != infratorKey;
-          });
-        favoritos.set(favs);
-      });
+      Infrator.verificUserToFavoriteInfrator(favoritos, infratorKey);
     }
   }, [favorito]);
 
@@ -405,58 +337,39 @@ function Cadastro({ navigation }) {
       return;
     }
     if (haveAccess("AccessToInfração")) {
-      const infrações = infratores.child(infratorKey).child("Infrações");
+      const infracoes = Infrator.getRefInfracoes(infratorKey);
 
-      let query = infrações
-        .orderByChild("Data_registro")
-        .equalTo(item.Data_registro);
-      query.once("value", (snapshot) => {
-        if (snapshot.val()) {
-          let infra_key = Object.keys(snapshot.val())[0];
+      let query = Infrator.filterInfracaoToUser(infracoes, item.Data_registro);
 
-          infrações
-            .child(infra_key)
-            .remove()
-            .then(() => {
-              removeAnexos("Sucesso:", "Infração removida!", infra_key, false);
-            })
-            .catch((err) => {
-              Alert.alert("Falha:", "Infração não foi removida!");
-            });
-        }
-      });
+      Infrator.deleteInfracoes(query, infracoes)
+        .then(async (infra_key) => {
+          await removeAnexos(
+            "Sucesso:",
+            "Infração removida!",
+            infra_key,
+            false
+          );
+        })
+        .catch((err) => {
+          Alert.alert("Falha:", "Infração não foi removida!");
+        });
     } else accessDeniedAlert();
   };
 
-  const removeAnexos = (title, msg, infra_key, del_all) => {
+  const removeAnexos = async (title, msg, infra_key, del_all) => {
     if (del_all) {
-      firebase
-        .database()
-        .ref()
-        .child("anexos")
-        .child(infratorKey)
-        .remove()
-        .then(() => {
-          deleteRecursiveFiles(infratorKey + "/");
-        });
+      await Infrator.removeAllAnexosToInfrator(infratorKey).then(() => {
+        deleteRecursiveFiles(infratorKey + "/");
+      });
     } else {
-      firebase
-        .database()
-        .ref()
-        .child("anexos")
-        .child(infratorKey)
-        .child(infra_key)
-        .remove()
-        .then(() => {
-          deleteRecursiveFiles(infratorKey + "/" + infra_key);
-        });
+      Infrator.removeOneAnexoToInfrator(infratorKey, infra_key).then(() => {
+        deleteRecursiveFiles(infratorKey + "/" + infra_key);
+      });
     }
   };
 
   const deleteRecursiveFiles = (path) => {
-    const ref = firebase.storage().ref().child("anexos").child(path);
-    ref
-      .listAll()
+    Infrator.createRefFiles(path)
       .then((dir) => {
         dir.items.forEach((fileRef) => {
           deleteFile(ref.fullPath, fileRef.name);
@@ -469,9 +382,7 @@ function Cadastro({ navigation }) {
   };
 
   const deleteFile = (pathToFile, fileName) => {
-    const ref = firebase.storage().ref(pathToFile);
-    const childRef = ref.child(fileName);
-    childRef.delete();
+    Infrator.deleteOneFile(pathToFile, fileName);
   };
 
   const NavigationToAttachment = (infração_) => {
