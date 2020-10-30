@@ -1,3 +1,4 @@
+import Anexo from './Anexo';
 import * as Auth from "./Auth";
 import * as Credential from "./Credential";
 import Infrator from "./Infrator";
@@ -8,6 +9,7 @@ import Search from "./Search";
 import Uploader from "./Uploader";
 
 export { 
+  Anexo,
   Auth, 
   Credential, 
   Infrator, 

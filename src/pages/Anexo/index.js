@@ -18,6 +18,7 @@ import { Credential, Network, Uploader } from "../../controllers";
 import * as DocumentPicker from "expo-document-picker";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Anexo as Item } from "../../components/Itens";
+import { Anexo as AnexoController } from '../../controllers';
 
 function Anexo({ navigation }) {
   const infração = navigation.getParam("item");
@@ -29,8 +30,7 @@ function Anexo({ navigation }) {
   const { accessDeniedAlert, haveAccess } = Credential.useCredential();
   const { connected, alertOffline } = Network.useNetwork();
 
-  const anexos_db = firebase.database().ref().child("anexos");
-  const anexos_st = firebase.storage().ref().child("anexos");
+
 
   useEffect(() => {
     Uploader.callback = callBack_;
@@ -45,15 +45,10 @@ function Anexo({ navigation }) {
   }, [navigation]);
 
   useEffect(() => {
-    const infrações = firebase
-      .database()
-      .ref("infratores")
-      .child(infração.infratorKey)
-      .child("Infrações");
 
-    let query = infrações
-      .orderByChild("Data_registro")
-      .equalTo(infração.Data_registro);
+    let query = AnexoController
+               .getRefInfracao(infração.infratorKey, infração.Data_registro);
+      
     query.once("value", (snapshot) => {
       if (snapshot.val()) {
         setInfraKey(Object.keys(snapshot.val())[0]);
@@ -63,32 +58,10 @@ function Anexo({ navigation }) {
 
   useEffect(() => {
     if (infraKey) {
-      let anexos = anexos_db.child(infração.infratorKey).child(infraKey);
+      let anexos = AnexoController.getRefAnexo(infração.infratorKey, infraKey);
 
       anexos.on("value", (snapshot) => {
-        let results = [];
-        if (snapshot.val()) {
-          snapshot.forEach(function (child) {
-            if (child.val()) {
-              results.push({
-                ...child.val(),
-                key: child.key,
-                uri: "",
-                progress: 100,
-              });
-            }
-          });
-        }
-        let listUploading = [];
-        if (Uploader.uploadQueue.length > 0) {
-          listUploading = Uploader.uploadQueue.filter(
-            (i) => i.infraKey == infraKey
-          );
-          results.map((r) => {
-            listUploading = listUploading.filter((i) => i.key != r.key);
-          });
-        }
-        setLista([...results, ...listUploading]);
+        AnexoController.setAnexosFromInfracao(snapshot, Uploader, infraKey, setLista);
       });
     }
   }, [infraKey]);
@@ -102,11 +75,11 @@ function Anexo({ navigation }) {
       listUploading = Uploader.uploadQueue.filter(
         (i) => i.infraKey == infraKey
       );
-    } catch {}
+    } catch { }
 
     try {
       setLista([...listProntos, ...listUploading]);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -166,11 +139,10 @@ function Anexo({ navigation }) {
     };
 
     Uploader.upload(item, infração.infratorKey, infraKey);
-
-    //setLista([...lista, item]);
   }
 
   function maskFileName(fileName) {
+
     fileName = fileName.replace(".pdf", "");
     if (fileName.length >= 30) {
       let str = fileName.substring(0, 25);
@@ -185,27 +157,21 @@ function Anexo({ navigation }) {
       alertOffline();
       return;
     }
+    
     const index = lista.indexOf(item);
-    console.log("KEY[" + index + "]: " + item.key);
+
     if (index > -1) {
-      let anexo = anexos_st
-        .child(infração.infratorKey)
-        .child(infraKey)
-        .child(item.key);
-      anexo
-        .delete()
+      AnexoController
+      .deleteAnexo(infração.infratorKey, infraKey, item.key)
         .then(() => {
-          anexos_db
-            .child(infração.infratorKey)
-            .child(infraKey)
-            .child(item.key)
-            .remove()
+            AnexoController
+            .removeAnexoBD(infração.infratorKey, infraKey, item.key)
             .catch((err) => {
-              console.log(err);
+              alert("Ocorreu um erro!");
             });
         })
         .catch((err) => {
-          console.log(err);
+          alert("Ocorreu um erro!");
         });
     }
   }
@@ -242,7 +208,7 @@ function Anexo({ navigation }) {
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
-        style={[Styles.page, {width:"100%", justifyContent: "center"}]}
+        style={[Styles.page, { width: "100%", justifyContent: "center" }]}
       >
         <Text
           style={{

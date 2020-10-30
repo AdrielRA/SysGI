@@ -11,7 +11,7 @@ class Uploader {
       let index = -1;
       if (this.uploadQueue.length > 0) {
         index = this.uploadQueue.findIndex((i) => i.key == item.key);
-        console.log("Index: " + index);
+
         if (index >= 0) {
           this.uploadQueue[index] = item;
           return;

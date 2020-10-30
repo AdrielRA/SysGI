@@ -19,7 +19,7 @@ import moment from "moment";
 import { Search } from '../../controllers';
 
 function Consulta({ navigation }) {
-  const fire_user = firebase.auth().currentUser;
+  const fire_user = Search.getUser();
   const [TermoPesquisa, setTermoPesquisa] = useState("");
   const [termoAnterior, setTermoAnterior] = useState("");
   const [Filtro, setFiltro] = useState("");

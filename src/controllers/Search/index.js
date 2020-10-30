@@ -1,6 +1,9 @@
 import { db, auth } from '../../services/firebase';
 
 export default {
+    getUser(){
+        return auth().currentUser;
+    },
     onAuthStateChanged(callback) {
         auth().onAuthStateChanged((user) => {
             callback(user)
