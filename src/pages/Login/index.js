@@ -54,7 +54,7 @@ function Login({ navigation }) {
     }
     setLoading(true);
     Auth.signIn(Email, Senha)
-      .then((user) => entrar(user))
+      .then(entrar)
       .catch((error) => {
         setLoading(false);
         switch (error) {
