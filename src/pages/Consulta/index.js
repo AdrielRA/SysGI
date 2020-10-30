@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SearchBar } from "react-native-elements";
 import firebase from "../../services/firebase";
 import moment from "moment";
+import { Search } from '../../controllers';
 
 function Consulta({ navigation }) {
   const fire_user = firebase.auth().currentUser;
@@ -47,12 +48,14 @@ function Consulta({ navigation }) {
     setTermoPesquisa("");
   }, [searchType]);
 
-  firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-      Alert.alert("Atenção:", "Seu usuário foi desconectado!");
-      navigation.navigate("Login");
-    }
-  });
+  useEffect(() => {
+    Search.onAuthStateChanged((user) => {
+      if (!user) {
+        Alert.alert("Atenção:", "Seu usuário foi desconectado!");
+        navigation.navigate("Login");
+      }
+    })
+  }, [])
 
   useEffect(() => {
     if (TermoPesquisa !== termoAnterior) {
@@ -64,6 +67,7 @@ function Consulta({ navigation }) {
     if (searchType < 2) setTermoPesquisa(maskRG(txt));
     else setTermoPesquisa(txt);
   };
+  
   const maskRG = (rg) => {
     rg = rg.replace(/\D/g, "");
     if (rg.length == 9)
@@ -73,6 +77,7 @@ function Consulta({ navigation }) {
 
     return rg;
   };
+
   const maskCpf = (cpf) => {
     cpf = cpf.replace(/\D/g, "");
     if (cpf.length == 11)
@@ -114,27 +119,15 @@ function Consulta({ navigation }) {
       observerQuery.off("value");
     }
     if (fire_user) {
-      let infratores = firebase.database().ref("infratores");
-      let query = infratores
-        .orderByChild(child_)
-        .limitToFirst(1)
-        .equalTo(termo);
+      
+      let query = Search.getSearchInfrator(child_, termo);
+
       setObserver(query);
       query.on("value", function (snapshot) {
         if (snapshot.val() != null) {
-          snapshot.forEach(function (child) {
-            if (child.val()) {
-              setInfratorKey(child.key);
-              let infrator = child.val();
-              let infras = [];
-              if (child.val().Infrações) {
-                infras = Object.values(child.val().Infrações);
-              }
-              infrator.Infrações = infras;
-              setInfrator(infrator);
-            }
-          });
-        } else {
+           Search.setFoundInfrator(snapshot, setInfratorKey, setInfrator)
+        } 
+        else {
           setInfrator(undefined);
           query.off("value");
           setObserver(undefined);
@@ -223,15 +216,15 @@ function Consulta({ navigation }) {
                 <Text style={Styles.txtRegularWhite}>
                   {Infrator.Infrações.length > 0
                     ? moment(
-                        new Date(
-                          Infrator.Infrações.sort(function (a, b) {
-                            return (
-                              new Date(b.Data_ocorrência) -
-                              new Date(a.Data_ocorrência)
-                            );
-                          })[0].Data_ocorrência
-                        )
-                      ).format("DD/MM/YYYY")
+                      new Date(
+                        Infrator.Infrações.sort(function (a, b) {
+                          return (
+                            new Date(b.Data_ocorrência) -
+                            new Date(a.Data_ocorrência)
+                          );
+                        })[0].Data_ocorrência
+                      )
+                    ).format("DD/MM/YYYY")
                     : "--/--/----"}
                 </Text>
               </View>
@@ -249,8 +242,8 @@ function Consulta({ navigation }) {
                   {Infrator.Infrações.length > 1
                     ? "Reincidente"
                     : Infrator.Infrações.length > 0
-                    ? "Incidente"
-                    : "Sem Passagens"}
+                      ? "Incidente"
+                      : "Sem Passagens"}
                 </Text>
               </View>
             </View>
@@ -349,17 +342,17 @@ function Consulta({ navigation }) {
           </View>
         </View>
       ) : (
-        <View style={{ flex: 6 }}>
-          <Text
-            style={[
-              Styles.lblMENU,
-              { paddingTop: 0, color: Colors.Secondary.Normal },
-            ]}
-          >
-            {TermoPesquisa == "" ? "" : "Infrator não encontrado!"}
-          </Text>
-        </View>
-      )}
+          <View style={{ flex: 6 }}>
+            <Text
+              style={[
+                Styles.lblMENU,
+                { paddingTop: 0, color: Colors.Secondary.Normal },
+              ]}
+            >
+              {TermoPesquisa == "" ? "" : "Infrator não encontrado!"}
+            </Text>
+          </View>
+        )}
     </SafeAreaView>
   );
 }

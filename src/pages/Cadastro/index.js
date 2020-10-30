@@ -30,8 +30,7 @@ import { Infrator } from '../../controllers'
 function Cadastro({ navigation }) {
   const { connected, alertOffline } = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
-  const infratores = firebase.database().ref("infratores");
-
+  
   const [infratorKey, setInfratorKey] = useState(undefined);
   const [isNew, setIsNew] = useState(true);
   const [fireInfrações, setFireInfrações] = useState({});
