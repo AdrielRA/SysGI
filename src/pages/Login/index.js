@@ -10,6 +10,7 @@ import {
   Image,
   LogBox,
   ActivityIndicator,
+  Keyboard,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
@@ -34,6 +35,22 @@ function Login({ navigation }) {
   const { blockedAccess, isValidCredential } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
   const { handlePersistence, isLogged, persistence, user } = useContext();
+  const [showUnifenas, setShowUnifenas] = useState(true);
+
+  useEffect(() => {
+    const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
+      setShowUnifenas(false)
+    );
+
+    const keyboardCloseListener = Keyboard.addListener("keyboardDidHide", () =>
+      setShowUnifenas(true)
+    );
+
+    return () => {
+      keyboardListener.remove();
+      keyboardCloseListener.remove();
+    };
+  }, []);
 
   useEffect(() => {
     setLoading(isLogged !== false);
@@ -282,13 +299,15 @@ function Login({ navigation }) {
             onPress={() => navigation.navigate("Signup")}
           ></Button>
         </KeyboardAvoidingView>
-        <Unifenas
-          style={{
-            flex: 0.9,
-            justifyContent: "center",
-            marginBottom: 30,
-          }}
-        />
+        {showUnifenas && (
+          <Unifenas
+            style={{
+              flex: 0.9,
+              justifyContent: "center",
+              marginBottom: 30,
+            }}
+          />
+        )}
         <Text style={[Styles.lblRodape, { position: "absolute", bottom: 22 }]}>
           Todos os Direitos Reservados - {new Date().getFullYear()}
         </Text>
