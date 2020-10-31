@@ -16,21 +16,19 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Network, Credential, Relatory } from "../../controllers";
+import { Credential, Infrator, Network, Relatory } from "../../controllers";
 import { Button, Itens, Picker, TextInput } from "../../components";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
 import { SwipeListView } from "react-native-swipe-list-view";
-import firebase from "../../services/firebase";
 import { DropDownPicker } from "../../components";
 import axios from "axios";
-
-import { Infrator } from "../../controllers";
+import { useContext } from "../../context";
 
 function Cadastro({ navigation }) {
   const { connected, alertOffline } = Network.useNetwork();
   const infrator_ = navigation.getParam("Infrator");
-  
+
   const [infratorKey, setInfratorKey] = useState(undefined);
   const [isNew, setIsNew] = useState(true);
   const [fireInfrações, setFireInfrações] = useState({});
@@ -42,7 +40,8 @@ function Cadastro({ navigation }) {
   const [cidades, setCidades] = useState([]);
   const [ufs, setUfs] = useState([]);
   const [loadRelatorio, setLoadRelatorio] = useState(false);
-  const { accessDeniedAlert, haveAccess } = Credential.useCredential();
+  const { credential } = useContext();
+  const { accessDeniedAlert, haveAccess } = Credential;
 
   useEffect(() => {
     axios
@@ -198,7 +197,7 @@ function Cadastro({ navigation }) {
       dadosOk(infrator).then((ok) => {
         if (!ok) return;
         else {
-          if (haveAccess("AccessToCadastro")) {
+          if (haveAccess(credential, "AccessToCadastro")) {
             if (!infrator.Data_registro) {
               setInfrator({
                 ...infrator,
@@ -221,7 +220,7 @@ function Cadastro({ navigation }) {
         }
       });
     } else {
-      if (haveAccess("AccessToEditar")) {
+      if (haveAccess(credential, "AccessToEditar")) {
         Infrator.saveDataToEdit(infratorKey, infrator, fireInfrações)
           .then(() => {
             Alert.alert("Sucesso:", "Infrator atualizado!");
@@ -239,7 +238,7 @@ function Cadastro({ navigation }) {
       return;
     }
 
-    if (haveAccess("AccessToInfração")) {
+    if (haveAccess(credential, "AccessToInfração")) {
       if (infração.Descrição == "") {
         Alert.alert("Atenção:", "Adicione uma descrição primeiro!");
         return;
@@ -266,7 +265,7 @@ function Cadastro({ navigation }) {
       return;
     }
 
-    if (haveAccess("AccessToDelete")) {
+    if (haveAccess(credential, "AccessToDelete")) {
       Alert.alert(
         "Tem certeza?",
         "Os dados deste infrator serão perdidos para sempre!",
@@ -335,7 +334,7 @@ function Cadastro({ navigation }) {
       alertOffline();
       return;
     }
-    if (haveAccess("AccessToInfração")) {
+    if (haveAccess(credential, "AccessToInfração")) {
       const infracoes = Infrator.getRefInfracoes(infratorKey);
 
       let query = Infrator.filterInfracaoToUser(infracoes, item.Data_registro);
@@ -390,7 +389,7 @@ function Cadastro({ navigation }) {
         alertOffline();
         return;
       }
-      if (haveAccess("AccessToAnexar"))
+      if (haveAccess(credential, "AccessToAnexar"))
         navigation.navigate("Anexo", { item: { ...infração_, infratorKey } });
       else accessDeniedAlert();
     } else {

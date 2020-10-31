@@ -1,64 +1,46 @@
 import { db } from "../../services/firebase";
-import { useEffect, useState } from "react";
 import Credentials from "../../utils/Credentials.json";
-import * as Auth from "../Auth";
 
-const useCredential = () => {
-  const [credential, setCredential] = useState();
-  const { user, isLogged } = Auth.useAuth();
+const getCredencial = (uid, resolve) => {
+  db()
+    .ref("users")
+    .child(uid)
+    .once("value")
+    .then((snapshot) => resolve(snapshot.val().Credencial));
+};
 
-  useEffect(() => {
-    if (isLogged) getCredencial(user.uid);
-  }, [isLogged]);
+const setCredential = (uid, credential) => {
+  return db()
+    .ref()
+    .child("users")
+    .child(uid)
+    .child("Credencial")
+    .set(credential);
+};
 
-  const getCredencial = (uid) => {
-    if (!!credential) return;
-    else {
-      db()
-        .ref("users")
-        .child(uid)
-        .once("value")
-        .then((snapshot) => setCredential(snapshot.val().Credencial));
-    }
-  };
+const blockedAccess = (credential) => {
+  return credential === 99;
+};
 
-  const blockedAccess = (Credential) => {
-    return Credential === 99;
-  };
+const haveAccess = (credential, access) => {
+  const allowed = Credentials[access];
+  return isAdmin() || (!!allowed && allowed.includes(credential % 10));
+};
 
-  const haveAccess = (access) => {
-    const allowed = Credentials[access];
-    return isAdmin() || (!!allowed && allowed.includes(credential % 10));
-  };
+const haveAccessToUserControl = (credential) => {
+  return credential > 10 && credential < 20;
+};
 
-  const haveAccessToUserControl = () => {
-    return credential > 10 && credential < 20;
-  };
+const isAdmin = (credential) => {
+  return credential === 30;
+};
 
-  const isAdmin = () => {
-    return credential === 30;
-  };
+const isValidCredential = (credential) => {
+  return credential > 0 && credential <= 30;
+};
 
-  const isValidCredential = (Credential) => {
-    return Credential > 0 && Credential <= 30;
-  };
-
-  accessDeniedAlert = () => {
-    Alert.alert(
-      "Atenção:",
-      "Você não tem permissão para acessar este recurso!"
-    );
-  };
-
-  return {
-    accessDeniedAlert,
-    blockedAccess,
-    credential,
-    haveAccess,
-    haveAccessToUserControl,
-    isAdmin,
-    isValidCredential,
-  };
+const accessDeniedAlert = () => {
+  Alert.alert("Atenção:", "Você não tem permissão para acessar este recurso!");
 };
 
 const onNewUserWithCredential = (credential, isAdmin, callback) => {
@@ -72,13 +54,14 @@ const onNewUserWithCredential = (credential, isAdmin, callback) => {
       .on("value", callback);
 };
 
-const setCredential = (uid, credential) => {
-  return db()
-    .ref()
-    .child("users")
-    .child(uid)
-    .child("Credencial")
-    .set(credential);
+export {
+  accessDeniedAlert,
+  getCredencial,
+  blockedAccess,
+  haveAccess,
+  haveAccessToUserControl,
+  isAdmin,
+  isValidCredential,
+  onNewUserWithCredential,
+  setCredential,
 };
-
-export { onNewUserWithCredential, setCredential, useCredential };

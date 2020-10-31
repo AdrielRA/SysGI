@@ -10,13 +10,12 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Credential, Network } from "../../controllers";
+import { Credential, Network, Search } from "../../controllers";
 import { Consulta as Item } from "../../components/Itens";
 import { LinearGradient } from "expo-linear-gradient";
 import { SearchBar } from "react-native-elements";
-import firebase from "../../services/firebase";
+import { useContext } from "../../context";
 import moment from "moment";
-import { Search } from '../../controllers';
 
 function Consulta({ navigation }) {
   const fire_user = Search.getUser();
@@ -29,7 +28,8 @@ function Consulta({ navigation }) {
   const [searchPadding, setSearchPadding] = useState(55);
   const [observerQuery, setObserver] = useState(undefined);
   const { connected, alertOffline } = Network.useNetwork();
-  const { accessDeniedAlert, haveAccess } = Credential.useCredential();
+  const { credential } = useContext();
+  const { accessDeniedAlert, haveAccess } = Credential;
 
   useEffect(() => {
     switch (searchType) {
@@ -54,8 +54,8 @@ function Consulta({ navigation }) {
         Alert.alert("Atenção:", "Seu usuário foi desconectado!");
         navigation.navigate("Login");
       }
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     if (TermoPesquisa !== termoAnterior) {
@@ -67,7 +67,7 @@ function Consulta({ navigation }) {
     if (searchType < 2) setTermoPesquisa(maskRG(txt));
     else setTermoPesquisa(txt);
   };
-  
+
   const maskRG = (rg) => {
     rg = rg.replace(/\D/g, "");
     if (rg.length == 9)
@@ -119,15 +119,13 @@ function Consulta({ navigation }) {
       observerQuery.off("value");
     }
     if (fire_user) {
-      
       let query = Search.getSearchInfrator(child_, termo);
 
       setObserver(query);
       query.on("value", function (snapshot) {
         if (snapshot.val() != null) {
-           Search.setFoundInfrator(snapshot, setInfratorKey, setInfrator)
-        } 
-        else {
+          Search.setFoundInfrator(snapshot, setInfratorKey, setInfrator);
+        } else {
           setInfrator(undefined);
           query.off("value");
           setObserver(undefined);
@@ -216,15 +214,15 @@ function Consulta({ navigation }) {
                 <Text style={Styles.txtRegularWhite}>
                   {Infrator.Infrações.length > 0
                     ? moment(
-                      new Date(
-                        Infrator.Infrações.sort(function (a, b) {
-                          return (
-                            new Date(b.Data_ocorrência) -
-                            new Date(a.Data_ocorrência)
-                          );
-                        })[0].Data_ocorrência
-                      )
-                    ).format("DD/MM/YYYY")
+                        new Date(
+                          Infrator.Infrações.sort(function (a, b) {
+                            return (
+                              new Date(b.Data_ocorrência) -
+                              new Date(a.Data_ocorrência)
+                            );
+                          })[0].Data_ocorrência
+                        )
+                      ).format("DD/MM/YYYY")
                     : "--/--/----"}
                 </Text>
               </View>
@@ -242,8 +240,8 @@ function Consulta({ navigation }) {
                   {Infrator.Infrações.length > 1
                     ? "Reincidente"
                     : Infrator.Infrações.length > 0
-                      ? "Incidente"
-                      : "Sem Passagens"}
+                    ? "Incidente"
+                    : "Sem Passagens"}
                 </Text>
               </View>
             </View>
@@ -276,7 +274,7 @@ function Consulta({ navigation }) {
                     alertOffline();
                     return;
                   }
-                  if (haveAccess("AccessToDetalhes"))
+                  if (haveAccess(credential, "AccessToDetalhes"))
                     navigation.navigate("Cadastro", { Infrator });
                   else accessDeniedAlert();
                 }}
@@ -329,7 +327,7 @@ function Consulta({ navigation }) {
                           alertOffline();
                           return;
                         }
-                        if (haveAccess("AccessToAnexar"))
+                        if (haveAccess(credential, "AccessToAnexar"))
                           navigation.navigate("Anexo", {
                             item: { ...infração_, infratorKey },
                           });
@@ -342,17 +340,17 @@ function Consulta({ navigation }) {
           </View>
         </View>
       ) : (
-          <View style={{ flex: 6 }}>
-            <Text
-              style={[
-                Styles.lblMENU,
-                { paddingTop: 0, color: Colors.Secondary.Normal },
-              ]}
-            >
-              {TermoPesquisa == "" ? "" : "Infrator não encontrado!"}
-            </Text>
-          </View>
-        )}
+        <View style={{ flex: 6 }}>
+          <Text
+            style={[
+              Styles.lblMENU,
+              { paddingTop: 0, color: Colors.Secondary.Normal },
+            ]}
+          >
+            {TermoPesquisa == "" ? "" : "Infrator não encontrado!"}
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

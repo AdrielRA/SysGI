@@ -1,92 +1,52 @@
-import { db, auth } from "../../services/firebase";
-import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-community/async-storage";
-import * as Crypto from "expo-crypto";
+import { db, auth } from "../../services/firebase";
 import Constants from "expo-constants";
+import * as Crypto from "expo-crypto";
 
-const useAuth = () => {
-  const [isLogged, setIsLogged] = useState(!!auth().currentUser);
-  const [user, setUser] = useState(auth().currentUser);
-  const [persistence, setPersiste] = useState();
-  const [session, setSession] = useState(null);
+const handleAuthChange = (resolve) => {
+  return auth().onAuthStateChanged(resolve);
+};
 
-  useEffect(() => {
-    getPersistence().then((persistence) => {
-      setPersiste(persistence);
-      if (!persistence) signOut();
-
-      const timer = setTimeout(() => {
-        handleAuthChange;
-        return handleAuthChange();
-      }, 1000);
-
-      return clearTimeout(() => timer());
+const handleSessionChange = (uid, resolve) => {
+  return db()
+    .ref("users")
+    .child(uid)
+    .on("value", (snapshot) => {
+      try {
+        resolve(snapshot.val().SessionId);
+      } catch {}
     });
-  }, []);
+};
 
-  useEffect(() => setIsLogged(!!user), [user]);
+const handleAuthPersistence = (persistence, resolve) => {
+  setPersistence(!persistence).then(() => getPersistence().then(resolve));
+};
 
-  useEffect(() => {
-    if (!!user) return handleSessionChange(user.uid);
-  }, [user]);
+const setPersistence = async (persiste) => {
+  await AsyncStorage.setItem("@login_persistence", JSON.stringify(persiste));
+};
 
-  const handleAuthChange = () => {
-    return auth().onAuthStateChanged((user) => {
-      if (user) {
-        setUser(user);
-      } else setUser(undefined);
-    });
-  };
+const getPersistence = async () => {
+  const persistence = await AsyncStorage.getItem("@login_persistence");
+  return JSON.parse(persistence);
+};
 
-  const handleSessionChange = (uid) => {
-    return db()
+const validateSession = (sessionId, create) => {
+  if (!auth().currentUser) return false;
+  if (!sessionId && create) {
+    db()
       .ref("users")
-      .child(uid)
-      .on("value", (snapshot) => {
-        try {
-          setSession(snapshot.val().SessionId);
-        } catch {}
-      });
-  };
+      .child(auth().currentUser.uid)
+      .child("SessionId")
+      .set(Constants.deviceId);
+    return true;
+  }
+  return Constants.deviceId === sessionId;
+};
 
-  const handlePersistence = () => {
-    setPersistence(!persistence).then(() => getPersistence().then(setPersiste));
-  };
-
-  const setPersistence = async (persiste) => {
-    await AsyncStorage.setItem("@login_persistence", JSON.stringify(persiste));
-  };
-
-  const getPersistence = async () => {
-    const persistence = await AsyncStorage.getItem("@login_persistence");
-    return JSON.parse(persistence);
-  };
-
-  const validateSession = (sessionId, create) => {
-    if (!sessionId && create) {
-      db()
-        .ref("users")
-        .child(user.uid)
-        .child("SessionId")
-        .set(Constants.deviceId);
-      return true;
-    }
-    return Constants.deviceId === sessionId;
-  };
-
-  const clearSession = () => {
-    db().ref("users").child(user.uid).child("SessionId").remove();
-  };
-
-  return {
-    clearSession,
-    handlePersistence,
-    isLogged,
-    persistence,
-    session,
-    user,
-    validateSession,
-  };
+const clearSession = () => {
+  if (!auth().currentUser) return;
+  db().ref("users").child(auth().currentUser.uid).child("SessionId").remove();
 };
 
 const signIn = (email, senha) => {
@@ -108,7 +68,7 @@ const signOut = () => {
   }
 };
 
-const createUser = (email, senha, callback) => {
+const createUser = (email, senha) => {
   return auth().createUserWithEmailAndPassword(email, senha);
 };
 
@@ -152,6 +112,7 @@ const generateRecoveryCode = (baseToCreate) => {
 };
 
 const disconnectDevices = (cod) => {
+  if (!auth().currentUser) return;
   return new Promise((resolve, reject) => {
     db()
       .ref("users")
@@ -171,14 +132,20 @@ const disconnectDevices = (cod) => {
 };
 
 export {
+  clearSession,
   createUser,
   deleteUser,
+  handleAuthChange,
+  handleAuthPersistence,
+  handleSessionChange,
   generateRecoveryCode,
+  getPersistence,
   getUserData,
   disconnectDevices,
   sendEmailVerification,
+  setPersistence,
   setUserData,
   signIn,
   signOut,
-  useAuth,
+  validateSession,
 };

@@ -4,17 +4,16 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Text,
-  TouchableHighlight,
   Alert,
   ScrollView,
 } from "react-native";
 import Styles from "../../styles";
-import Colors from "../../styles/colors";
 import { Primary, Tertiary } from "../../styles/colors";
 import { Button, TextInput, Picker } from "../../components";
 import { LinearGradient } from "expo-linear-gradient";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";
+import { useContext } from "../../context";
 
 function Signup({ navigation }) {
   const [nome, setNome] = useState("");
@@ -27,8 +26,7 @@ function Signup({ navigation }) {
   const [categoria, setCategoria] = useState("");
 
   const { connected, alertOffline } = Network.useNetwork();
-
-  const { isLogged } = Auth.useAuth();
+  const { isLogged } = useContext();
 
   useEffect(() => {
     if (isLogged) Auth.signOut();

@@ -9,15 +9,16 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Credential, Credencial, Network } from "../../controllers";
+import { Credential, Network } from "../../controllers";
 import { Button } from "../../components";
 import { Controle as Item } from "../../components/Itens";
 import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
-import firebase from "../../services/firebase";
+import { useContext } from "../../context";
 
 function Controle({ navigation }) {
-  const { accessDeniedAlert, credential, isAdmin } = Credential.useCredential();
+  const { accessDeniedAlert, isAdmin } = Credential;
+  const { credential } = useContext();
   const { connected, alertOffline } = Network.useNetwork();
   const [lista, setLista] = useState([]);
 
@@ -25,14 +26,14 @@ function Controle({ navigation }) {
     if (!!credential) {
       const unsubscribe = Credential.onNewUserWithCredential(
         credential,
-        isAdmin(),
+        isAdmin(credential),
         handleUserList
       );
       return unsubscribe();
     }
   }, [credential]);
 
-  handleUserList = (snap) => {
+  const handleUserList = (snap) => {
     if (!!snap) {
       let users = [];
       snap.forEach((user) => {
@@ -42,19 +43,12 @@ function Controle({ navigation }) {
     }
   };
 
-  /*firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-      Alert.alert("Atenção:", "Seu usuário foi desconectado!");
-      navigation.navigate("Login");
-    }
-  });*/
-
-  handleAccess = (item, removed) => {
+  const handleAccess = (item, removed) => {
     if (!connected) {
       alertOffline();
       return;
     }
-    if (isAdmin()) {
+    if (isAdmin(credential)) {
       Credential.setCredential(
         item.key,
         removed ? 99 : Math.abs(item.Credencial)

@@ -14,20 +14,23 @@ import { Button, Unifenas } from "../../components";
 import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
+import { useContext } from "../../context";
 
 function MENU({ navigation }) {
   const userData = navigation.getParam("userData");
-  const { clearSession, session, user, validateSession } = Auth.useAuth();
+  const { clearSession, validateSession } = Auth;
   const {
     haveAccess,
     haveAccessToUserControl,
     isAdmin,
     accessDeniedAlert,
-  } = Credential.useCredential();
+  } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
   const { enabled, handleNotification } = Notifications.useNotifications();
+  const { credential, session, user } = useContext();
 
   useEffect(() => {
+    console.log(session);
     if (session !== null && !validateSession(session)) {
       Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
       Auth.signOut();
@@ -35,7 +38,7 @@ function MENU({ navigation }) {
     }
   }, [session]);
 
-  handleSignOut = () => {
+  const handleSignOut = () => {
     if (!user) goOut();
     else clearSession();
   };
@@ -51,7 +54,8 @@ function MENU({ navigation }) {
   const handleCadastrar = () => {
     if (!connected) alertOffline();
     else {
-      if (haveAccess("AccessToCadastro")) navigation.navigate("Cadastro");
+      if (haveAccess(credential, "AccessToCadastro"))
+        navigation.navigate("Cadastro");
       else accessDeniedAlert();
     }
   };
@@ -59,7 +63,8 @@ function MENU({ navigation }) {
   const handleConsultar = () => {
     if (!connected) alertOffline();
     else {
-      if (haveAccess("AccessToConsulta")) navigation.navigate("Consulta");
+      if (haveAccess(credential, "AccessToConsulta"))
+        navigation.navigate("Consulta");
       else accessDeniedAlert();
     }
   };
@@ -67,11 +72,13 @@ function MENU({ navigation }) {
   const handleControle = () => {
     if (!connected) alertOffline();
     else {
-      if (haveAccessToUserControl() || isAdmin())
-        navigation.navigate("Controle");
+      if (accessToControl) navigation.navigate("Controle");
       else accessDeniedAlert();
     }
   };
+
+  const accessToControl =
+    haveAccessToUserControl(credential) || isAdmin(credential);
 
   return (
     <SafeAreaView style={[Styles.page, { marginTop: 0 }]}>
@@ -98,7 +105,7 @@ function MENU({ navigation }) {
           />
           <Button text="CADASTRAR" type="light" onPress={handleCadastrar} />
           <Button text="CONSULTAR" type="light" onPress={handleConsultar} />
-          {haveAccessToUserControl() || isAdmin() ? (
+          {accessToControl ? (
             <Button text="CONTROLE" type="light" onPress={handleControle} />
           ) : (
             <></>

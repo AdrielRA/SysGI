@@ -5,6 +5,7 @@ import * as Updates from "expo-updates";
 import Routes from "./src/routes";
 import * as Font from "expo-font";
 import Colors from "./src/styles/colors";
+import ContextProvider from "./src/context";
 
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -50,21 +51,23 @@ export default function App() {
   }, []);
 
   return (
-    <AppearanceProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#800000" />
-      {fontLoaded ? (
-        <Routes />
-      ) : (
-        <ActivityIndicator
-          size="large"
-          color={Colors.Primary.White}
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            backgroundColor: Colors.Secondary.Normal,
-          }}
-        />
-      )}
-    </AppearanceProvider>
+    <ContextProvider>
+      <AppearanceProvider>
+        <StatusBar barStyle="light-content" backgroundColor="#800000" />
+        {fontLoaded ? (
+          <Routes />
+        ) : (
+          <ActivityIndicator
+            size="large"
+            color={Colors.Primary.White}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              backgroundColor: Colors.Secondary.Normal,
+            }}
+          />
+        )}
+      </AppearanceProvider>
+    </ContextProvider>
   );
 }

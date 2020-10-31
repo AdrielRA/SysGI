@@ -19,25 +19,21 @@ import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
 import { CheckBox } from "react-native-elements";
 import { Strings } from "../../utils";
+import { useContext } from "../../context";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 LogBox.ignoreLogs(["VirtualizedList"]);
 
 function Login({ navigation }) {
+  const [loading, setLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showReSendEmail, setShowReSendEmail] = useState(false);
   const [Email, setEmail] = useState("");
   const [Senha, setSenha] = useState("");
-  const {
-    handlePersistence,
-    isLogged,
-    persistence,
-    user,
-    validateSession,
-  } = Auth.useAuth();
-  const { blockedAccess, isValidCredential } = Credential.useCredential();
+  const { validateSession } = Auth;
+  const { blockedAccess, isValidCredential } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const [loading, setLoading] = useState(false);
+  const { handlePersistence, isLogged, persistence, user } = useContext();
 
   useEffect(() => {
     setLoading(isLogged !== false);
@@ -57,6 +53,7 @@ function Login({ navigation }) {
       .then(entrar)
       .catch((error) => {
         setLoading(false);
+        console.log(error);
         switch (error) {
           case "email-verification-fail":
             alertEmailVerificationError(user);

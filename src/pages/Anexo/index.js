@@ -13,12 +13,16 @@ import DialogInput from "react-native-dialog-input";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import moment from "moment";
-import firebase from "../../services/firebase";
-import { Credential, Network, Uploader } from "../../controllers";
+import {
+  Anexo as AnexoController,
+  Credential,
+  Network,
+  Uploader,
+} from "../../controllers";
 import * as DocumentPicker from "expo-document-picker";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { Anexo as Item } from "../../components/Itens";
-import { Anexo as AnexoController } from '../../controllers';
+import { useContext } from "../../context";
 
 function Anexo({ navigation }) {
   const infração = navigation.getParam("item");
@@ -27,10 +31,9 @@ function Anexo({ navigation }) {
   const [nomeAnexo, setNomeAnexo] = useState("");
   const [Anexo, setAnexo] = useState(undefined);
   const [showDialogNovoNome, setShowDiagNomeAnexo] = useState(false);
-  const { accessDeniedAlert, haveAccess } = Credential.useCredential();
+  const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-
-
+  const { credential } = useContext();
 
   useEffect(() => {
     Uploader.callback = callBack_;
@@ -45,10 +48,11 @@ function Anexo({ navigation }) {
   }, [navigation]);
 
   useEffect(() => {
+    let query = AnexoController.getRefInfracao(
+      infração.infratorKey,
+      infração.Data_registro
+    );
 
-    let query = AnexoController
-               .getRefInfracao(infração.infratorKey, infração.Data_registro);
-      
     query.once("value", (snapshot) => {
       if (snapshot.val()) {
         setInfraKey(Object.keys(snapshot.val())[0]);
@@ -61,12 +65,21 @@ function Anexo({ navigation }) {
       let anexos = AnexoController.getRefAnexo(infração.infratorKey, infraKey);
 
       anexos.on("value", (snapshot) => {
-        AnexoController.setAnexosFromInfracao(snapshot, Uploader, infraKey, setLista);
+        AnexoController.setAnexosFromInfracao(
+          snapshot,
+          Uploader,
+          infraKey,
+          setLista
+        );
       });
     }
   }, [infraKey]);
 
-  callBack_ = () => {
+  useEffect(() => {
+    if (Anexo) changeNomeAnexo(Anexo);
+  }, [Anexo]);
+
+  const callBack_ = () => {
     let listProntos = [];
     let listUploading = [];
 
@@ -75,23 +88,19 @@ function Anexo({ navigation }) {
       listUploading = Uploader.uploadQueue.filter(
         (i) => i.infraKey == infraKey
       );
-    } catch { }
+    } catch {}
 
     try {
       setLista([...listProntos, ...listUploading]);
-    } catch { }
+    } catch {}
   };
-
-  useEffect(() => {
-    if (Anexo) changeNomeAnexo(Anexo);
-  }, [Anexo]);
 
   const getAnexo = async () => {
     if (!connected) {
       alertOffline();
       return;
     }
-    if (haveAccess("AccessToAnexar")) {
+    if (haveAccess(credential, "AccessToAnexar")) {
       let file = await DocumentPicker.getDocumentAsync({
         copyToCacheDirectory: false,
         type: "application/pdf",
@@ -103,7 +112,7 @@ function Anexo({ navigation }) {
     } else accessDeniedAlert();
   };
 
-  function changeNomeAnexo(anexo) {
+  const changeNomeAnexo = (anexo) => {
     let fileName = anexo.name.toString();
     setNomeAnexo(fileName);
     Alert.alert(
@@ -126,9 +135,9 @@ function Anexo({ navigation }) {
       ],
       { cancelable: false }
     );
-  }
+  };
 
-  async function addAnexo(fileName) {
+  const addAnexo = async (fileName) => {
     fileName = maskFileName(fileName);
     let item = {
       key: "",
@@ -139,10 +148,9 @@ function Anexo({ navigation }) {
     };
 
     Uploader.upload(item, infração.infratorKey, infraKey);
-  }
+  };
 
-  function maskFileName(fileName) {
-
+  const maskFileName = (fileName) => {
     fileName = fileName.replace(".pdf", "");
     if (fileName.length >= 30) {
       let str = fileName.substring(0, 25);
@@ -150,39 +158,40 @@ function Anexo({ navigation }) {
         str + "..." + fileName.substring(fileName.length - 3, fileName.length);
     }
     return fileName + ".pdf";
-  }
+  };
 
-  function removeAnexo(item) {
+  const removeAnexo = (item) => {
     if (!connected) {
       alertOffline();
       return;
     }
-    
+
     const index = lista.indexOf(item);
 
     if (index > -1) {
-      AnexoController
-      .deleteAnexo(infração.infratorKey, infraKey, item.key)
+      AnexoController.deleteAnexo(infração.infratorKey, infraKey, item.key)
         .then(() => {
-            AnexoController
-            .removeAnexoBD(infração.infratorKey, infraKey, item.key)
-            .catch((err) => {
-              alert("Ocorreu um erro!");
-            });
+          AnexoController.removeAnexoBD(
+            infração.infratorKey,
+            infraKey,
+            item.key
+          ).catch((err) => {
+            alert("Ocorreu um erro!");
+          });
         })
         .catch((err) => {
           alert("Ocorreu um erro!");
         });
     }
-  }
+  };
 
-  function openAnexo(url) {
+  const openAnexo = (url) => {
     try {
       Linking.openURL(url);
     } catch {
       Alert.alert("Falha no anexo:", "Não foi possivel abri-lo no momento!");
     }
-  }
+  };
 
   return (
     <SafeAreaView style={Styles.page}>
