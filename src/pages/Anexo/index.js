@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   TouchableHighlight,
+  TouchableOpacity,
   Text,
   View,
   ScrollView,
+  Image,
   Alert,
   Linking,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import DialogInput from "react-native-dialog-input";
@@ -36,19 +39,19 @@ function Anexo({ navigation }) {
   const { credential } = useContext();
 
   useEffect(() => {
-    Uploader.callback = callBack_;
+    //Uploader.callback = callBack_;
   });
 
   useEffect(() => {
-    navigation.addListener("didBlur", (e) => {
+    /*navigation.addListener("didBlur", (e) => {
       if (!e.state) {
         Uploader.callback = undefined;
       }
-    });
+    });*/
   }, [navigation]);
 
   useEffect(() => {
-    let query = AnexoController.getRefInfracao(
+    /*let query = AnexoController.getRefInfracao(
       infração.infratorKey,
       infração.Data_registro
     );
@@ -57,11 +60,11 @@ function Anexo({ navigation }) {
       if (snapshot.val()) {
         setInfraKey(Object.keys(snapshot.val())[0]);
       }
-    });
+    });*/
   }, [infração]);
 
   useEffect(() => {
-    if (infraKey) {
+    /*if (infraKey) {
       let anexos = AnexoController.getRefAnexo(infração.infratorKey, infraKey);
 
       anexos.on("value", (snapshot) => {
@@ -72,14 +75,14 @@ function Anexo({ navigation }) {
           setLista
         );
       });
-    }
+    }*/
   }, [infraKey]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (Anexo) changeNomeAnexo(Anexo);
-  }, [Anexo]);
+  }, [Anexo]);*/
 
-  const callBack_ = () => {
+  /*const callBack_ = () => {
     let listProntos = [];
     let listUploading = [];
 
@@ -93,9 +96,9 @@ function Anexo({ navigation }) {
     try {
       setLista([...listProntos, ...listUploading]);
     } catch {}
-  };
+  };*/
 
-  const getAnexo = async () => {
+  /*const getAnexo = async () => {
     if (!connected) {
       alertOffline();
       return;
@@ -110,9 +113,9 @@ function Anexo({ navigation }) {
       }
       setAnexo(file);
     } else accessDeniedAlert();
-  };
+  };*/
 
-  const changeNomeAnexo = (anexo) => {
+  /*const changeNomeAnexo = (anexo) => {
     let fileName = anexo.name.toString();
     setNomeAnexo(fileName);
     Alert.alert(
@@ -135,9 +138,9 @@ function Anexo({ navigation }) {
       ],
       { cancelable: false }
     );
-  };
+  };*/
 
-  const addAnexo = async (fileName) => {
+  /*const addAnexo = async (fileName) => {
     fileName = maskFileName(fileName);
     let item = {
       key: "",
@@ -148,9 +151,9 @@ function Anexo({ navigation }) {
     };
 
     Uploader.upload(item, infração.infratorKey, infraKey);
-  };
+  };*/
 
-  const maskFileName = (fileName) => {
+  /*const maskFileName = (fileName) => {
     fileName = fileName.replace(".pdf", "");
     if (fileName.length >= 30) {
       let str = fileName.substring(0, 25);
@@ -158,9 +161,9 @@ function Anexo({ navigation }) {
         str + "..." + fileName.substring(fileName.length - 3, fileName.length);
     }
     return fileName + ".pdf";
-  };
+  };*/
 
-  const removeAnexo = (item) => {
+  /*const removeAnexo = (item) => {
     if (!connected) {
       alertOffline();
       return;
@@ -191,7 +194,7 @@ function Anexo({ navigation }) {
     } catch {
       Alert.alert("Falha no anexo:", "Não foi possivel abri-lo no momento!");
     }
-  };
+  };*/
 
   return (
     <SafeAreaView style={Styles.page}>
@@ -201,15 +204,15 @@ function Anexo({ navigation }) {
         message={"Digite o novo nome:"}
         hintInput={"Novo nome aqui"}
         submitInput={(nome) => {
-          setShowDiagNomeAnexo(false);
+          /*setShowDiagNomeAnexo(false);
           setNomeAnexo(nome);
-          addAnexo(nome);
+          addAnexo(nome);*/
         }}
         submitText={"Concluir"}
         cancelText={"Cancelar"}
         closeDialog={() => {
-          setShowDiagNomeAnexo(false);
-          addAnexo(nomeAnexo);
+          /*setShowDiagNomeAnexo(false);
+          addAnexo(nomeAnexo);*/
         }}
       ></DialogInput>
       <LinearGradient
@@ -217,18 +220,51 @@ function Anexo({ navigation }) {
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
-        style={[Styles.page, { width: "100%", justifyContent: "center" }]}
+        style={{
+          width: "100%",
+          height: 60,
+          paddingHorizontal: 15,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
-        <Text
-          style={{
-            textAlign: "center",
-            color: "#fff",
-            fontSize: 25,
-            fontFamily: "CenturyGothicBold",
+        <TouchableOpacity
+          onPress={() => {
+            navigation.goBack();
           }}
         >
-          DETALHES DA INFRAÇÃO
+          <Image
+            source={require("../../assets/images/back.png")}
+            style={{ width: 30, height: 30 }}
+          />
+        </TouchableOpacity>
+        <Text
+          style={[
+            Styles.txtBoldWhite,
+            {
+              fontSize: 25,
+              marginLeft: 15,
+              width: Dimensions.get("screen").width - 156,
+            },
+          ]}
+        >
+          DETALHES
         </Text>
+        <View style={{ flexDirection: "row" }}>
+          <TouchableOpacity onPress={() => {}}>
+            <Image
+              source={require("../../assets/images/edit-icon-white.png")}
+              style={{ width: 30, height: 30, marginRight: 20 }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => {}}>
+            <Image
+              source={require("../../assets/images/icon_lixeira_white.png")}
+              style={{ width: 30, height: 30 }}
+            />
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
       <View
         style={{
@@ -280,6 +316,11 @@ function Anexo({ navigation }) {
         <View style={{ flexDirection: "row" }}>
           <Text style={Styles.DescAnexo}>{infração.Reds}</Text>
         </View>
+        {infração.Observações && (
+          <View style={{ flexDirection: "row" }}>
+            <Text style={Styles.DescAnexo}>{infração.Observações}</Text>
+          </View>
+        )}
 
         <View style={Styles.lbAnexos}>
           <View style={Styles.btngroupAnexo}>
@@ -287,7 +328,7 @@ function Anexo({ navigation }) {
             <TouchableHighlight
               style={[Styles.btnPrimary, { flex: 1 }]}
               underlayColor={Colors.Primary.White}
-              onPress={getAnexo}
+              /*onPress={getAnexo}*/
             >
               <Text style={[Styles.btnTextPrimary, { fontSize: 16 }]}>
                 ADICIONAR
@@ -304,12 +345,12 @@ function Anexo({ navigation }) {
                     progress: `${item.progress}%`,
                   }}
                   onLongPress={() => {
-                    openAnexo(item.status);
+                    /* openAnexo(item.status);*/
                   }}
                 />
               )}
               renderHiddenItem={({ item, index }) => (
-                <Item.swipe onDelete={() => removeAnexo(item)} />
+                <Item.swipe /*onDelete={() => removeAnexo(item)}*/ />
               )}
               leftOpenValue={40}
               disableLeftSwipe={true}

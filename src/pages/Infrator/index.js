@@ -25,11 +25,13 @@ import {
 import { useContext } from "../../context";
 import { ScrollView } from "react-native-gesture-handler";
 import { getCidades, getEstados } from "../../services/ibge";
+import { validator } from "../../utils";
+import { Infrator as Model } from "../../models";
 
 LogBox.ignoreLogs(["YellowBox"]);
 
 export default ({ navigation }) => {
-  const [infrator, setInfrator] = useState({});
+  const [infrator, setInfrator] = useState(new Model());
   const [infratorFromRoute, setinfratorFromRoute] = useState(
     navigation.getParam("Infrator")
   );
@@ -83,20 +85,28 @@ export default ({ navigation }) => {
       alertOffline();
       return;
     }
-
+    const emptyEntries = validator.getEmptyEntries(infrator);
     switch (status) {
       case "new":
         if (haveAccess(credential, "AccessToCadastro")) {
-          Infrator.validate(infrator)
-            .then(() => {
-              addInfrator(infrator);
-            })
-            .catch((err) => Alert.alert("Falha:", err));
+          if (emptyEntries.length > 0) {
+            Alert.alert("Atenção:", "Existem campos sem preencher");
+          } else {
+            Infrator.validate(infrator)
+              .then(() => {
+                addInfrator(infrator);
+              })
+              .catch((err) => Alert.alert("Falha:", err));
+          }
         } else accessDeniedAlert();
         break;
       case "saved":
         if (haveAccess(credential, "AccessToEditar")) {
-          if (haveAccess(credential, "AccessToCadastro")) saveChanges(infrator);
+          if (emptyEntries.length > 0) {
+            Alert.alert("Atenção:", "Existem campos sem preencher");
+          } else {
+            saveChanges(infrator);
+          }
         } else accessDeniedAlert();
         break;
 
@@ -106,8 +116,12 @@ export default ({ navigation }) => {
   };
 
   const addInfrator = (infrator) => {
-    updateInfrator({ Data_registro: new Date().toISOString() });
-    Infrator.addInfrator(infrator)
+    let Data_registro = new Date().toISOString();
+    updateInfrator({ Data_registro });
+    Infrator.addInfrator({
+      ...infrator,
+      Data_registro,
+    })
       .then((id) => {
         updateInfrator({ id });
         Alert.alert("Sucesso:", "Infrator salvo!");
@@ -119,10 +133,14 @@ export default ({ navigation }) => {
   };
 
   const saveChanges = (infrator) => {
-    updateInfrator({ Data_alteracao: new Date().toISOString() });
+    let Data_alteracao = new Date().toISOString();
+    updateInfrator({ Data_alteracao });
     let id = infrator.id;
     delete infrator.id;
-    Infrator.updateInfrator(id, infrator)
+    Infrator.updateInfrator(id, {
+      ...infrator,
+      Data_alteracao,
+    })
       .then(() => {
         Alert.alert("Sucesso:", "Infrator atualizado!");
         setStatus("saved");
@@ -172,6 +190,9 @@ export default ({ navigation }) => {
             onPress: () => {
               Infrator.remInfrator(infrator.id)
                 .then(() => {
+                  setInfrator(new Model());
+                  dateState.onSelect(null);
+                  setStatus("new");
                   /*
                   await removeAnexos(
                     "Sucesso:",
@@ -319,7 +340,10 @@ export default ({ navigation }) => {
                 alignItems: "center",
               }}
             >
-              <Datepicker.Element onStateChange={dateState} />
+              <Datepicker.Element
+                placeholder="Nascimento"
+                onStateChange={dateState}
+              />
               <Picker
                 width={152}
                 heigth={40}

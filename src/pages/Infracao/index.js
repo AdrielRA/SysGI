@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Styles from "../../styles";
@@ -17,22 +18,64 @@ import {
   Network,
   Relatory,
 } from "../../controllers";
-import { Button, Itens, Picker, TextInput } from "../../components";
+import { Button, Itens, Picker, TextInput, Datepicker } from "../../components";
 import { useContext } from "../../context";
 import { FlatList } from "react-native-gesture-handler";
+import { validator } from "../../utils";
+import { Infração } from "../../models";
 
 export default ({ navigation }) => {
   const [idInfrator, setIdInfrator] = useState(
     navigation.getParam("idInfrator")
   );
-
   const [infracoes, setInfracoes] = useState([]);
+  const [infracao, setInfracao] = useState(new Infração());
+  const dateState = Datepicker.useDatepickerState();
+  const { accessDeniedAlert, haveAccess } = Credential;
+  const { connected, alertOffline } = Network.useNetwork();
+  const { credential } = useContext();
+  const [refs, setRefs] = useState({
+    Reds: useRef(),
+  });
+
+  useEffect(() => {
+    if (!!dateState.date) updateInfracao({ Data_ocorrência: dateState.date });
+  }, [dateState.date]);
 
   useEffect(() => {
     if (!!idInfrator) {
-      Infracao.getInfracoesByIdInfrator(idInfrator).then(setInfracoes);
+      updateListInfracoes();
     }
   }, [idInfrator]);
+
+  const updateListInfracoes = () => {
+    Infracao.getInfracoesByIdInfrator(idInfrator).then(setInfracoes);
+  };
+
+  const updateInfracao = (property) =>
+    setInfracao({ ...infracao, ...property });
+
+  const handleSaveInfracao = () => {
+    if (!connected) {
+      alertOffline();
+      return;
+    }
+    if (haveAccess(credential, "AccessToInfração")) {
+      const emptyEntries = validator.getEmptyEntries(infracao);
+      if (emptyEntries.length > 0) {
+        Alert.alert("Atenção:", "Existem campos sem preencher");
+      } else {
+        Infracao.addInfracao(idInfrator, {
+          ...infracao,
+          Data_registro: new Date().toISOString(),
+        }).then(() => {
+          updateListInfracoes();
+          setInfracao(new Infração());
+          dateState.onSelect(null);
+        });
+      }
+    } else accessDeniedAlert();
+  };
 
   return (
     <SafeAreaView style={Styles.page}>
@@ -85,22 +128,32 @@ export default ({ navigation }) => {
         <TextInput
           placeholder="Infração"
           type="secondary"
-          autoFocus={true}
-          onChangeText={(infra) => {}}
+          returnKeyType="next"
+          value={infracao.Descrição}
+          onChangeText={(Descrição) => updateInfracao({ Descrição })}
+          onSubmitEditing={() => refs.Reds.current.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
+          Ref={refs.Reds}
           placeholder="REDS"
           returnKeyType="next"
+          value={infracao.Reds}
           type="secondary"
-          onChangeText={(reds) => {}}
+          onChangeText={(Reds) => updateInfracao({ Reds })}
+        />
+        <Datepicker.Element
+          placeholder="Data da ocorrência"
+          onStateChange={dateState}
         />
         <TextInput
           placeholder="Observações"
           type="secondary"
           multiline={true}
-          onChangeText={(obs) => {}}
+          value={infracao.Observações}
+          onChangeText={(Observações) => updateInfracao({ Observações })}
         />
-        <Button text="ADICIONAR" type="normal" onPress={() => {}} />
+        <Button text="ADICIONAR" type="normal" onPress={handleSaveInfracao} />
       </View>
       <FlatList
         style={{
@@ -111,7 +164,8 @@ export default ({ navigation }) => {
         data={infracoes}
         keyExtractor={(item) => item.value}
         renderItem={({ item, i }) => (
-          <View
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Anexo", { item })}
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
@@ -124,7 +178,7 @@ export default ({ navigation }) => {
             }}
           >
             <Text style={[Styles.txtBold, { color: Colors.Secondary.Normal }]}>
-              {!!item.Reds ? item.Reds : item}
+              {!!item.Descrição ? item.Descrição : item}
             </Text>
             <View
               style={{
@@ -134,17 +188,47 @@ export default ({ navigation }) => {
               <TouchableOpacity onPress={() => {}}>
                 <Image
                   source={require("../../assets/images/edit-icon.png")}
-                  style={{ width: 30, height: 30, marginRight: 10 }}
+                  style={{ width: 30, height: 30, marginRight: 20 }}
                 />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert(
+                    "Tem certeza?",
+                    "Os dados desta infração serão perdidos para sempre!",
+                    [
+                      {
+                        text: "Não",
+                        onPress: () => {},
+                        style: "cancel",
+                      },
+                      {
+                        text: "Sim",
+                        onPress: () => {
+                          Infracao.remInfracao(idInfrator, item.id)
+                            .then(() => {
+                              updateListInfracoes();
+                            })
+                            .catch((err) => {
+                              Alert.alert(
+                                "Falha:",
+                                "Infração não foi removida!"
+                              );
+                            });
+                        },
+                      },
+                    ],
+                    { cancelable: false }
+                  );
+                }}
+              >
                 <Image
-                  source={require("../../assets/images/goTo.png")}
+                  source={require("../../assets/images/icon_lixeira_primary.png")}
                   style={{ width: 30, height: 30 }}
                 />
               </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         nestedScrollEnabled={true}
       />

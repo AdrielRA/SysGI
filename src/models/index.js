@@ -1,6 +1,6 @@
 import anexo from "./anexo";
-import infração from "./infração";
-import infrator from "./infrator";
+import Infração from "./infração";
+import Infrator from "./infrator";
 import user from "./user";
 
-export { anexo, infração, infrator, user };
+export { anexo, Infração, Infrator, user };

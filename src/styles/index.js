@@ -3,8 +3,8 @@ import Colors from "./colors";
 
 const Styles = StyleSheet.create({
   page: {
-    flex:1,
-    alignItems:'center',
+    flex: 1,
+    alignItems: "center",
   },
 
   txtNormal: {
@@ -127,7 +127,6 @@ const Styles = StyleSheet.create({
     marginHorizontal: 2.5,
     marginTop: 10,
     flex: 1,
-
   },
   DescAnexo: {
     fontFamily: "CenturyGothic",
@@ -135,9 +134,10 @@ const Styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 25,
     marginHorizontal: 5,
-    marginVertical: 10,
+    marginVertical: 5,
     paddingVertical: 10,
     paddingHorizontal: 15,
+    maxHeight: 80,
     flex: 1,
     fontSize: 18,
     backgroundColor: Colors.Primary.White,
@@ -311,7 +311,5 @@ const Styles = StyleSheet.create({
     fontFamily: "CenturyGothic",
   },
 });
-
-
 
 export default Styles;

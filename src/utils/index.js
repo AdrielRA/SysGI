@@ -1,3 +1,3 @@
 import Strings from "./Strings.json";
-
-export { Strings };
+import * as validator from "./validator";
+export { Strings, validator };

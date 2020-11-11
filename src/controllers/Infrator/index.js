@@ -82,14 +82,14 @@ const addInfrator = (infrator) => {
     const key = refInfratores.push().key;
     refInfratores
       .child(key)
-      .set(infrator)
+      .set(JSON.parse(JSON.stringify(infrator)))
       .then(() => resolve(key))
       .catch(reject);
   });
 };
 
 const updateInfrator = (id, updatedData) =>
-  refInfratores.child(id).update(updatedData);
+  refInfratores.child(id).update(JSON.parse(JSON.stringify(updatedData)));
 
 const remInfrator = (id) => refInfratores.child(id).remove();
 

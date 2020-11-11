@@ -8,7 +8,7 @@ const refInfracoesByInfratorId = (id) =>
 const addInfracao = (idInfrator, infracao) => {
   const ref = refInfracoesByInfratorId(idInfrator);
   let key = ref.push().key;
-  return ref.child(key).set(infracao);
+  return ref.child(key).set(JSON.parse(JSON.stringify(infracao)));
 };
 
 const remInfracao = (idInfrator, idInfracao) =>
@@ -24,7 +24,15 @@ const getInfracoesByIdInfrator = (idInfrator) => {
     refInfracoesByInfratorId(idInfrator)
       .once("value")
       .then((snap) => {
-        resolve(snap.val());
+        if (snap.exists()) {
+          resolve(
+            Object.entries(snap.val()).map(([key, obj]) => {
+              return { id: key, ...obj };
+            })
+          );
+        } else {
+          resolve([]);
+        }
       })
       .catch(reject);
   });

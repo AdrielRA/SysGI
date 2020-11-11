@@ -1,17 +1,15 @@
-class Infrator {
-  Id;
-  Nome;
+export default class Infrator {
+  Nome = null;
   Cpf;
   Rg;
-  Mãe;
+  Mãe = null;
   Logradouro;
   Num_residência;
   Bairro;
   Cidade;
   Uf;
-  Sexo;
-  Data_nascimento;
+  Sexo = null;
+  Data_nascimento = null;
   Data_registro;
   Infrações;
-  constructor() { }
 }

@@ -73,7 +73,7 @@ export default (props) => {
     >
       <Datepicker
         status="basic"
-        placeholder="Nascimento"
+        placeholder={props.placeholder}
         dateService={dateConfig}
         {...props.onStateChange}
       />
