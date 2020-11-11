@@ -1,0 +1,57 @@
+{
+  "components": {
+    "Datepicker": {
+      "meta": {},
+      "appearances": {
+        "default": {
+          "mapping": {
+            "paddingHorizontal": 8,
+            "textMarginHorizontal": 8,
+            "textFontFamily": "text-font-family",
+            "iconWidth": 24,
+            "iconHeight": 24,
+            "iconMarginHorizontal": 8,
+            "labelMarginBottom": 4,
+            "labelFontSize": "text-label-font-size",
+            "labelFontWeight": "text-label-font-weight",
+            "labelFontFamily": "text-label-font-family",
+            "captionMarginTop": 4,
+            "captionFontSize": "text-caption-1-font-size",
+            "captionFontWeight": "text-caption-1-font-weight",
+            "captionFontFamily": "text-caption-1-font-family",
+            "captionIconWidth": 10,
+            "captionIconHeight": 10,
+            "captionIconMarginRight": 8
+          },
+          "variantGroups": {
+            "status": {
+              "basic": {
+                "borderColor": "transparent",
+                "backgroundColor": "transparent",
+                "textColor": "color-danger-default",
+                "labelColor": "color-danger-default",
+                "captionColor": "color-danger-default",
+                "placeholderColor": "color-danger-default",
+                "iconTintColor": "color-danger-default",
+                "captionIconTintColor": "color-danger-default",
+                "state": {
+                  "active": {
+                    "borderColor": "transparent",
+                    "backgroundColor": "transparent",
+                    "textColor": "color-danger-default"
+                  },
+                  "disabled": {
+                    "borderColor": "transparent",
+                    "backgroundColor": "transparent",
+                    "textColor": "text-disabled-color",
+                    "iconTintColor": "text-disabled-color"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

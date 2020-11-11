@@ -30,7 +30,6 @@ function MENU({ navigation }) {
   const { credential, session, user } = useContext();
 
   useEffect(() => {
-    console.log(session);
     if (session !== null && !validateSession(session)) {
       Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
       Auth.signOut();
@@ -55,7 +54,7 @@ function MENU({ navigation }) {
     if (!connected) alertOffline();
     else {
       if (haveAccess(credential, "AccessToCadastro"))
-        navigation.navigate("Cadastro");
+        navigation.navigate("Infrator");
       else accessDeniedAlert();
     }
   };
@@ -90,7 +89,12 @@ function MENU({ navigation }) {
         style={[Styles.page, { alignSelf: "stretch" }]}
       >
         <Text style={[Styles.lblMENU, { paddingTop: 40 }]}>MENU</Text>
-        <Text style={Styles.lblMsg}>Bem-vindo, {userData.Nome}</Text>
+        <Text style={Styles.lblMsg}>
+          Bem-vindo,{" "}
+          {userData.Nome.split(" ")[0]
+            ? userData.Nome.split(" ")[0]
+            : "Usuário"}
+        </Text>
         <View
           style={{
             flex: 6,

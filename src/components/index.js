@@ -1,8 +1,19 @@
 import Button from "./Button";
-import DropDownPicker from './DropDownPicker';
+import DatePicker, { useDatepickerState } from "./Datepicker";
+import DropDownPicker from "./DropDownPicker";
 import * as Itens from "./Itens";
 import Picker from "./Picker";
 import TextInput from "./TextInput";
 import Unifenas from "./Unifenas";
 
-export { Button, DropDownPicker, Itens, Picker, TextInput, Unifenas };
+const Datepicker = { Element: DatePicker, useDatepickerState };
+
+export {
+  Button,
+  Datepicker,
+  DropDownPicker,
+  Itens,
+  Picker,
+  TextInput,
+  Unifenas,
+};

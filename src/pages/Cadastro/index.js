@@ -158,29 +158,20 @@ function Cadastro({ navigation }) {
     return msg == "";
   };
 
-  const dadosOk = async (infrator) => {
-    let res = false;
-
-    let snapshot = await Infrator.getRGInfratorWithKey(infrator.Rg);
-
-    if (snapshot.exists()) {
-      Alert.alert(
-        "Verifique os dados:",
-        "RG fornecido já foi cadastrado em outro infrator!"
-      );
-      res = false;
-    } else {
-      snapshot = await Infrator.getCPFInfratorWithKey(infrator.Cpf);
-
-      if (snapshot.exists())
-        Alert.alert(
-          "Verifique os dados:",
-          "CPF fornecido já foi cadastrado em outro infrator!"
-        );
-      res = !snapshot.exists();
-    }
-
-    return res;
+  const dadosOk = (infrator) => {
+    return new Promise((resolve, reject) => {
+      Infrator.getInfratorByRG(infrator.Rg).then((snap) => {
+        if (snap.exists())
+          reject("RG fornecido já foi cadastrado em outro infrator!");
+        else {
+          Infrator.getInfratorByCPF(infrator.Cpf).then((snap) => {
+            if (snap.exists())
+              reject("CPF fornecido já foi cadastrado em outro infrator!");
+            else resolve();
+          });
+        }
+      });
+    });
   };
 
   const saveInfrator = (infrator) => {
@@ -194,10 +185,9 @@ function Cadastro({ navigation }) {
     }
 
     if (isNew) {
-      dadosOk(infrator).then((ok) => {
-        if (!ok) return;
-        else {
-          if (haveAccess(credential, "AccessToCadastro")) {
+      if (haveAccess(credential, "AccessToCadastro")) {
+        dadosOk(infrator)
+          .then(() => {
             if (!infrator.Data_registro) {
               setInfrator({
                 ...infrator,
@@ -207,7 +197,6 @@ function Cadastro({ navigation }) {
 
             Infrator.saveInfrator(infrator)
               .then((key) => {
-                console.log(key);
                 Alert.alert("Sucesso:", "Infrator salvo!");
                 setInfratorKey(key);
                 setIsNew(false);
@@ -216,9 +205,9 @@ function Cadastro({ navigation }) {
               .catch((err) => {
                 Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
               });
-          } else accessDeniedAlert();
-        }
-      });
+          })
+          .catch((err) => Alert.alert("Falha:", err));
+      } else accessDeniedAlert();
     } else {
       if (haveAccess(credential, "AccessToEditar")) {
         Infrator.saveDataToEdit(infratorKey, infrator, fireInfrações)
@@ -226,6 +215,7 @@ function Cadastro({ navigation }) {
             Alert.alert("Sucesso:", "Infrator atualizado!");
           })
           .catch((err) => {
+            console.log(err);
             Alert.alert("Falha:", "Infrator não foi atualizado!");
           });
       } else accessDeniedAlert();
@@ -856,7 +846,7 @@ function Cadastro({ navigation }) {
                       }}
                     />
                     <Button
-                      text="ADICIONAR"
+                      text="INFRAÇÕES"
                       type="normal"
                       style={{
                         marginHorizontal: 0,
@@ -865,10 +855,11 @@ function Cadastro({ navigation }) {
                       }}
                       textStyle={{ fontSize: 13 }}
                       onPress={() => {
-                        let infra = infração;
+                        navigation.push("Infracao");
+                        /*let infra = infração;
                         infra.Data_registro = new Date().toISOString();
                         setInfração(infra);
-                        saveInfração();
+                        saveInfração();*/
                       }}
                     />
                   </View>

@@ -4,6 +4,7 @@ import DropDownPicker from "../DropDownPicker";
 export default function Picker({
   width,
   heigth,
+  defaultValue,
   color,
   name,
   data,
@@ -25,12 +26,15 @@ export default function Picker({
     <DropDownPicker
       items={data ? data : [{}]}
       placeholder={medidaSE != "" ? medidaSE : name}
+      defaultValue={defaultValue}
       placeholderStyle={{ color: color }}
       onChangeItem={(item) => {
         if (name == "Categoria") {
           setSelected(item.value);
         } else if (name == "MedidaSE") {
           setSelected({ ...auxData, MedidaSE: item.value });
+        } else {
+          setSelected(item);
         }
       }}
       style={{

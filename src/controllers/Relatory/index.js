@@ -1,9 +1,9 @@
-import moment from 'moment';
+import moment from "moment";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
-class Relatory
-{
-  htmlRelatorio = (infrator) => {
-    let html_res = `
+const htmlRelatorio = (infrator) => {
+  let html_res = `
     <html>
       <head>
         <style>
@@ -120,7 +120,7 @@ class Relatory
                 </div>
                 <div class="atributo">
                   <label>Sexo</label>
-                  <p>${infrator.Sexo == 'M' ? "Masculino" : "Feminino"}</p>
+                  <p>${infrator.Sexo == "M" ? "Masculino" : "Feminino"}</p>
                 </div>
                 <div class="atributo">
                   <label>Rg</label>
@@ -132,7 +132,9 @@ class Relatory
                 </div>
                 <div class="atributo">
                   <label>Nascimento</label>
-                  <p>${moment(infrator.Data_nascimento).format("DD/MM/YYYY")}</p>
+                  <p>${moment(infrator.Data_nascimento).format(
+                    "DD/MM/YYYY"
+                  )}</p>
                 </div>
                 <div class="atributo">
                   <label>Nome da mãe</label>
@@ -171,9 +173,8 @@ class Relatory
             <tr><th>INFRAÇÕES</th></tr>
           </thead>
           <tbody>
-            ${
-              infrator.Infrações.map((infração) => {
-                return `<tr>
+            ${infrator.Infrações.map((infração) => {
+              return `<tr>
                 <td>
                   <div>
                     <div class="atributo">
@@ -186,25 +187,46 @@ class Relatory
                     </div>
                     <div class="atributo">
                       <label>Data de ocorrência</label>
-                      <p>${moment(infração.Data_ocorrência).format("DD/MM/YYYY")}</p>
+                      <p>${moment(infração.Data_ocorrência).format(
+                        "DD/MM/YYYY"
+                      )}</p>
                     </div>
                     <div class="atributo">
                       <label>Data de registro</label>
-                      <p>${moment(infração.Data_registro).format("DD/MM/YYYY")}</p>
+                      <p>${moment(infração.Data_registro).format(
+                        "DD/MM/YYYY"
+                      )}</p>
                     </div>
                   </div>
                 </td>
               </tr>
-                `
-              })
-            }
+                `;
+            })}
           </tbody>
         </table>
       </body>
-    <html>`
+    <html>`;
 
-    return html_res;
-  }
-}
+  return html_res;
+};
 
-export default new Relatory
+const createRelatorio = (infrator) => {
+  return new Promise((resolve) => {
+    Print.printToFileAsync({
+      html: htmlRelatorio(infrator),
+      width: 612,
+      height: 792,
+      base64: false,
+    })
+      .then(({ uri }) => {
+        Sharing.shareAsync(uri, {
+          dialogTitle: "Abrir seu relatório?",
+          mimeType: "application/pdf",
+        });
+        resolve(false);
+      })
+      .catch(resolve(false));
+  });
+};
+
+export { createRelatorio };

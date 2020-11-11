@@ -36,6 +36,7 @@ export default function Input(props) {
 
   return (
     <TextInput
+      ref={props.Ref}
       placeholder={props.placeholder}
       placeholderTextColor={placeholderColor}
       keyboardType={props.keyboardType}
@@ -54,6 +55,8 @@ export default function Input(props) {
       multiline={props.multiline}
       textAlignVertical={props.textAlignVertical}
       secureTextEntry={props.secureTextEntry}
+      onSubmitEditing={props.onSubmitEditing}
+      blurOnSubmit={props.blurOnSubmit}
     />
   );
 }

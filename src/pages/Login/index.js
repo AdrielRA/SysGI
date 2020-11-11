@@ -47,7 +47,7 @@ function Login({ navigation }) {
     );
 
     return () => {
-      keyboardListener.remove();
+      keyboardOpenListener.remove();
       keyboardCloseListener.remove();
     };
   }, []);
@@ -70,7 +70,6 @@ function Login({ navigation }) {
       .then(entrar)
       .catch((error) => {
         setLoading(false);
-        console.log(error);
         switch (error) {
           case "email-verification-fail":
             alertEmailVerificationError(user);

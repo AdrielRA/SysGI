@@ -1,41 +1,36 @@
-import { db, auth } from '../../services/firebase';
+import { db, auth } from "../../services/firebase";
 
 export default {
-    getUser(){
-        return auth().currentUser;
-    },
-    onAuthStateChanged(callback) {
-        auth().onAuthStateChanged((user) => {
-            callback(user)
-        });
-    },
-    getSearchInfrator(child, termo){
-        return db()
-        .ref("infratores")
-        .orderByChild(child)
-        .limitToFirst(1)
-        .equalTo(termo);
-    },
-    setFoundInfrator(snapshot, setInfratorKey, setInfrator){
-        snapshot.forEach((child) =>{
+  getUser() {
+    return auth().currentUser;
+  },
+  onAuthStateChanged(callback) {
+    auth().onAuthStateChanged((user) => {
+      callback(user);
+    });
+  },
+  getSearchInfrator(child, termo) {
+    return db()
+      .ref("infratores")
+      .orderByChild(child)
+      .limitToFirst(1)
+      .equalTo(termo);
+  },
+  setFoundInfrator(snapshot, setInfratorKey, setInfrator) {
+    snapshot.forEach((child) => {
+      if (child.val()) {
+        setInfratorKey(child.key);
 
-            if (child.val()) {
+        let infrator = child.val();
+        let infras = [];
 
-              setInfratorKey(child.key);
+        if (child.val().Infrações) {
+          infras = Object.values(child.val().Infrações);
+        }
 
-              let infrator = child.val();
-              let infras = [];
-
-              if (child.val().Infrações) {
-                infras = Object.values(child.val().Infrações);
-              }
-
-              infrator.Infrações = infras;
-              setInfrator(infrator);
-
-            }
-
-          });
-    }
-
-}
+        infrator.Infrações = infras;
+        setInfrator({ ...infrator, id: child.key });
+      }
+    });
+  },
+};

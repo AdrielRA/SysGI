@@ -1,180 +1,188 @@
-import { db, auth, storage } from "../../services/firebase";
-import { Alert } from "react-native";
-export default {
-  setDataEdit(rg, callback) {
-    let query = db().ref("infratores").orderByChild("Rg").equalTo(rg);
-    query.once("value", function (snapshot) {
-      if (snapshot.val() != null) {
-        snapshot.forEach(function (child) {
-          if (child.val()) {
-            callback(child.key);
-          }
-        });
-      }
-    });
-  },
-  setDataInfracoes(infratorKey, setFireInfrações, setInfrator, setFavorito) {
-    db()
-      .ref("infratores")
-      .child(infratorKey)
-      .on("value", (snapshot) => {
-        if (snapshot.val() != null) {
-          let infrator = snapshot.val();
-          let infras = [];
+import { db } from "../../services/firebase";
 
-          setFireInfrações(snapshot.val().Infrações);
+const refInfratores = db().ref("infratores");
+const refUsers = db().ref("users");
 
-          if (snapshot.val().Infrações) {
-            infras = Object.values(snapshot.val().Infrações);
-          }
+const getInfratorById = (id) => {
+  return new Promise((resolve, reject) => {
+    refInfratores
+      .child(id)
+      .once("value")
+      .then((snap) => resolve(snap.val()))
+      .catch(reject);
+  });
+};
 
-          infrator.Infrações = infras;
-
-          setInfrator(infrator);
-        } else {
-          if (!favorito) {
-            return navigation.goBack();
-          } else {
-            db().ref("infratores").child(infratorKey).off("value");
-            Alert.alert(
-              "Infrator não Encontrado!",
-              "Provavelmente ele foi removido por alguém!"
-            );
-            navigation.goBack();
-          }
-        }
-      });
-    setFavorito(null);
-  },
-  async getRGInfratorWithKey(rg) {
-    return await db()
-      .ref("infratores")
+const getInfratorByRG = (rg) => {
+  return new Promise((resolve, reject) => {
+    if (!rg) resolve();
+    refInfratores
       .orderByChild("Rg")
       .equalTo(rg)
-      .once("value");
-  },
-  async getCPFInfratorWithKey(cpf) {
-    return await db()
-      .ref("infratores")
+      .once("value")
+      .then((snap) => resolve(snap.val()))
+      .catch(reject);
+  });
+};
+
+const getInfratorByCPF = (cpf) => {
+  return new Promise((resolve, reject) => {
+    if (!cpf) resolve();
+    refInfratores
       .orderByChild("Cpf")
       .equalTo(cpf)
-      .once("value");
-  },
-  async saveInfrator(infrator) {
-    let key = db().ref("infratores").push().key;
-    return db()
-      .ref("infratores")
+      .once("value")
+      .then((snap) => resolve(snap.val()))
+      .catch(reject);
+  });
+};
+
+const getIdInfratorByRg = (rg) => {
+  return new Promise((resolve, reject) => {
+    if (!rg) reject();
+    refInfratores
+      .orderByChild("Rg")
+      .equalTo(rg)
+      .once(
+        "value",
+        (snapshot) => {
+          if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+              if (child.exists()) resolve(child.key);
+            });
+          } else reject();
+        },
+        reject
+      );
+  });
+};
+
+const validate = (infrator) => {
+  return new Promise((resolve, reject) => {
+    getInfratorByRG(infrator.Rg)
+      .then((snapRG) => {
+        if (!!snapRG)
+          reject("RG fornecido já foi cadastrado em outro infrator!");
+        else {
+          getInfratorByCPF(infrator.Cpf)
+            .then((snapCpf) => {
+              if (!!snapCpf)
+                reject("CPF fornecido já foi cadastrado em outro infrator!");
+              else resolve();
+            })
+            .catch(reject);
+        }
+      })
+      .catch(reject);
+  });
+};
+
+const addInfrator = (infrator) => {
+  return new Promise((resolve, reject) => {
+    const key = refInfratores.push().key;
+    refInfratores
       .child(key)
       .set(infrator)
-      .then(() => {
-        return key;
-      });
-  },
-  async saveDataToEdit(infratorKey, infrator, fireInfracoes) {
-    await infratores
-      .child(infratorKey)
-      .set(
-        JSON.parse(JSON.stringify({ ...infrator, Infrações: fireInfracoes }))
+      .then(() => resolve(key))
+      .catch(reject);
+  });
+};
+
+const updateInfrator = (id, updatedData) =>
+  refInfratores.child(id).update(updatedData);
+
+const remInfrator = (id) => refInfratores.child(id).remove();
+
+const getFavorites = (uid) => {
+  return new Promise((resolve, reject) => {
+    refUsers
+      .child(uid)
+      .child("Infratores_favoritados")
+      .once(
+        "value",
+        (snap) => {
+          if (snap.exists) resolve(snap.val());
+          else reject();
+        },
+        reject
       );
-  },
-  getRefInfracoes(infratorKey) {
-    return db().ref("infratores").child(infratorKey).child("Infrações");
-  },
-  async saveInfracao(infratorKey, infracao) {
-    const infracoes = this.getRefInfracoes(infratorKey);
+  });
+};
 
-    let key = infracoes.push().key;
+const isFavorite = (uid, idInfrator) => {
+  return new Promise((resolve, reject) => {
+    getFavorites(uid)
+      .then((favorites) => {
+        resolve(!!favorites && favorites.includes(idInfrator));
+      })
+      .catch(reject);
+  });
+};
 
-    await infracoes.child(key).set({ ...infracao });
-  },
-  async deleteInfrator(infratorKey) {
-    await db().ref("infratores").child(infratorKey).remove();
-  },
-  async removeAllFavorites() {
-    db()
-      .ref()
-      .child("users")
-      .orderByChild("Infratores_favoritados")
-      .startAt("")
-      .once("value", (snapshot) => {
-        snapshot.forEach((user) => {
-          user.ref
+const addFavorite = (uid, idInfrator) => {
+  return new Promise((resolve, reject) => {
+    getFavorites(uid)
+      .then((favorites) => {
+        favorites = !!favorites ? favorites : [];
+        if (!favorites.includes(idInfrator)) {
+          favorites.push(idInfrator);
+          refUsers
+            .child(uid)
             .child("Infratores_favoritados")
-            .set(user.val().Infratores_favoritados.filter((e) => e != key));
+            .set(favorites)
+            .then(resolve)
+            .catch(reject);
+        }
+      })
+      .catch(reject);
+  });
+};
+
+const remFavorite = (uid, idInfrator) => {
+  return new Promise((resolve, reject) => {
+    getFavorites(uid)
+      .then((favorites) => {
+        if (!!favorites && favorites.includes(idInfrator)) {
+          favorites = favorites.filter((key) => idInfrator !== key);
+          refUsers
+            .child(uid)
+            .child("Infratores_favoritados")
+            .set(favorites)
+            .then(resolve)
+            .catch(reject);
+        }
+      })
+      .catch(reject);
+  });
+};
+
+const clearFavorites = (idInfracao) => {
+  refUsers
+    .orderByChild("Infratores_favoritados")
+    .startAt("")
+    .once("value", (snapshot) => {
+      snapshot.forEach((user) => {
+        user.ref.child("Infratores_favoritados").update({
+          Infratores_favoritados: user
+            .val()
+            .Infratores_favoritados.filter((e) => e != idInfracao),
         });
       });
-  },
-  getDataUser() {
-    let userId = auth().currentUser.uid;
-    let user = db().ref().child("users").child(userId);
-    let favoritos = user.child("Infratores_favoritados");
+    });
+};
 
-    return favoritos;
-  },
-  setFavorites(favoritos, setFavorito, infratorKey) {
-    favoritos.once("value", (snapshot) => {
-      let favs = [];
-      if (snapshot.val()) {
-        favs = snapshot.val();
-      }
-      setFavorito(favs.includes(infratorKey.toString()));
-    });
-  },
-  setBDFavorites(favoritos, infratorKey) {
-    favoritos.once("value", (snapshot) => {
-      let favs = [];
-      if (snapshot.val()) {
-        favs = snapshot.val();
-      }
-      if (!favs.includes(infratorKey)) favs.push(infratorKey);
-      favoritos.set(favs);
-    });
-  },
-  verificUserToFavoriteInfrator(favoritos, infratorKey) {
-    favoritos.once("value", (snapshot) => {
-      let favs = [];
-      if (snapshot.val()) {
-        favs = snapshot.val();
-      }
-      if (favs.includes(infratorKey))
-        favs = favs.filter((infra_) => {
-          infra_ != infratorKey;
-        });
-      favoritos.set(favs);
-    });
-  },
-  filterInfracaoToUser(infracoes, dataRegistro) {
-    return infracoes.orderByChild("Data_registro").equalTo(dataRegistro);
-  },
-  async deleteInfracoes(query, infracoes) {
-    return query.once("value", (snapshot) => {
-      if (snapshot.val()) {
-        let infra_key = Object.keys(snapshot.val())[0];
-
-        infracoes
-          .child(infra_key)
-          .remove()
-          .then(() => {
-            return infra_key;
-          });
-      }
-    });
-  },
-  async removeAllAnexosToInfrator(infratorKey) {
-    await db().ref().child("anexos").child(infratorKey).remove();
-  },
-  async removeOneAnexoToInfrator(infratorKey, infra_key) {
-    await db()
-      .ref()
-      .child("anexos")
-      .child(infratorKey)
-      .child(infra_key)
-      .remove();
-  },
-  async createRefFiles(path) {
-    await storage().ref().child("anexos").child(path).listAll();
-  },
-  async deleteOneFile(pathToFile, fileName) {
-    await storage().ref(pathToFile).child(fileName).delete();
-  },
+export {
+  addInfrator,
+  remInfrator,
+  getIdInfratorByRg,
+  getInfratorByRG,
+  getInfratorByCPF,
+  getInfratorById,
+  updateInfrator,
+  clearFavorites,
+  getFavorites,
+  addFavorite,
+  remFavorite,
+  validate,
+  isFavorite,
 };

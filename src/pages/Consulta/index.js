@@ -275,7 +275,7 @@ function Consulta({ navigation }) {
                     return;
                   }
                   if (haveAccess(credential, "AccessToDetalhes"))
-                    navigation.navigate("Cadastro", { Infrator });
+                    navigation.navigate("Infrator", { Infrator });
                   else accessDeniedAlert();
                 }}
               >

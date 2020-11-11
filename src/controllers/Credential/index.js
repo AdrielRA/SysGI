@@ -1,5 +1,6 @@
 import { db } from "../../services/firebase";
 import Credentials from "../../utils/Credentials.json";
+import { Alert } from "react-native";
 
 const getCredencial = (uid, resolve) => {
   db()
@@ -24,7 +25,9 @@ const blockedAccess = (credential) => {
 
 const haveAccess = (credential, access) => {
   const allowed = Credentials[access];
-  return isAdmin() || (!!allowed && allowed.includes(credential % 10));
+  return (
+    isAdmin(credential) || (!!allowed && allowed.includes(credential % 10))
+  );
 };
 
 const haveAccessToUserControl = (credential) => {
