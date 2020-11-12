@@ -2,8 +2,7 @@ import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 
 import {
-  Anexo,
-  Cadastro,
+  Detalhes,
   Consulta,
   Controle,
   Infracao,
@@ -24,11 +23,10 @@ const Routes = createAppContainer(
       Sobre,
       MENU,
       Infrator,
-      Cadastro,
       Infracao,
       Consulta,
       Controle,
-      Anexo,
+      Detalhes,
     },
     {
       defaultNavigationOptions: {

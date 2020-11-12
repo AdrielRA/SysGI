@@ -1,5 +1,4 @@
-import Anexo from "./Anexo";
-import Cadastro from "./Cadastro";
+import Detalhes from "./Detalhes";
 import Consulta from "./Consulta";
 import Controle from "./Controle";
 import Infracao from "./Infracao";
@@ -11,8 +10,7 @@ import Signup from "./Signup";
 import Sobre from "./Sobre";
 
 export {
-  Anexo,
-  Cadastro,
+  Detalhes,
   Consulta,
   Controle,
   Infracao,

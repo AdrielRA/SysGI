@@ -328,7 +328,7 @@ function Consulta({ navigation }) {
                           return;
                         }
                         if (haveAccess(credential, "AccessToAnexar"))
-                          navigation.navigate("Anexo", {
+                          navigation.navigate("Detalhes", {
                             item: { ...infração_, infratorKey },
                           });
                         else accessDeniedAlert();

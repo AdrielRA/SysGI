@@ -165,7 +165,7 @@ export default ({ navigation }) => {
         keyExtractor={(item) => item.value}
         renderItem={({ item, i }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("Anexo", { item })}
+            onPress={() => navigation.navigate("Detalhes", { item })}
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
