@@ -17,6 +17,7 @@ import {
 const Routes = createAppContainer(
   createStackNavigator(
     {
+      Consulta,
       Login,
       Signup,
       Recovery,
@@ -24,7 +25,6 @@ const Routes = createAppContainer(
       MENU,
       Infrator,
       Infracao,
-      Consulta,
       Controle,
       Detalhes,
     },

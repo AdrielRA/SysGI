@@ -6,7 +6,7 @@ import * as Infrator from "./Infrator";
 import * as Network from "./Network";
 import * as Notifications from "./Notifications";
 import * as Relatory from "./Relatory";
-import Search from "./Search";
+import * as Search from "./Search";
 import Uploader from "./Uploader";
 
 export {
