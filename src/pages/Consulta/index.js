@@ -29,12 +29,15 @@ export default ({ navigation }) => {
   const { search, setSearch, type, setType, filter, setFilter } = useSearch();
 
   useEffect(() => {
+    setSearch();
     clearListener();
     setInfratores([]);
-    setSearch("");
     setFilter("Rg");
-    if (type === "all") handleSearch();
   }, [type]);
+
+  useEffect(() => {
+    if (!search && type === "all") handleSearch();
+  }, [search]);
 
   useEffect(() => {
     if (!!search) handleSearch();
