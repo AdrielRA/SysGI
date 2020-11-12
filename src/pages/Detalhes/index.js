@@ -21,6 +21,7 @@ import {
   Credential,
   Network,
   Uploader,
+  Infracao,
 } from "../../controllers";
 import * as DocumentPicker from "expo-document-picker";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -28,7 +29,9 @@ import { Anexo as Item } from "../../components/Itens";
 import { useContext } from "../../context";
 
 function Anexo({ navigation }) {
-  const infração = navigation.getParam("item");
+  const idInfracao = navigation.getParam("idInfracao");
+  const idInfrator = navigation.getParam("idInfrator");
+  const [infracao, setInfracao] = useState({});
   const [infraKey, setInfraKey] = useState(undefined);
   const [lista, setLista] = useState([]);
   const [nomeAnexo, setNomeAnexo] = useState("");
@@ -39,9 +42,17 @@ function Anexo({ navigation }) {
   const { credential } = useContext();
 
   useEffect(() => {
-    //Uploader.callback = callBack_;
-  });
+    Infracao.listenOne(idInfrator, idInfracao, handleListener);
 
+    //Uploader.callback = callBack_;
+  }, []);
+
+  const handleListener = (infracao) => {
+    if (!infracao) {
+      Alert.alert("Atenção:", "A infração foi removida!");
+      navigation.goBack();
+    } else setInfracao(infracao);
+  };
   useEffect(() => {
     /*navigation.addListener("didBlur", (e) => {
       if (!e.state) {
@@ -61,7 +72,7 @@ function Anexo({ navigation }) {
         setInfraKey(Object.keys(snapshot.val())[0]);
       }
     });*/
-  }, [infração]);
+  }, [infracao]);
 
   useEffect(() => {
     /*if (infraKey) {
@@ -252,13 +263,47 @@ function Anexo({ navigation }) {
           DETALHES
         </Text>
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.push("EditeInfracao", {
+                infracao,
+                idInfrator,
+              });
+            }}
+          >
             <Image
               source={require("../../assets/images/edit-icon-white.png")}
               style={{ width: 30, height: 30, marginRight: 20 }}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                "Tem certeza?",
+                "Os dados desta infração serão perdidos para sempre!",
+                [
+                  {
+                    text: "Não",
+                    onPress: () => {},
+                    style: "cancel",
+                  },
+                  {
+                    text: "Sim",
+                    onPress: () => {
+                      Infracao.remInfracao(idInfrator, infracao.id)
+                        .then(() => {
+                          navigation.goBack();
+                        })
+                        .catch((err) => {
+                          Alert.alert("Falha:", "Infração não foi removida!");
+                        });
+                    },
+                  },
+                ],
+                { cancelable: false }
+              );
+            }}
+          >
             <Image
               source={require("../../assets/images/icon_lixeira_white.png")}
               style={{ width: 30, height: 30 }}
@@ -304,21 +349,21 @@ function Anexo({ navigation }) {
         </View>
         <View style={{ flexDirection: "row" }}>
           <Text style={Styles.TextAnexo}>
-            {moment(new Date(infração.Data_registro)).format("DD/MM/YYYY")}
+            {moment(new Date(infracao.Data_registro)).format("DD/MM/YYYY")}
           </Text>
           <Text style={Styles.TextAnexo}>
-            {moment(new Date(infração.Data_ocorrência)).format("DD/MM/YYYY")}
+            {moment(new Date(infracao.Data_ocorrência)).format("DD/MM/YYYY")}
           </Text>
         </View>
         <View style={{ flexDirection: "row" }}>
-          <Text style={Styles.DescAnexo}>{infração.Descrição}</Text>
+          <Text style={Styles.DescAnexo}>{infracao.Descrição}</Text>
         </View>
         <View style={{ flexDirection: "row" }}>
-          <Text style={Styles.DescAnexo}>{infração.Reds}</Text>
+          <Text style={Styles.DescAnexo}>{infracao.Reds}</Text>
         </View>
-        {infração.Observações && (
+        {infracao.Observações && (
           <View style={{ flexDirection: "row" }}>
-            <Text style={Styles.DescAnexo}>{infração.Observações}</Text>
+            <Text style={Styles.DescAnexo}>{infracao.Observações}</Text>
           </View>
         )}
 

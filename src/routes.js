@@ -5,6 +5,7 @@ import {
   Detalhes,
   Consulta,
   Controle,
+  EditeInfracao,
   Infracao,
   Infrator,
   Login,
@@ -27,6 +28,7 @@ const Routes = createAppContainer(
       Consulta,
       Controle,
       Detalhes,
+      EditeInfracao,
     },
     {
       defaultNavigationOptions: {

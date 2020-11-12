@@ -276,7 +276,8 @@ export default ({ navigation }) => {
                 }
                 if (haveAccess(credential, "AccessToAnexar"))
                   navigation.navigate("Detalhes", {
-                    item,
+                    idInfracao: item.id,
+                    idInfrator: Infrator.id,
                   });
                 else accessDeniedAlert();
               }}
@@ -296,14 +297,20 @@ export default ({ navigation }) => {
         alignItems: "center",
       }}
     >
-      <Text
-        style={[
-          Styles.txtBold,
-          { color: Colors.Secondary.Normal, fontSize: 28, textAlign: "center" },
-        ]}
-      >
-        Nenhum infrator encontrado!
-      </Text>
+      {!!search && (
+        <Text
+          style={[
+            Styles.txtBold,
+            {
+              color: Colors.Secondary.Normal,
+              fontSize: 28,
+              textAlign: "center",
+            },
+          ]}
+        >
+          Nenhum infrator encontrado!
+        </Text>
+      )}
     </View>
   );
 

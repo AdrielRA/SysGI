@@ -137,6 +137,7 @@ export default ({ navigation }) => {
     updateInfrator({ Data_alteracao });
     let id = infrator.id;
     delete infrator.id;
+    delete infrator.Infrações;
     Infrator.updateInfrator(id, {
       ...infrator,
       Data_alteracao,
@@ -248,7 +249,7 @@ export default ({ navigation }) => {
             alignItems: "center",
           }}
         >
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
               source={require("../../assets/images/back.png")}
               style={{ width: 30, height: 30 }}

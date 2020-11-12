@@ -29,7 +29,7 @@ export default ({ navigation }) => {
     navigation.getParam("idInfrator")
   );
   const [infracoes, setInfracoes] = useState([]);
-  const [infracao, setInfracao] = useState(new Infração());
+  const [infracao, setInfracao] = useState(navigation.getParam("infracao"));
   const dateState = Datepicker.useDatepickerState();
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
@@ -39,14 +39,18 @@ export default ({ navigation }) => {
   });
 
   useEffect(() => {
+    if (!!infracao) {
+      dateState.onSelect(new Date(infracao.Data_ocorrência));
+    }
+  }, []);
+
+  useEffect(() => {
     if (!!dateState.date) updateInfracao({ Data_ocorrência: dateState.date });
   }, [dateState.date]);
 
-  useEffect(() => {
-    if (!!idInfrator) {
-      Infracao.listenAll(idInfrator, setInfracoes);
-    }
-  }, [idInfrator]);
+  const updateListInfracoes = () => {
+    Infracao.getInfracoesByIdInfrator(idInfrator).then(setInfracoes);
+  };
 
   const updateInfracao = (property) =>
     setInfracao({ ...infracao, ...property });
@@ -61,12 +65,13 @@ export default ({ navigation }) => {
       if (emptyEntries.length > 0) {
         Alert.alert("Atenção:", "Existem campos sem preencher");
       } else {
-        Infracao.addInfracao(idInfrator, {
-          ...infracao,
-          Data_registro: new Date().toISOString(),
-        }).then(() => {
-          setInfracao(new Infração());
-          dateState.onSelect(null);
+        const id = infracao.id;
+        delete infracao.id;
+        infracao.Data_alteracao = new Date().toISOString();
+        console.log(infracao);
+        Infracao.updateInfracao(idInfrator, id, infracao).then(() => {
+          Alert.alert("Sucesso:", "Infração atualizada!");
+          navigation.goBack();
         });
       }
     } else accessDeniedAlert();
@@ -98,7 +103,7 @@ export default ({ navigation }) => {
           />
         </TouchableOpacity>
         <Text style={[Styles.txtBoldWhite, { fontSize: 25, marginLeft: 15 }]}>
-          INFRAÇÕES
+          INFRAÇÃO
         </Text>
       </LinearGradient>
       <View
@@ -118,7 +123,7 @@ export default ({ navigation }) => {
             color: Colors.Secondary.Normal,
           }}
         >
-          Cadastrar infração:
+          Editar informações:
         </Text>
         <TextInput
           placeholder="Infração"
@@ -148,95 +153,8 @@ export default ({ navigation }) => {
           value={infracao.Observações}
           onChangeText={(Observações) => updateInfracao({ Observações })}
         />
-        <Button text="ADICIONAR" type="normal" onPress={handleSaveInfracao} />
+        <Button text="SALVAR" type="normal" onPress={handleSaveInfracao} />
       </View>
-      <FlatList
-        style={{
-          width: Dimensions.get("screen").width - 30,
-          marginHorizontal: 15,
-          marginBottom: 15,
-        }}
-        data={infracoes}
-        keyExtractor={(item) => item.value}
-        renderItem={({ item, i }) => (
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("Detalhes", {
-                idInfracao: item.id,
-                idInfrator,
-              })
-            }
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 15,
-              paddingVertical: 10,
-              marginBottom: 7,
-              backgroundColor: "#fff",
-              alignItems: "center",
-              borderRadius: 10,
-            }}
-          >
-            <Text style={[Styles.txtBold, { color: Colors.Secondary.Normal }]}>
-              {!!item.Descrição ? item.Descrição : item}
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("EditeInfracao", {
-                    infracao: item,
-                    idInfrator,
-                  });
-                }}
-              >
-                <Image
-                  source={require("../../assets/images/edit-icon.png")}
-                  style={{ width: 30, height: 30, marginRight: 20 }}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  Alert.alert(
-                    "Tem certeza?",
-                    "Os dados desta infração serão perdidos para sempre!",
-                    [
-                      {
-                        text: "Não",
-                        onPress: () => {},
-                        style: "cancel",
-                      },
-                      {
-                        text: "Sim",
-                        onPress: () => {
-                          Infracao.remInfracao(idInfrator, item.id).catch(
-                            (err) => {
-                              Alert.alert(
-                                "Falha:",
-                                "Infração não foi removida!"
-                              );
-                            }
-                          );
-                        },
-                      },
-                    ],
-                    { cancelable: false }
-                  );
-                }}
-              >
-                <Image
-                  source={require("../../assets/images/icon_lixeira_primary.png")}
-                  style={{ width: 30, height: 30 }}
-                />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        )}
-        nestedScrollEnabled={true}
-      />
     </SafeAreaView>
   );
 };

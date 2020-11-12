@@ -1,6 +1,7 @@
 import Detalhes from "./Detalhes";
 import Consulta from "./Consulta";
 import Controle from "./Controle";
+import EditeInfracao from "./EditeInfracao";
 import Infracao from "./Infracao";
 import Infrator from "./Infrator";
 import Login from "./Login";
@@ -13,6 +14,7 @@ export {
   Detalhes,
   Consulta,
   Controle,
+  EditeInfracao,
   Infracao,
   Infrator,
   Login,
