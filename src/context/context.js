@@ -27,7 +27,6 @@ export default ({ children }) => {
   } = Auth;
 
   const { getCredencial } = Credential;
-
   const [isLogged, setIsLogged] = useState();
   const [user, setUser] = useState();
   const [userData, setUserData] = useState();
@@ -86,6 +85,8 @@ export default ({ children }) => {
   );
 };
 
-export function useContext() {
+const useContext = () => {
   return useReactContext(Context);
-}
+};
+
+export { useContext };

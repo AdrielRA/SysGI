@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Text,
   View,
-  ScrollView,
   Image,
   Alert,
   Linking,
@@ -16,36 +15,37 @@ import DialogInput from "react-native-dialog-input";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import moment from "moment";
-import {
-  Anexo as AnexoController,
-  Credential,
-  Network,
-  Uploader,
-  Infracao,
-} from "../../controllers";
-import * as DocumentPicker from "expo-document-picker";
-import { SwipeListView } from "react-native-swipe-list-view";
-import { Anexo as Item } from "../../components/Itens";
-import { useContext } from "../../context";
+import { Anexo, Credential, Network, Infracao } from "../../controllers";
+//import { SwipeListView } from "react-native-swipe-list-view";
+import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { Itens } from "../../components";
+import { useContext, useUploadContext } from "../../context";
+import { NavigationEvents } from "react-navigation";
 
-function Anexo({ navigation }) {
+export default ({ navigation }) => {
   const idInfracao = navigation.getParam("idInfracao");
   const idInfrator = navigation.getParam("idInfrator");
   const [infracao, setInfracao] = useState({});
-  const [infraKey, setInfraKey] = useState(undefined);
-  const [lista, setLista] = useState([]);
   const [nomeAnexo, setNomeAnexo] = useState("");
-  const [Anexo, setAnexo] = useState(undefined);
   const [showDialogNovoNome, setShowDiagNomeAnexo] = useState(false);
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
   const { credential } = useContext();
+  const { uploads } = useUploadContext();
+  const [lista, setLista] = useState([]);
+  const [anexos, setAnexos] = useState([]);
 
   useEffect(() => {
     Infracao.listenOne(idInfrator, idInfracao, handleListener);
-
-    //Uploader.callback = callBack_;
+    Anexo.listenAnexos(idInfrator, idInfracao, setAnexos);
   }, []);
+
+  useEffect(() => {
+    setLista([
+      ...uploads.queue.filter((u) => u.idInfracao === idInfracao),
+      ...anexos,
+    ]);
+  }, [uploads.queue, anexos]);
 
   const handleListener = (infracao) => {
     if (!infracao) {
@@ -53,78 +53,28 @@ function Anexo({ navigation }) {
       navigation.goBack();
     } else setInfracao(infracao);
   };
-  useEffect(() => {
-    /*navigation.addListener("didBlur", (e) => {
-      if (!e.state) {
-        Uploader.callback = undefined;
-      }
-    });*/
-  }, [navigation]);
 
-  useEffect(() => {
-    /*let query = AnexoController.getRefInfracao(
-      infração.infratorKey,
-      infração.Data_registro
-    );
+  const handleClearListeners = () => {
+    Anexo.clearListener();
+    Infracao.clearListener();
+  };
 
-    query.once("value", (snapshot) => {
-      if (snapshot.val()) {
-        setInfraKey(Object.keys(snapshot.val())[0]);
-      }
-    });*/
-  }, [infracao]);
-
-  useEffect(() => {
-    /*if (infraKey) {
-      let anexos = AnexoController.getRefAnexo(infração.infratorKey, infraKey);
-
-      anexos.on("value", (snapshot) => {
-        AnexoController.setAnexosFromInfracao(
-          snapshot,
-          Uploader,
-          infraKey,
-          setLista
-        );
-      });
-    }*/
-  }, [infraKey]);
-
-  /*useEffect(() => {
-    if (Anexo) changeNomeAnexo(Anexo);
-  }, [Anexo]);*/
-
-  /*const callBack_ = () => {
-    let listProntos = [];
-    let listUploading = [];
-
-    try {
-      listProntos = lista.filter((i) => i.status != "" && i.status != "up");
-      listUploading = Uploader.uploadQueue.filter(
-        (i) => i.infraKey == infraKey
-      );
-    } catch {}
-
-    try {
-      setLista([...listProntos, ...listUploading]);
-    } catch {}
-  };*/
-
-  /*const getAnexo = async () => {
+  const handleAddAnexo = async () => {
     if (!connected) {
       alertOffline();
       return;
     }
     if (haveAccess(credential, "AccessToAnexar")) {
-      let file = await DocumentPicker.getDocumentAsync({
-        copyToCacheDirectory: false,
-        type: "application/pdf",
+      Anexo.openAnexo("application/pdf").then((file) => {
+        Anexo.addAnexo(
+          Anexo.formatMetadata(file),
+          idInfrator,
+          idInfracao,
+          uploads.upload
+        );
       });
-      if (file.type === "cancel") {
-        return;
-      }
-      setAnexo(file);
     } else accessDeniedAlert();
-  };*/
+  };
 
   /*const changeNomeAnexo = (anexo) => {
     let fileName = anexo.name.toString();
@@ -151,64 +101,31 @@ function Anexo({ navigation }) {
     );
   };*/
 
-  /*const addAnexo = async (fileName) => {
-    fileName = maskFileName(fileName);
-    let item = {
-      key: "",
-      fileName,
-      uri: Anexo.uri.replace("file://", ""),
-      progress: 0,
-      status: "",
-    };
-
-    Uploader.upload(item, infração.infratorKey, infraKey);
-  };*/
-
-  /*const maskFileName = (fileName) => {
-    fileName = fileName.replace(".pdf", "");
-    if (fileName.length >= 30) {
-      let str = fileName.substring(0, 25);
-      fileName =
-        str + "..." + fileName.substring(fileName.length - 3, fileName.length);
-    }
-    return fileName + ".pdf";
-  };*/
-
-  /*const removeAnexo = (item) => {
+  const handleRemoveAnexo = (key) => {
     if (!connected) {
       alertOffline();
       return;
     }
 
-    const index = lista.indexOf(item);
-
-    if (index > -1) {
-      AnexoController.deleteAnexo(infração.infratorKey, infraKey, item.key)
-        .then(() => {
-          AnexoController.removeAnexoBD(
-            infração.infratorKey,
-            infraKey,
-            item.key
-          ).catch((err) => {
-            alert("Ocorreu um erro!");
-          });
-        })
-        .catch((err) => {
-          alert("Ocorreu um erro!");
-        });
-    }
+    Anexo.remAnexo(idInfrator, idInfracao, key);
   };
 
   const openAnexo = (url) => {
     try {
       Linking.openURL(url);
     } catch {
-      Alert.alert("Falha no anexo:", "Não foi possivel abri-lo no momento!");
+      Alert.alert("Falha no anexo:", "Não foi possível abri-lo no momento!");
     }
-  };*/
+  };
+
+  const handleRename = (key) => {};
 
   return (
     <SafeAreaView style={Styles.page}>
+      <NavigationEvents
+        onDidBlur={(payload) => !payload.lastState && handleClearListeners()}
+      />
+
       <DialogInput
         isDialogVisible={showDialogNovoNome}
         title={"Alterar Nome do Anexo"}
@@ -373,37 +290,56 @@ function Anexo({ navigation }) {
             <TouchableHighlight
               style={[Styles.btnPrimary, { flex: 1 }]}
               underlayColor={Colors.Primary.White}
-              /*onPress={getAnexo}*/
+              onPress={handleAddAnexo}
             >
               <Text style={[Styles.btnTextPrimary, { fontSize: 16 }]}>
                 ADICIONAR
               </Text>
             </TouchableHighlight>
           </View>
-          <ScrollView style={Styles.scrollAnexos}>
-            <SwipeListView
+          {!!lista && lista.length > 0 ? (
+            <FlatList
               data={lista}
-              renderItem={({ item }) => (
-                <Item.idle
-                  data={{
-                    fileName: item.fileName,
-                    progress: `${item.progress}%`,
-                  }}
-                  onLongPress={() => {
-                    /* openAnexo(item.status);*/
-                  }}
+              keyExtractor={(item) => item.value}
+              renderItem={({ item, i }) => (
+                <Itens.Anexo
+                  key={i}
+                  anexo={item}
+                  onRename={handleRename}
+                  onDelete={handleRemoveAnexo}
+                  onLongPress={openAnexo}
                 />
               )}
-              renderHiddenItem={({ item, index }) => (
-                <Item.swipe /*onDelete={() => removeAnexo(item)}*/ />
-              )}
-              leftOpenValue={40}
-              disableLeftSwipe={true}
+              nestedScrollEnabled={true}
             />
-          </ScrollView>
+          ) : (
+            <View
+              style={{
+                justifyContent: "center",
+                flex: 1,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={[
+                  Styles.txtBold,
+                  {
+                    color: Colors.Secondary.Normal,
+                    fontSize: 15,
+                    textAlign: "center",
+                  },
+                ]}
+              >
+                Nenhum anexo encontrado...
+              </Text>
+              <Image
+                source={require("../../assets/images/no-data.png")}
+                style={{ width: 100, height: 98, marginTop: 15 }}
+              />
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
   );
-}
-export default Anexo;
+};

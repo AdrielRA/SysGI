@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,19 +6,19 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  Alert,
   TextInput as Input,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import { Credential, Network, Search } from "../../controllers";
-import { Button, Itens, Picker, TextInput } from "../../components";
+import { Itens } from "../../components";
 import { Icon } from "@ui-kitten/components";
 import { useContext } from "../../context";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 import moment from "moment";
 import { mask } from "../../utils";
+import { NavigationEvents } from "react-navigation";
 
 export default ({ navigation }) => {
   const { accessDeniedAlert, haveAccess } = Credential;
@@ -298,24 +298,33 @@ export default ({ navigation }) => {
       }}
     >
       {!!search && (
-        <Text
-          style={[
-            Styles.txtBold,
-            {
-              color: Colors.Secondary.Normal,
-              fontSize: 28,
-              textAlign: "center",
-            },
-          ]}
-        >
-          Nenhum infrator encontrado!
-        </Text>
+        <>
+          <Text
+            style={[
+              Styles.txtBold,
+              {
+                color: Colors.Secondary.Normal,
+                fontSize: 28,
+                textAlign: "center",
+              },
+            ]}
+          >
+            Nenhum infrator encontrado!
+          </Text>
+          <Image
+            source={require("../../assets/images/searching.png")}
+            style={{ width: 250, height: 232 }}
+          />
+        </>
       )}
     </View>
   );
 
   return (
     <SafeAreaView style={Styles.page}>
+      <NavigationEvents
+        onDidBlur={(payload) => !payload.lastState && clearListener()}
+      />
       <LinearGradient
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}

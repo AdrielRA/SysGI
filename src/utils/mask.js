@@ -20,4 +20,12 @@ const Numeric = (text) => {
   return text.replace(/\D/g, "");
 };
 
-export { CPF, RG, Numeric };
+const FileName = (fileName, ext, maxSize) => {
+  if (fileName.length >= maxSize) {
+    let str = fileName.substring(0, maxSize - 3);
+    fileName = str + "...";
+  }
+  return fileName + ext;
+};
+
+export { CPF, RG, Numeric, FileName };

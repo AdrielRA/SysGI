@@ -7,7 +7,6 @@ import * as Network from "./Network";
 import * as Notifications from "./Notifications";
 import * as Relatory from "./Relatory";
 import * as Search from "./Search";
-import Uploader from "./Uploader";
 
 export {
   Anexo,
@@ -19,5 +18,4 @@ export {
   Notifications,
   Relatory,
   Search,
-  Uploader,
 };

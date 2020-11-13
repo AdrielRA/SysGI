@@ -68,7 +68,6 @@ export default ({ navigation }) => {
         const id = infracao.id;
         delete infracao.id;
         infracao.Data_alteracao = new Date().toISOString();
-        console.log(infracao);
         Infracao.updateInfracao(idInfrator, id, infracao).then(() => {
           Alert.alert("Sucesso:", "Infração atualizada!");
           navigation.goBack();

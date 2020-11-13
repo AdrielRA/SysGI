@@ -1,4 +1,5 @@
 import { db } from "../../services/firebase";
+import { removeAllAnexosFromInfracao } from "../Anexo";
 
 const refInfratores = db().ref("infratores");
 
@@ -16,8 +17,19 @@ const updateInfracao = (idInfrator, idInfracao, updatedData) =>
     .child(idInfracao)
     .update(JSON.parse(JSON.stringify(updatedData)));
 
-const remInfracao = (idInfrator, idInfracao) =>
-  refInfracoesByInfratorId(idInfrator).child(idInfracao).remove();
+const remInfracao = (idInfrator, idInfracao) => {
+  return new Promise((resolve, reject) => {
+    refInfracoesByInfratorId(idInfrator)
+      .child(idInfracao)
+      .remove()
+      .then(() => {
+        removeAllAnexosFromInfracao(idInfrator, idInfracao)
+          .then(resolve)
+          .catch(resolve);
+      })
+      .catch(reject);
+  });
+};
 
 const getInfracoesByRegDate = (idInfrator, date) =>
   refInfracoesByInfratorId(idInfrator)
@@ -84,9 +96,11 @@ let listenerOne;
 
 const clearListener = (listener) => {
   if (!!listener) listener.off("value");
+  else if (listenerOne) listenerOne.off("value");
 };
 
 export {
+  clearListener,
   addInfracao,
   remInfracao,
   listenAll,

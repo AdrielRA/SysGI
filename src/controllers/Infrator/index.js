@@ -1,4 +1,5 @@
 import { db } from "../../services/firebase";
+import { removeAllAnexosFromInfrator } from "../Anexo";
 
 const refInfratores = db().ref("infratores");
 const refUsers = db().ref("users");
@@ -91,7 +92,17 @@ const addInfrator = (infrator) => {
 const updateInfrator = (id, updatedData) =>
   refInfratores.child(id).update(JSON.parse(JSON.stringify(updatedData)));
 
-const remInfrator = (id) => refInfratores.child(id).remove();
+const remInfrator = (id) => {
+  return new Promise((resolve, reject) => {
+    refInfratores
+      .child(id)
+      .remove()
+      .then(() => {
+        removeAllAnexosFromInfrator(id).then(resolve).catch(resolve);
+      })
+      .catch(reject);
+  });
+};
 
 const getFavorites = (uid) => {
   return new Promise((resolve, reject) => {

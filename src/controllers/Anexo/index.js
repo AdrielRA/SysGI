@@ -1,62 +1,147 @@
+import * as DocumentPicker from "expo-document-picker";
 import { db, storage } from "../../services/firebase";
 
 const refDbAnexos = db().ref().child("anexos");
 const refStAnexos = storage().ref().child("anexos");
 
+const openAnexo = (type) => {
+  return new Promise((resolve) => {
+    DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: false,
+      type,
+    })
+      .then((file) => {
+        if (file.type === "cancel") {
+          resolve();
+        } else resolve(file);
+      })
+      .catch(resolve);
+  });
+};
+
+const formatMetadata = (file) => {
+  let metadata = {};
+
+  metadata.ext = file.name.match(/\.[0-9a-z]+$/i)[0];
+  metadata.name = file.name.replace(/\.[^/.]+$/, "");
+  metadata.size = file.size;
+  metadata.uri = file.uri;
+
+  return metadata;
+};
+
 const getRefAnexo = (idInfrator, idInfracao) =>
   refDbAnexos.child(idInfrator).child(idInfracao);
 
-const addAnexo = (data) => {};
+const addAnexo = (metaData, idInfrator, idInfracao, upload) => {
+  const refDb = getRefAnexo(idInfrator, idInfracao);
+  const key = refDb.push().key;
 
-const remAnexo = (id) => {};
+  upload({ ...metaData, idInfracao, key }, idInfrator).then((snap) =>
+    refDb.child(key).set(snap)
+  );
+};
 
-const getAnexos = (idInfracao) => {};
+let listener;
+const listenAnexos = (idInfrator, idInfracao, callback) => {
+  clearListener();
+  return new Promise((resolve, reject) => {
+    listener = getRefAnexo(idInfrator, idInfracao);
+    listener.on(
+      "value",
+      (snap) => {
+        if (snap.exists()) {
+          callback(
+            Object.entries(snap.val()).map(([key, obj]) => {
+              return { key, ...obj };
+            })
+          );
+        } else callback([]);
+      },
+      reject
+    );
+  });
+};
 
-const setAnexosFromInfracao = (snapshot, Uploader, infraKey, setLista) => {
-  let results = [];
-  if (snapshot.val()) {
-    snapshot.forEach(function (child) {
-      if (child.val()) {
-        results.push({
-          ...child.val(),
-          key: child.key,
-          uri: "",
-          progress: 100,
-        });
-      }
+const clearListener = () => {
+  if (!!listener) listener.off("value");
+};
+
+const remAnexo = (idInfrator, idInfracao, key) => {
+  return new Promise((resolve, reject) => {
+    getRefAnexo(idInfrator, idInfracao)
+      .child(key)
+      .remove()
+      .then(() => {
+        deleteFromStorage(idInfrator, idInfracao, key)
+          .then(resolve)
+          .catch(reject);
+      })
+      .catch(reject);
+  });
+};
+
+const deleteFromStorage = (idInfrator, idInfracao, key) => {
+  return new Promise((resolve, reject) => {
+    refStAnexos
+      .child(idInfrator)
+      .child(idInfracao)
+      .child(key)
+      .delete()
+      .then(resolve)
+      .catch(reject);
+  });
+};
+
+const removeAllAnexosFromInfrator = (idInfrator) => {
+  return new Promise((resolve, reject) => {
+    refDbAnexos
+      .child(idInfrator)
+      .remove()
+      .then(() =>
+        deleteRecursiveFiles(`anexos/${idInfrator}`).then(resolve).catch(reject)
+      )
+      .catch(reject);
+  });
+};
+
+const removeAllAnexosFromInfracao = async (idInfrator, idInfracao) => {
+  return new Promise((resolve, reject) => {
+    refDbAnexos
+      .child(idInfrator)
+      .child(idInfracao)
+      .remove()
+      .then(() =>
+        deleteRecursiveFiles(`anexos/${idInfrator}/${idInfracao}`)
+          .then(resolve)
+          .catch(resolve)
+      )
+      .catch(reject);
+  });
+};
+
+const getListFiles = (path) => storage().ref().child(path).listAll();
+
+const deleteOneStorageFile = (pathToFile) => storage().ref(pathToFile).delete();
+
+const deleteRecursiveFiles = (path) => {
+  getListFiles(path).then((dir) => {
+    dir.items.forEach(async (dirRef) => {
+      await deleteOneStorageFile(dirRef.fullPath);
     });
-  }
-
-  let listUploading = [];
-
-  if (Uploader.uploadQueue.length > 0) {
-    listUploading = Uploader.uploadQueue.filter((i) => i.infraKey == infraKey);
-
-    results.map((r) => {
-      listUploading = listUploading.filter((i) => i.key != r.key);
+    dir.prefixes.forEach(async (subDir) => {
+      await deleteRecursiveFiles(subDir.fullPath);
     });
-  }
-
-  setLista([...results, ...listUploading]);
-};
-const deleteAnexo = async (infratorKey, infraKey, key) => {
-  await refStAnexos.child(infratorKey).child(infraKey).child(key).delete();
-};
-const removeAnexoBD = async (infratorKey, infraKey, key) => {
-  await refDbAnexos.child(infratorKey).child(infraKey).child(key).remove();
+  });
 };
 
-const removeAllAnexosToInfrator = async (infratorKey) => {
-  await db().ref().child("anexos").child(infratorKey).remove();
+export {
+  addAnexo,
+  openAnexo,
+  formatMetadata,
+  listenAnexos,
+  clearListener,
+  remAnexo,
+  removeAllAnexosFromInfrator,
+  removeAllAnexosFromInfracao,
 };
-const removeOneAnexoToInfrator = async (infratorKey, infra_key) => {
-  await db().ref().child("anexos").child(infratorKey).child(infra_key).remove();
-};
-const createRefFiles = async (path) => {
-  await storage().ref().child("anexos").child(path).listAll();
-};
-const deleteOneFile = async (pathToFile, fileName) => {
-  await storage().ref(pathToFile).child(fileName).delete();
-};
-
-export { setAnexosFromInfracao, deleteAnexo, removeAnexoBD };
