@@ -11,12 +11,10 @@ import {
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import DialogInput from "react-native-dialog-input";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
 import moment from "moment";
 import { Anexo, Credential, Network, Infracao } from "../../controllers";
-//import { SwipeListView } from "react-native-swipe-list-view";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Itens } from "../../components";
 import { useContext, useUploadContext } from "../../context";
@@ -118,31 +116,15 @@ export default ({ navigation }) => {
     }
   };
 
-  const handleRename = (key) => {};
+  const handleRename = (key, name) => {
+    Anexo.renameAnexo(name, idInfrator, idInfracao, key);
+  };
 
   return (
     <SafeAreaView style={Styles.page}>
       <NavigationEvents
         onDidBlur={(payload) => !payload.lastState && handleClearListeners()}
       />
-
-      <DialogInput
-        isDialogVisible={showDialogNovoNome}
-        title={"Alterar Nome do Anexo"}
-        message={"Digite o novo nome:"}
-        hintInput={"Novo nome aqui"}
-        submitInput={(nome) => {
-          /*setShowDiagNomeAnexo(false);
-          setNomeAnexo(nome);
-          addAnexo(nome);*/
-        }}
-        submitText={"Concluir"}
-        cancelText={"Cancelar"}
-        closeDialog={() => {
-          /*setShowDiagNomeAnexo(false);
-          addAnexo(nomeAnexo);*/
-        }}
-      ></DialogInput>
       <LinearGradient
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}
@@ -228,118 +210,120 @@ export default ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </LinearGradient>
-      <View
-        style={{
-          flex: 5,
-          alignSelf: "stretch",
-          backgroundColor: "#fff",
-          margin: 10,
-          marginHorizontal: 15,
-          borderRadius: 10,
-        }}
-      >
-        <View style={{ flexDirection: "row" }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "CenturyGothicBold",
-              marginStart: 11,
-              marginTop: 10,
-              color: Colors.Secondary.Normal,
-              flex: 1,
-            }}
-          >
-            Registrado:
-          </Text>
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "CenturyGothicBold",
-              marginStart: 15,
-              marginTop: 10,
-              color: Colors.Secondary.Normal,
-              flex: 1,
-            }}
-          >
-            Ocorrido:
-          </Text>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={Styles.TextAnexo}>
-            {moment(new Date(infracao.Data_registro)).format("DD/MM/YYYY")}
-          </Text>
-          <Text style={Styles.TextAnexo}>
-            {moment(new Date(infracao.Data_ocorrência)).format("DD/MM/YYYY")}
-          </Text>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={Styles.DescAnexo}>{infracao.Descrição}</Text>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={Styles.DescAnexo}>{infracao.Reds}</Text>
-        </View>
-        {infracao.Observações && (
+      <ScrollView>
+        <View
+          style={{
+            width: Dimensions.get("screen").width - 30,
+            height: Dimensions.get("screen").height - 165,
+            backgroundColor: "#fff",
+            margin: 10,
+            marginHorizontal: 15,
+            borderRadius: 10,
+          }}
+        >
           <View style={{ flexDirection: "row" }}>
-            <Text style={Styles.DescAnexo}>{infracao.Observações}</Text>
-          </View>
-        )}
-
-        <View style={Styles.lbAnexos}>
-          <View style={Styles.btngroupAnexo}>
-            <Text style={Styles.lblAnexo}>ANEXOS</Text>
-            <TouchableHighlight
-              style={[Styles.btnPrimary, { flex: 1 }]}
-              underlayColor={Colors.Primary.White}
-              onPress={handleAddAnexo}
-            >
-              <Text style={[Styles.btnTextPrimary, { fontSize: 16 }]}>
-                ADICIONAR
-              </Text>
-            </TouchableHighlight>
-          </View>
-          {!!lista && lista.length > 0 ? (
-            <FlatList
-              data={lista}
-              keyExtractor={(item) => item.value}
-              renderItem={({ item, i }) => (
-                <Itens.Anexo
-                  key={i}
-                  anexo={item}
-                  onRename={handleRename}
-                  onDelete={handleRemoveAnexo}
-                  onLongPress={openAnexo}
-                />
-              )}
-              nestedScrollEnabled={true}
-            />
-          ) : (
-            <View
+            <Text
               style={{
-                justifyContent: "center",
+                fontSize: 18,
+                fontFamily: "CenturyGothicBold",
+                marginStart: 11,
+                marginTop: 10,
+                color: Colors.Secondary.Normal,
                 flex: 1,
-                alignItems: "center",
               }}
             >
-              <Text
-                style={[
-                  Styles.txtBold,
-                  {
-                    color: Colors.Secondary.Normal,
-                    fontSize: 15,
-                    textAlign: "center",
-                  },
-                ]}
-              >
-                Nenhum anexo encontrado...
-              </Text>
-              <Image
-                source={require("../../assets/images/no-data.png")}
-                style={{ width: 100, height: 98, marginTop: 15 }}
-              />
+              Registrado:
+            </Text>
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "CenturyGothicBold",
+                marginStart: 15,
+                marginTop: 10,
+                color: Colors.Secondary.Normal,
+                flex: 1,
+              }}
+            >
+              Ocorrido:
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={Styles.TextAnexo}>
+              {moment(new Date(infracao.Data_registro)).format("DD/MM/YYYY")}
+            </Text>
+            <Text style={Styles.TextAnexo}>
+              {moment(new Date(infracao.Data_ocorrência)).format("DD/MM/YYYY")}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={Styles.DescAnexo}>{infracao.Descrição}</Text>
+          </View>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={Styles.DescAnexo}>{infracao.Reds}</Text>
+          </View>
+          {infracao.Observações && (
+            <View style={{ flexDirection: "row" }}>
+              <Text style={Styles.DescAnexo}>{infracao.Observações}</Text>
             </View>
           )}
+
+          <View style={Styles.lbAnexos}>
+            <View style={Styles.btngroupAnexo}>
+              <Text style={Styles.lblAnexo}>ANEXOS</Text>
+              <TouchableHighlight
+                style={[Styles.btnPrimary, { flex: 1 }]}
+                underlayColor={Colors.Primary.White}
+                onPress={handleAddAnexo}
+              >
+                <Text style={[Styles.btnTextPrimary, { fontSize: 16 }]}>
+                  ADICIONAR
+                </Text>
+              </TouchableHighlight>
+            </View>
+            {!!lista && lista.length > 0 ? (
+              <FlatList
+                data={lista}
+                keyExtractor={(item) => item.value}
+                renderItem={({ item, i }) => (
+                  <Itens.Anexo
+                    key={i}
+                    anexo={item}
+                    onRename={handleRename}
+                    onDelete={handleRemoveAnexo}
+                    onLongPress={openAnexo}
+                  />
+                )}
+                nestedScrollEnabled={true}
+              />
+            ) : (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={[
+                    Styles.txtBold,
+                    {
+                      color: Colors.Secondary.Normal,
+                      fontSize: 15,
+                      textAlign: "center",
+                    },
+                  ]}
+                >
+                  Nenhum anexo encontrado...
+                </Text>
+                <Image
+                  source={require("../../assets/images/no-data.png")}
+                  style={{ width: 100, height: 98, marginTop: 15 }}
+                />
+              </View>
+            )}
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

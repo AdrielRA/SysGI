@@ -42,6 +42,9 @@ const addAnexo = (metaData, idInfrator, idInfracao, upload) => {
   );
 };
 
+const renameAnexo = (name, idInfrator, idInfracao, idAnexo) =>
+  getRefAnexo(idInfrator, idInfracao).child(idAnexo).update({ name });
+
 let listener;
 const listenAnexos = (idInfrator, idInfracao, callback) => {
   clearListener();
@@ -137,6 +140,7 @@ const deleteRecursiveFiles = (path) => {
 
 export {
   addAnexo,
+  renameAnexo,
   openAnexo,
   formatMetadata,
   listenAnexos,

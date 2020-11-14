@@ -1,17 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Image,
   Text,
+  TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Dimensions,
+  Alert,
 } from "react-native";
 import Styles from "../../../styles";
 import Colors from "../../../styles/colors";
-import { mask } from "../../../utils";
 
 export default ({ key, anexo, onRename, onDelete, onLongPress }) => {
+  const [editMode, setEditMode] = useState(false);
+  const [newName, setNewName] = useState(anexo.name);
+
+  useEffect(() => {
+    if (!editMode && newName !== anexo.name) handleEdit();
+  }, [editMode]);
+
+  const handleEdit = () => {
+    if (!!newName) {
+      Alert.alert(
+        "Atenção:",
+        "Confirma alteração do nome do anexo?",
+        [
+          {
+            text: "Não",
+            onPress: () => {
+              setNewName(anexo.name);
+            },
+            style: "cancel",
+          },
+          {
+            text: "Sim",
+            onPress: () => {
+              onRename(anexo.key, newName);
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    } else Alert.alert("Falha:", "Nome informado é inválido!");
+  };
+
   return (
     <View key={key} style={{ padding: 5 }}>
       <TouchableOpacity onLongPress={() => onLongPress(anexo.uri)}>
@@ -22,36 +54,63 @@ export default ({ key, anexo, onRename, onDelete, onLongPress }) => {
             alignItems: "center",
           }}
         >
-          <Text
-            style={[
-              Styles.txtBold,
-              { color: Colors.Secondary.Normal, fontSize: 14 },
-            ]}
-          >
-            {anexo.name
-              ? mask.FileName(anexo.name, anexo.ext ? anexo.ext : "", 30)
-              : "Anexo Sem Nome"}
-          </Text>
-          <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity
-              style={{ padding: 10, paddingRight: 0 }}
-              onPress={() => onRename(anexo.key)}
+          {editMode ? (
+            <TextInput
+              style={[
+                Styles.txtBold,
+                {
+                  color: Colors.Secondary.Normal,
+                  fontSize: 14,
+                  maxWidth: "74%",
+                  minWidth: "74%",
+                },
+              ]}
+              value={newName}
+              onChangeText={setNewName}
+            />
+          ) : (
+            <Text
+              style={[
+                Styles.txtBold,
+                {
+                  color: Colors.Secondary.Normal,
+                  fontSize: 14,
+                  maxWidth: "74%",
+                },
+              ]}
+              numberOfLines={1}
             >
-              <Image
-                source={require("../../../assets/images/edit-icon.png")}
-                style={{ width: 20, height: 20 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ padding: 10 }}
-              onPress={() => onDelete(anexo.key)}
-            >
-              <Image
-                source={require("../../../assets/images/icon_lixeira_primary.png")}
-                style={{ width: 20, height: 20 }}
-              />
-            </TouchableOpacity>
-          </View>
+              {anexo.name
+                ? /*mask.FileName(anexo.name, anexo.ext ? anexo.ext : "", 30)*/ anexo.name
+                : "Anexo Sem Nome"}
+            </Text>
+          )}
+          {!anexo.progress && (
+            <View style={{ flexDirection: "row" }}>
+              <TouchableOpacity
+                style={{ padding: 10, paddingRight: 0 }}
+                onPress={() => setEditMode(!editMode)}
+              >
+                <Image
+                  source={
+                    editMode
+                      ? require("../../../assets/images/confirm.png")
+                      : require("../../../assets/images/edit-icon.png")
+                  }
+                  style={{ width: 20, height: 20 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ padding: 10 }}
+                onPress={() => onDelete(anexo.key)}
+              >
+                <Image
+                  source={require("../../../assets/images/icon_lixeira_primary.png")}
+                  style={{ width: 20, height: 20 }}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
       {anexo.progress !== undefined && (
