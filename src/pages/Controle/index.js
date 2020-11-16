@@ -4,7 +4,9 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
+  Image,
+  Dimensions,
   Alert,
 } from "react-native";
 import Styles from "../../styles";
@@ -75,20 +77,36 @@ function Controle({ navigation }) {
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
-        colors={[Colors.Primary.Normal, Colors.Secondary.Normal]}
+        colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
         style={{
-          flex: 1,
-          alignSelf: "stretch",
+          width: "100%",
+          height: 60,
+          paddingHorizontal: 15,
+          flexDirection: "row",
           alignItems: "center",
         }}
       >
+        <TouchableOpacity
+          onPress={() => {
+            navigation.goBack();
+          }}
+        >
+          <Image
+            source={require("../../assets/images/back.png")}
+            style={{ width: 30, height: 30 }}
+          />
+        </TouchableOpacity>
         <Text
           style={[
-            Styles.lblSubtitle,
-            { fontSize: 24, textAlignVertical: "center" },
+            Styles.txtBoldWhite,
+            {
+              fontSize: 25,
+              marginLeft: 15,
+              width: Dimensions.get("screen").width - 156,
+            },
           ]}
         >
-          CONTROLE DE ACESSO
+          CONTROLE
         </Text>
       </LinearGradient>
       <View style={{ flex: 6, alignSelf: "stretch", paddingHorizontal: 15 }}>
