@@ -6,4 +6,17 @@ const getEmptyEntries = (obj, ignoredFields) => {
   return fields;
 };
 
-export { getEmptyEntries };
+const haveChanges = (changed, original, ignore) => {
+  if (!ignore) ignore = [];
+  let diff = Object.keys(original).reduce((diff, key) => {
+    if (changed[key] === original[key]) return diff;
+    return {
+      ...diff,
+      [key]: original[key],
+    };
+  }, {});
+
+  return Object.keys(diff).filter((key) => !ignore.includes(key));
+};
+
+export { getEmptyEntries, haveChanges };

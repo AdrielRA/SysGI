@@ -27,11 +27,13 @@ import { ScrollView } from "react-native-gesture-handler";
 import { getCidades, getEstados } from "../../services/ibge";
 import { validator } from "../../utils";
 import { Infrator as Model } from "../../models";
+import { NavigationEvents } from "react-navigation";
 
 LogBox.ignoreLogs(["YellowBox"]);
 
 export default ({ navigation }) => {
   const [infrator, setInfrator] = useState(new Model());
+  const [infratorFromFirebase, setInfratorFromFirebase] = useState({});
   const [infratorFromRoute, setinfratorFromRoute] = useState(
     navigation.getParam("Infrator")
   );
@@ -55,8 +57,6 @@ export default ({ navigation }) => {
     Bairro: useRef(),
   });
 
-  //setFavorito(favs.includes(infratorKey.toString()));
-
   useEffect(() => {
     getEstados().then(setUfs);
   }, []);
@@ -76,6 +76,80 @@ export default ({ navigation }) => {
       setStatus("saved");
     }
   }, [infratorFromRoute]);
+
+  useEffect(() => {
+    if (!!infrator.id) Infrator.listenInfrator(infrator.id, handleListener);
+    else Infrator.clearListener();
+  }, [infrator.id]);
+
+  useEffect(() => {
+    if (!!infratorFromFirebase) {
+      if (!!infratorFromFirebase.id) {
+        let changedDate = dateIsChanged(
+          infratorFromFirebase.Data_nascimento,
+          infrator.Data_nascimento
+        );
+
+        const changes = validator.haveChanges(infratorFromFirebase, infrator, [
+          "Infrações",
+          "Data_nascimento",
+        ]);
+
+        if (changedDate || changes.length > 0) {
+          Alert.alert(
+            "Atenção:",
+            "Os dados foram atualizados!\nDeseja recarregar?",
+            [
+              {
+                text: "Não",
+                onPress: () => {
+                  navigation.goBack();
+                },
+                style: "cancel",
+              },
+              {
+                text: "Sim",
+                onPress: () => {
+                  setInfrator(infratorFromFirebase);
+                  if (!!infratorFromFirebase.Data_nascimento)
+                    dateState.onSelect(
+                      new Date(infratorFromFirebase.Data_nascimento)
+                    );
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+        }
+      }
+    } else {
+      Alert.alert(
+        "Atenção:",
+        "Os dados deste infrator foram removidos!",
+        [
+          {
+            text: "Ok",
+            onPress: () => navigation.goBack(),
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  }, [infratorFromFirebase]);
+
+  const dateIsChanged = (date1, date2) => {
+    const dt1 = new Date(date1);
+    const dt2 = new Date(date2);
+    return (
+      dt1.getFullYear() !== dt2.getFullYear() ||
+      dt1.getMonth() !== dt2.getMonth() ||
+      dt1.getDay() !== dt2.getDay()
+    );
+  };
+
+  const handleListener = (snap) => {
+    setInfratorFromFirebase(snap);
+  };
 
   const updateInfrator = (property) =>
     setInfrator({ ...infrator, ...property });
@@ -132,23 +206,46 @@ export default ({ navigation }) => {
       });
   };
 
-  const saveChanges = (infrator) => {
-    let Data_alteracao = new Date().toISOString();
-    updateInfrator({ Data_alteracao });
-    let id = infrator.id;
-    delete infrator.id;
-    delete infrator.Infrações;
-    Infrator.updateInfrator(id, {
-      ...infrator,
-      Data_alteracao,
-    })
-      .then(() => {
-        Alert.alert("Sucesso:", "Infrator atualizado!");
-        setStatus("saved");
+  const saveChanges = (changes) => {
+    let changedDate = dateIsChanged(
+      infratorFromFirebase.Data_nascimento,
+      changes.Data_nascimento
+    );
+
+    const changed = validator.haveChanges(infratorFromFirebase, changes, [
+      "Infrações",
+      "Data_nascimento",
+    ]);
+    if (!changedDate && changed.length === 0) {
+      Alert.alert(
+        "Atenção:",
+        "Infrator já esta atualizado!",
+        [
+          {
+            text: "Ok",
+            onPress: () => setStatus("saved"),
+          },
+        ],
+        { cancelable: false }
+      );
+    } else {
+      let Data_alteracao = new Date().toISOString();
+      updateInfrator({ Data_alteracao });
+      let id = changes.id;
+      delete changes.id;
+      delete changes.Infrações;
+      Infrator.updateInfrator(id, {
+        ...changes,
+        Data_alteracao,
       })
-      .catch(() => {
-        Alert.alert("Falha:", "Não foi possível atualizar o infrator!");
-      });
+        .then(() => {
+          Alert.alert("Sucesso:", "Infrator atualizado!");
+          setStatus("saved");
+        })
+        .catch(() => {
+          Alert.alert("Falha:", "Não foi possível atualizar o infrator!");
+        });
+    }
   };
 
   const handleFavorite = () => {
@@ -189,7 +286,7 @@ export default ({ navigation }) => {
           {
             text: "Sim",
             onPress: () => {
-              Infrator.remInfrator(infrator.id)
+              Infrator.remInfrator(infrator.id, user.uid)
                 .then(() => {
                   setInfrator(new Model());
                   dateState.onSelect(null);
@@ -228,6 +325,9 @@ export default ({ navigation }) => {
 
   return (
     <SafeAreaView style={Styles.page}>
+      <NavigationEvents
+        onDidBlur={(payload) => !payload.lastState && Infrator.clearListener()}
+      />
       <LinearGradient
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}

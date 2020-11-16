@@ -92,13 +92,14 @@ const addInfrator = (infrator) => {
 const updateInfrator = (id, updatedData) =>
   refInfratores.child(id).update(JSON.parse(JSON.stringify(updatedData)));
 
-const remInfrator = (id) => {
+const remInfrator = (idInfrator, uid) => {
   return new Promise((resolve, reject) => {
     refInfratores
-      .child(id)
+      .child(idInfrator)
       .remove()
       .then(() => {
-        removeAllAnexosFromInfrator(id).then(resolve).catch(resolve);
+        remFavorite(uid, idInfrator);
+        removeAllAnexosFromInfrator(idInfrator).then(resolve).catch(resolve);
       })
       .catch(reject);
   });
@@ -182,6 +183,27 @@ const clearFavorites = (idInfracao) => {
     });
 };
 
+let listener;
+const listenInfrator = (idInfrator, callback) => {
+  clearListener();
+  return new Promise((resolve, reject) => {
+    listener = refInfratores.child(idInfrator);
+    listener.on(
+      "value",
+      (snap) => {
+        if (snap.exists()) {
+          callback({ ...snap.val(), id: snap.key });
+        } else callback(null);
+      },
+      reject
+    );
+  });
+};
+
+const clearListener = () => {
+  if (listener) listener.off("value");
+};
+
 export {
   addInfrator,
   remInfrator,
@@ -196,4 +218,6 @@ export {
   remFavorite,
   validate,
   isFavorite,
+  listenInfrator,
+  clearListener,
 };
