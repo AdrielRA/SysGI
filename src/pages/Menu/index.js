@@ -7,6 +7,7 @@ import {
   Switch,
   Alert,
   SafeAreaView,
+  AppState,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
@@ -15,6 +16,7 @@ import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import { useContext } from "../../context";
+import * as LocalAuthentication from "expo-local-authentication";
 
 function MENU({ navigation }) {
   const userData = navigation.getParam("userData");
@@ -27,15 +29,55 @@ function MENU({ navigation }) {
   } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
   const { enabled, handleNotification } = Notifications.useNotifications();
-  const { credential, session, user } = useContext();
+  const { credential, session, user, isLogged } = useContext();
+  const [appState, setAppState] = useState();
 
   useEffect(() => {
     if (session !== null && !validateSession(session)) {
       Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
       Auth.signOut();
-      goOut();
     }
   }, [session]);
+
+  useEffect(() => {
+    if (!isLogged) goOut();
+  }, [isLogged]);
+
+  useEffect(() => {
+    AppState.addEventListener("change", setAppState);
+    return () => AppState.removeEventListener("change", setAppState);
+  }, []);
+
+  useEffect(() => {
+    if (appState === "active")
+      handleLocalAuth().then((success) => {
+        if (!success) {
+          AppState.removeEventListener("change", setAppState);
+          handleSignOut();
+        }
+      });
+  }, [appState]);
+
+  handleLocalAuth = () => {
+    return new Promise((resolve) => {
+      LocalAuthentication.hasHardwareAsync().then((hasHardware) => {
+        if (hasHardware) {
+          LocalAuthentication.isEnrolledAsync().then((isEnrolled) => {
+            if (isEnrolled) {
+              LocalAuthentication.authenticateAsync({
+                promptMessage: "Confirme sua identidade",
+                cancelLabel: "Sair",
+                fallbackLabel: "",
+                disableDeviceFallback: true,
+              })
+                .then((result) => resolve(result.success))
+                .catch(() => resolve("error"));
+            }
+          });
+        }
+      });
+    });
+  };
 
   const handleSignOut = () => {
     if (!user) goOut();
