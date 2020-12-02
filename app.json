@@ -4,11 +4,7 @@
     "slug": "sysgi",
     "description": "Sistema de Gerenciamento de Infratores",
     "privacy": "public",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
     "primaryColor": "#DC143C",
@@ -17,6 +13,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "icon": "./src/assets/icon.png",
     "notification": {
       "icon": "./src/assets/icon-notify.png",
       "color": "#DC143C",
@@ -26,9 +23,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.UNIFENAS.SysGI",
       "icon": "./src/assets/icon-ios.png",
@@ -39,7 +34,8 @@
       "googleServicesFile": "./google-services.json",
       "package": "com.UNIFENAS.SysGI",
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/icon-adaptive.png"
+        "foregroundImage": "./src/assets/icon-adaptive.png",
+        "backgroundColor": "#ffffff"
       },
       "icon": "./src/assets/icon.png",
       "versionCode": 1
