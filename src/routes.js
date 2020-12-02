@@ -13,6 +13,7 @@ import {
   Recovery,
   Signup,
   Sobre,
+  Teste
 } from "./pages";
 
 const Routes = createAppContainer(
@@ -29,6 +30,7 @@ const Routes = createAppContainer(
       Controle,
       Detalhes,
       EditeInfracao,
+      Teste
     },
     {
       defaultNavigationOptions: {

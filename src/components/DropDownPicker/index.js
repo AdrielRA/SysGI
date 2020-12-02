@@ -12,6 +12,7 @@ import {
     YellowBox
 } from 'react-native';
 
+import Constants from 'expo-constants';
 // Icon
 import { Feather } from '@expo/vector-icons';
 Feather.loadFont();
@@ -442,7 +443,7 @@ class DropDownPicker extends React.Component {
         return (
             <View style={[this.props.containerStyle, {
 
-                ...(Platform.OS !== 'android' && {
+                ...(Constants.platform.ios && {
                     zIndex: this.props.zIndex
                 })
 

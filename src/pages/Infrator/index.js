@@ -559,7 +559,7 @@ export default ({ navigation }) => {
                 itemStyle={{
                   justifyContent: "flex-start",
                 }}
-                dropDownStyle={{ borderColor: Colors.Secondary.Normal }}
+                dropDownStyle={{ borderColor: Colors.Secondary.Normal}}
                 arrowColor={Colors.Secondary.Normal}
               />
 

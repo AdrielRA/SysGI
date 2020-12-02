@@ -9,7 +9,7 @@ import MENU from "./Menu";
 import Recovery from "./Recovery";
 import Signup from "./Signup";
 import Sobre from "./Sobre";
-
+import Teste from "./Teste";
 export {
   Detalhes,
   Consulta,
@@ -22,4 +22,5 @@ export {
   Recovery,
   Signup,
   Sobre,
+  Teste
 };

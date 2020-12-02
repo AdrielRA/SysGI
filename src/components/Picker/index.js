@@ -55,7 +55,7 @@ export default function Picker({
       itemStyle={{
         justifyContent: "flex-start",
       }}
-      dropDownStyle={{ borderColor: color }}
+      dropDownStyle={{ borderColor: color,  zIndex:10, backgroundColor:"#fff" }}
       arrowColor={color}
     />
   );
