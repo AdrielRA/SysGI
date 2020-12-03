@@ -18,9 +18,7 @@ import {
   Button,
   Itens,
   NewPicker,
-  Picker,
   TextInput,
-  DropDownPicker,
   Datepicker,
 } from "../../components";
 import { useContext } from "../../context";
@@ -529,6 +527,7 @@ export default ({ navigation }) => {
               }}
             >
               <NewPicker
+                style={{ marginRight: 3, maxWidth: 100 }}
                 placeholder="UF"
                 data={ufs ? ufs : [{}]}
                 value={infrator.Uf}
@@ -550,7 +549,7 @@ export default ({ navigation }) => {
               type="normal"
               onPress={handleSave}
             />
-            {status === "saved" && (
+            {status === "saved" ? (
               <View style={{ flexDirection: "row" }}>
                 <Button
                   style={{ width: status === "saved" ? "46%" : "100%" }}
@@ -628,6 +627,8 @@ export default ({ navigation }) => {
                   </TouchableOpacity>
                 </View>
               </View>
+            ) : (
+              <View style={{ height: 78 }}></View>
             )}
           </ScrollView>
         </View>

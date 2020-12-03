@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import { Primary, Tertiary } from "../../styles/colors";
-import { Button, TextInput, Picker } from "../../components";
+import { Button, TextInput, Picker, NewPicker } from "../../components";
 import { LinearGradient } from "expo-linear-gradient";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";
@@ -128,14 +128,14 @@ function Signup({ navigation }) {
           //keyboardVerticalOffset={50}
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
-            <Picker
-              width="100%"
-              heigth={40}
-              color="white"
-              name="Categoria"
+            <NewPicker
+              type="light"
+              placeholder="Categoria"
               data={pickerItems}
-              setSelected={setCategoria}
+              value={categoria}
+              onSelect={(Categoria) => setCategoria(Categoria)}
             />
+
             <TextInput
               placeholder="Nome de Usuário"
               autoCapitalize="words"

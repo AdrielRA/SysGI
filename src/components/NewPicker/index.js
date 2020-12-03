@@ -36,20 +36,30 @@ export default (props) => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={[props.style, { flex: 1 }]}>
       <View
         style={[
           styles.pickerGlobal,
+          props.type !== "light" && {
+            backgroundColor: "#fff",
+            borderColor: Secondary,
+          },
           visible ? styles.pickerListVisible : styles.pickerListNotVisible,
         ]}
       >
-        <Text style={styles.placeholder} numberOfLines={1}>
+        <Text
+          style={[
+            styles.placeholder,
+            props.type !== "light" && { color: Secondary },
+          ]}
+          numberOfLines={1}
+        >
           {!!selected ? selected : props.placeholder}
         </Text>
         <Feather
           name="chevron-down"
           size={24}
-          color={Secondary}
+          color={props.type === "light" ? "#fff" : Secondary}
           onPress={handleVisibleList}
         />
       </View>
@@ -72,14 +82,13 @@ export default (props) => {
 const styles = StyleSheet.create({
   pickerGlobal: {
     height: 40,
-    borderColor: Secondary,
+    borderColor: "#fff",
     borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 15,
     position: "relative",
-    backgroundColor: "#fff",
   },
   pickerListNotVisible: {
     borderRadius: 25,
@@ -89,7 +98,7 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 25,
   },
   placeholder: {
-    color: Secondary,
+    color: "#fff",
     fontFamily: "CenturyGothic",
     maxWidth: "85%",
   },
