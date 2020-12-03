@@ -156,7 +156,7 @@ function MENU({ navigation }) {
           ) : (
             <></>
           )}
-          <Button text="Teste" type="light" onPress={() => navigation.navigate("Teste")} />
+          {/*<Button text="Teste" type="light" onPress={() => navigation.navigate("Teste")} />*/}
           <Unifenas style={{ marginVertical: 10 }} />
         </View>
         <View

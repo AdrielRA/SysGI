@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import { Primary, Tertiary } from "../../styles/colors";
-import { Button, TextInput, Picker, NewPicker } from "../../components";
+import { Button, TextInput, NewPicker } from "../../components";
 import { LinearGradient } from "expo-linear-gradient";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";

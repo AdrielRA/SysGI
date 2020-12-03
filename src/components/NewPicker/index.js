@@ -9,9 +9,9 @@ import {
 import { Secondary } from "../../styles/colors";
 import { Feather } from "@expo/vector-icons";
 
-export default (props) => {
+export default ({value, onSelect, style, type, placeholder, data}) => {
   const [visible, setVisible] = useState(false);
-  const [selected, setSelected] = useState(props.value);
+  const [selected, setSelected] = useState(value);
 
   function handleVisibleList() {
     setVisible(!visible);
@@ -20,7 +20,7 @@ export default (props) => {
   const handleSelect = (item) => {
     setSelected(item);
     handleVisibleList();
-    if (!!props.onSelect) props.onSelect(item);
+    if (!!onSelect) onSelect(item);
   };
 
   const ItemList = ({ item, index }) => (
@@ -36,11 +36,11 @@ export default (props) => {
   );
 
   return (
-    <View style={[props.style, { flex: 1 }]}>
+    <View style={[style, { flex: 1 }]}>
       <View
         style={[
           styles.pickerGlobal,
-          props.type !== "light" && {
+          type !== "light" && {
             backgroundColor: "#fff",
             borderColor: Secondary,
           },
@@ -50,16 +50,16 @@ export default (props) => {
         <Text
           style={[
             styles.placeholder,
-            props.type !== "light" && { color: Secondary },
+            type !== "light" && { color: Secondary },
           ]}
           numberOfLines={1}
         >
-          {!!selected ? selected : props.placeholder}
+          {!!selected ? selected : placeholder}
         </Text>
         <Feather
           name="chevron-down"
           size={24}
-          color={props.type === "light" ? "#fff" : Secondary}
+          color={type === "light" ? "#fff" : Secondary}
           onPress={handleVisibleList}
         />
       </View>
@@ -68,7 +68,7 @@ export default (props) => {
           <FlatList
             style={{ width: "100%" }}
             nestedScrollEnabled={true}
-            data={props.data}
+            data={data}
             renderItem={({ item, index }) => (
               <ItemList item={item.label} index={index} />
             )}
