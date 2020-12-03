@@ -13,7 +13,7 @@ const getEstados = () => {
             value: uf.sigla,
           };
         });
-        resolve(responseUfs);
+        resolve(responseUfs.sort((a, b) => a.label > b.label));
       })
       .catch(resolve);
   });

@@ -60,11 +60,16 @@ export default ({ navigation }) => {
     getEstados().then(setUfs);
   }, []);
   useEffect(() => {
+    updateInfrator({ Cidade: undefined });
     getCidades(estado).then(setCidades);
   }, [estado]);
   useEffect(() => {
     if (!!dateState.date) updateInfrator({ Data_nascimento: dateState.date });
   }, [dateState.date]);
+
+  useEffect(() => {
+    console.log(infrator.Cidade);
+  }, [infrator]);
 
   useEffect(() => {
     if (!!infratorFromRoute) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,26 +14,34 @@ import { Feather } from "@expo/vector-icons";
 
 export default ({ value, onSelect, style, type, placeholder, data }) => {
   const [visible, setVisible] = useState(false);
-  const [selected, setSelected] = useState(value);
+  const [selected, setSelected] = useState();
+
+  useEffect(() => {
+    if (!!value) {
+      try {
+        setSelected(data.filter((d) => d.value === value)[0].label);
+      } catch {}
+    } else setSelected(value);
+  }, [value, data]);
 
   function handleVisibleList() {
     setVisible(!visible);
   }
 
   const handleSelect = (item) => {
-    setSelected(item);
+    setSelected(item.label);
     handleVisibleList();
-    if (!!onSelect) onSelect(item);
+    if (!!onSelect) onSelect(item.value);
   };
 
   const ItemList = ({ item, index }) => (
     <TouchableOpacity onPress={() => handleSelect(item)}>
       <Text
-        key={index}
+        key={index.value}
         numberOfLines={1}
-        style={[styles.item, item === selected && styles.itemSelected]}
+        style={[styles.item, item.label === selected && styles.itemSelected]}
       >
-        {item}
+        {item.label}
       </Text>
     </TouchableOpacity>
   );
@@ -107,7 +115,7 @@ export default ({ value, onSelect, style, type, placeholder, data }) => {
                 nestedScrollEnabled={true}
                 data={data}
                 renderItem={({ item, index }) => (
-                  <ItemList item={item.label} index={index} />
+                  <ItemList item={item} index={index} />
                 )}
               />
             </View>
