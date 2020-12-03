@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StatusBar, ActivityIndicator, Alert } from "react-native";
+import { StatusBar, ActivityIndicator, Alert, Platform } from "react-native";
 import { AppearanceProvider } from "react-native-appearance";
 import * as Updates from "expo-updates";
 import Routes from "./src/routes";
@@ -64,7 +64,10 @@ export default function App() {
           customMapping={mapping}
           theme={{ ...eva.light, ...theme }}
         >
-          <StatusBar barStyle="light-content" backgroundColor="#800000" />
+          <StatusBar
+            barStyle={Platform.OS === "ios" ? "dark-content" : "light-content"}
+            backgroundColor="#800000"
+          />
           {fontLoaded ? (
             <Routes />
           ) : (
