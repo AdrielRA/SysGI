@@ -71,13 +71,13 @@ export default (props) => {
 
 const styles = StyleSheet.create({
   pickerGlobal: {
-    height: 50,
+    height: 40,
     borderColor: Secondary,
     borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     position: "relative",
     backgroundColor: "#fff",
   },
@@ -90,14 +90,13 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     color: Secondary,
-    fontSize: 16,
     fontFamily: "CenturyGothic",
     maxWidth: "85%",
   },
   list: {
     position: "absolute",
     width: "100%",
-    top: 49,
+    top: 39,
     maxHeight: 150,
     backgroundColor: "#fff",
     borderColor: Secondary,
@@ -109,9 +108,8 @@ const styles = StyleSheet.create({
     zIndex: 5000,
   },
   item: {
-    fontSize: 16,
     fontFamily: "CenturyGothic",
-    paddingLeft: 20,
+    paddingLeft: 15,
     paddingRight: 10,
     paddingVertical: 5,
     color: Secondary,

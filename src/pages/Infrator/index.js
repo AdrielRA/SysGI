@@ -17,6 +17,7 @@ import { Credential, Infrator, Network, Relatory } from "../../controllers";
 import {
   Button,
   Itens,
+  NewPicker,
   Picker,
   TextInput,
   DropDownPicker,
@@ -445,14 +446,11 @@ export default ({ navigation }) => {
                 placeholder="Nascimento"
                 onStateChange={dateState}
               />
-              <Picker
-                width={152}
-                heigth={40}
-                color={Colors.Secondary.Normal}
-                name="Sexo"
-                defaultValue={infrator.Sexo}
+              <NewPicker
+                placeholder="Sexo"
                 data={sexoItens}
-                setSelected={({ value }) => updateInfrator({ Sexo: value })}
+                value={infrator.Sexo}
+                onSelect={(Sexo) => updateInfrator({ Sexo })}
               />
             </View>
 
@@ -468,14 +466,11 @@ export default ({ navigation }) => {
               onChangeText={(Mãe) => updateInfrator({ Mãe })}
             />
             <View style={{ flexDirection: "row", height: 40 }}>
-              <Picker
-                width={307}
-                heigth={40}
-                color={Colors.Secondary.Normal}
-                name="Medida Socioeducativa"
+              <NewPicker
+                placeholder="Medida Socioeducativa"
                 data={medidaItens}
-                defaultValue={infrator.MedidaSE}
-                setSelected={({ value }) => updateInfrator({ MedidaSE: value })}
+                value={infrator.MedidaSE}
+                onSelect={(MedidaSE) => updateInfrator({ MedidaSE })}
               />
             </View>
             <TextInput
@@ -533,62 +528,20 @@ export default ({ navigation }) => {
                 flexDirection: "row",
               }}
             >
-              <DropDownPicker
-                items={ufs ? ufs : [{}]}
-                placeholder={!!infrator.Uf ? infrator.Uf : "Uf"}
-                placeholderStyle={{ color: Colors.Secondary.Normal }}
-                onChangeItem={(item) => {
-                  updateInfrator({ Uf: item.value });
-                  setEstado(item.value);
+              <NewPicker
+                placeholder="UF"
+                data={ufs ? ufs : [{}]}
+                value={infrator.Uf}
+                onSelect={(Uf) => {
+                  updateInfrator({ Uf });
+                  setEstado(Uf);
                 }}
-                style={{
-                  width: 100,
-                  maxHeight: 40,
-                  marginRight: 3,
-                  borderColor: Colors.Secondary.Normal,
-                  backgroundColor: "transparent",
-                  borderTopLeftRadius: 25,
-                  borderTopRightRadius: 25,
-                  borderBottomLeftRadius: 25,
-                  borderBottomRightRadius: 25,
-                }}
-                labelStyle={{
-                  fontFamily: "CenturyGothic",
-                  color: Colors.Secondary.Normal,
-                }}
-                itemStyle={{
-                  justifyContent: "flex-start",
-                }}
-                dropDownStyle={{ borderColor: Colors.Secondary.Normal}}
-                arrowColor={Colors.Secondary.Normal}
               />
-
-              <DropDownPicker
-                items={cidades ? cidades : [{}]}
-                placeholder={!!infrator.Cidade ? infrator.Cidade : "Cidade"}
-                placeholderStyle={{ color: Colors.Secondary.Normal }}
-                onChangeItem={(item) => {
-                  updateInfrator({ Cidade: item.value });
-                }}
-                style={{
-                  width: (Dimensions.get("window").width - 35) * 0.63,
-                  maxHeight: 40,
-                  borderColor: Colors.Secondary.Normal,
-                  backgroundColor: "transparent",
-                  borderTopLeftRadius: 25,
-                  borderTopRightRadius: 25,
-                  borderBottomLeftRadius: 25,
-                  borderBottomRightRadius: 25,
-                }}
-                labelStyle={{
-                  fontFamily: "CenturyGothic",
-                  color: Colors.Secondary.Normal,
-                }}
-                itemStyle={{
-                  justifyContent: "flex-start",
-                }}
-                dropDownStyle={{ borderColor: Colors.Secondary.Normal }}
-                arrowColor={Colors.Secondary.Normal}
+              <NewPicker
+                placeholder="Cidade"
+                data={cidades ? cidades : [{}]}
+                value={infrator.Cidade}
+                onSelect={(Cidade) => updateInfrator({ Cidade })}
               />
             </View>
             <Button

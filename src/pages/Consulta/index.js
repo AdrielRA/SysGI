@@ -37,7 +37,7 @@ export default ({ navigation }) => {
 
   useEffect(() => {
     if (!search && type === "all") handleSearch();
-  }, [search]);
+  }, [search, type]);
 
   useEffect(() => {
     if (!!search) handleSearch();
