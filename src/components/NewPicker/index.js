@@ -5,11 +5,14 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Platform,
+  Modal,
+  Dimensions,
 } from "react-native";
 import { Secondary } from "../../styles/colors";
 import { Feather } from "@expo/vector-icons";
 
-export default ({value, onSelect, style, type, placeholder, data}) => {
+export default ({ value, onSelect, style, type, placeholder, data }) => {
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState(value);
 
@@ -44,14 +47,13 @@ export default ({value, onSelect, style, type, placeholder, data}) => {
             backgroundColor: "#fff",
             borderColor: Secondary,
           },
-          visible ? styles.pickerListVisible : styles.pickerListNotVisible,
+          visible && Platform.OS === "android"
+            ? styles.pickerListVisible
+            : styles.pickerListNotVisible,
         ]}
       >
         <Text
-          style={[
-            styles.placeholder,
-            type !== "light" && { color: Secondary },
-          ]}
+          style={[styles.placeholder, type !== "light" && { color: Secondary }]}
           numberOfLines={1}
         >
           {!!selected ? selected : placeholder}
@@ -63,17 +65,54 @@ export default ({value, onSelect, style, type, placeholder, data}) => {
           onPress={handleVisibleList}
         />
       </View>
-      {visible && (
-        <View style={[styles.list]}>
-          <FlatList
-            style={{ width: "100%" }}
-            nestedScrollEnabled={true}
-            data={data}
-            renderItem={({ item, index }) => (
-              <ItemList item={item.label} index={index} />
-            )}
-          />
-        </View>
+      {Platform.OS === "ios" ? (
+        <Modal animationType="fade" visible={visible} transparent={true}>
+          <TouchableOpacity
+            onPress={() => setVisible(false)}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <View
+              style={{
+                borderRadius: 15,
+                borderWidth: 1,
+                borderColor: Secondary,
+                width: Dimensions.get("screen").width / 1.5,
+                maxHeight: Dimensions.get("screen").height / 2,
+                backgroundColor: "#fff",
+                alignSelf: "center",
+                paddingBottom: 15,
+              }}
+            >
+              <Text style={styles.iosSelectLabel}>Selecione:</Text>
+              <FlatList
+                nestedScrollEnabled={true}
+                data={data}
+                renderItem={({ item, index }) => (
+                  <ItemList item={item.label} index={index} />
+                )}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      ) : (
+        <>
+          {visible && (
+            <View style={[styles.list]}>
+              <FlatList
+                style={{ width: "100%" }}
+                nestedScrollEnabled={true}
+                data={data}
+                renderItem={({ item, index }) => (
+                  <ItemList item={item.label} index={index} />
+                )}
+              />
+            </View>
+          )}
+        </>
       )}
     </View>
   );
@@ -91,11 +130,11 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   pickerListNotVisible: {
-    borderRadius: 25,
+    borderRadius: 20,
   },
   pickerListVisible: {
-    borderTopStartRadius: 25,
-    borderTopEndRadius: 25,
+    borderTopStartRadius: 20,
+    borderTopEndRadius: 20,
   },
   placeholder: {
     color: "#fff",
@@ -112,8 +151,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingTop: 5,
     paddingBottom: 20,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     zIndex: 5000,
   },
   item: {
@@ -126,5 +165,11 @@ const styles = StyleSheet.create({
   itemSelected: {
     backgroundColor: "#f5f5f5",
     fontFamily: "CenturyGothicBold",
+  },
+  iosSelectLabel: {
+    fontFamily: "CenturyGothicBold",
+    color: Secondary,
+    textAlign: "center",
+    paddingVertical: 5,
   },
 });
