@@ -66,6 +66,7 @@ export default ({ children }) => {
 
   useEffect(() => {
     if (isLogged && !credential) getCredencial(user.uid, setCredential);
+    else setCredential(undefined);
   }, [isLogged]);
 
   return (

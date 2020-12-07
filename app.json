@@ -5,9 +5,12 @@
     "description": "Sistema de Gerenciamento de Infratores",
     "privacy": "public",
     "platforms": ["ios", "android", "web"],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "primaryColor": "#DC143C",
+    "androidNavigationBar": {
+      "backgroundColor": "#2A0000"
+    },
     "splash": {
       "image": "./src/assets/splash.png",
       "resizeMode": "contain",
@@ -38,7 +41,8 @@
         "backgroundColor": "#ffffff"
       },
       "icon": "./src/assets/icon.png",
-      "versionCode": 1
+      "versionCode": 2,
+      "permissions": []
     }
   }
 }

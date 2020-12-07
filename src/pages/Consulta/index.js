@@ -293,6 +293,7 @@ export default ({ navigation }) => {
     <View
       style={{
         justifyContent: "center",
+        paddingTop: 40,
         height: "100%",
         alignItems: "center",
       }}
