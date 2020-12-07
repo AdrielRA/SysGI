@@ -44,8 +44,13 @@ function MENU({ navigation }) {
   }, [isLogged]);
 
   useEffect(() => {
-    AppState.addEventListener("change", setAppState);
-    return () => AppState.removeEventListener("change", setAppState);
+    const timer = setTimeout(() => {
+      AppState.addEventListener("change", setAppState);
+    }, 1000);
+    return () => {
+      clearTimeout(timer);
+      AppState.removeEventListener("change", setAppState);
+    };
   }, []);
 
   useEffect(() => {
