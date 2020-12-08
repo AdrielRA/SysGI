@@ -48,10 +48,6 @@ export default ({ navigation }) => {
     if (!!dateState.date) updateInfracao({ Data_ocorrência: dateState.date });
   }, [dateState.date]);
 
-  const updateListInfracoes = () => {
-    Infracao.getInfracoesByIdInfrator(idInfrator).then(setInfracoes);
-  };
-
   const updateInfracao = (property) =>
     setInfracao({ ...infracao, ...property });
 
@@ -142,6 +138,7 @@ export default ({ navigation }) => {
           onChangeText={(Reds) => updateInfracao({ Reds })}
         />
         <Datepicker.Element
+          max={new Date(infracao.Data_registro)}
           placeholder="Data da ocorrência"
           onStateChange={dateState}
         />

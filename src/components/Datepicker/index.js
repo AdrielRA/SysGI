@@ -73,6 +73,8 @@ export default (props) => {
     >
       <Datepicker
         status="basic"
+        min={!!props.min ? props.min : new Date("01/01/1950")}
+        max={!!props.max ? props.max : new Date()}
         placeholder={props.placeholder}
         dateService={dateConfig}
         {...props.onStateChange}

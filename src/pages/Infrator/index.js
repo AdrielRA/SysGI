@@ -68,10 +68,6 @@ export default ({ navigation }) => {
   }, [dateState.date]);
 
   useEffect(() => {
-    console.log(infrator.Cidade);
-  }, [infrator]);
-
-  useEffect(() => {
     if (!!infratorFromRoute) {
       setInfrator(infratorFromRoute);
       dateState.onSelect(new Date(infratorFromRoute.Data_nascimento));
