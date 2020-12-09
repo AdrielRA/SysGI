@@ -14,10 +14,9 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Button, TextInput, Unifenas } from "../../components";
+import { Button, TextInput, Unifenas, DialogInput } from "../../components";
 import { Auth, Network, Credential } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
-import DialogInput from "react-native-dialog-input";
 import { CheckBox } from "react-native-elements";
 import { Strings } from "../../utils";
 import { useContext } from "../../context";
@@ -66,26 +65,24 @@ function Login({ navigation }) {
       return;
     }
     setLoading(true);
-    Auth.signIn(Email, Senha)
-      .then(entrar)
-      .catch((error) => {
-        setLoading(false);
-        switch (error) {
-          case "email-verification-fail":
-            alertEmailVerificationError(user);
-            break;
-          case undefined:
-            break;
-          default:
-            if (!error.includes("undefined")) {
-              let msg = Strings["ptBr"]["signInError"][error];
-              let errorMsg = !!msg ? msg : "Tente novamente mais tarde";
-              Alert.alert("Falha:", errorMsg);
-            }
-            break;
-        }
-        Auth.signOut();
-      });
+    Auth.signIn(Email, Senha).catch((error) => {
+      setLoading(false);
+      switch (error) {
+        case "email-verification-fail":
+          alertEmailVerificationError(user);
+          break;
+        case undefined:
+          break;
+        default:
+          if (!error.includes("undefined")) {
+            let msg = Strings["ptBr"]["signInError"][error];
+            let errorMsg = !!msg ? msg : "Tente novamente mais tarde";
+            Alert.alert("Falha:", errorMsg);
+          }
+          break;
+      }
+      Auth.signOut();
+    });
   };
 
   const alertEmailVerificationError = (user) => {
@@ -202,17 +199,14 @@ function Login({ navigation }) {
   return (
     <SafeAreaView style={Styles.page}>
       <DialogInput
-        isDialogVisible={showDialog}
-        title={"Desconectar dispositivos"}
-        message={"Digite seu código de controle:"}
-        hintInput={"Código aqui"}
-        submitInput={(cod) => {
-          setShowDialog(false);
-          handleDisconnect(cod);
-        }}
+        visible={showDialog}
+        title="Desconectar dispositivos"
+        msg="Digite seu código de controle:"
+        placeholder="Código aqui"
+        onSubmit={handleDisconnect}
         submitText={"Confirmar"}
         cancelText={"Cancelar"}
-        closeDialog={() => {
+        onClose={() => {
           setShowDialog(false);
         }}
       ></DialogInput>

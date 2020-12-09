@@ -1,44 +1,96 @@
+/* eslint-disable promise/no-nesting */
+/* eslint-disable promise/always-return */
+/* eslint-disable promise/catch-or-return */
 const functions = require("firebase-functions");
 var fetch = require("node-fetch");
+const { Expo } = require("expo-server-sdk");
 
 const admin = require("firebase-admin");
 admin.initializeApp(functions.config().firebase);
 
-exports.sendPushNotification = functions.database
+let expo = new Expo();
+
+const getAllTokens = (ref) => {
+  return new Promise((resolve, reject) => {
+    let tokens = [];
+    ref
+      .once("value")
+      .then((snap) => {
+        snap.forEach((child) => {
+          let token = child.val().Device;
+          if (!Expo.isExpoPushToken(token))
+            console.error(`Push token ${token} is not a valid Expo push token`);
+          else tokens.push(token);
+        });
+
+        Promise.all(tokens).then(() => resolve(tokens));
+      })
+      .catch(() => resolve([]));
+  });
+};
+
+const getTokensFromFavorite = (ref) => {
+  return new Promise((resolve, reject) => {
+    let tokens = [];
+    ref
+      .once("value")
+      .then((snapshot) => {
+        snapshot.forEach((child) => {
+          if (child.exists()) {
+            child.ref
+              .child("Infratores_favoritados")
+              .once("value", (snapshot) => {
+                if (snapshot.val()) {
+                  if (snapshot.val().includes(id)) {
+                    let token = child.val().Device;
+
+                    if (!Expo.isExpoPushToken(token))
+                      console.error(
+                        `Push token ${token} is not a valid Expo push token`
+                      );
+                    else tokens.push(token);
+                  }
+                }
+              });
+          }
+        });
+        Promise.all(tokens).then(() => resolve(tokens));
+      })
+      .catch(() => resolve([]));
+  });
+};
+
+const dispatchNotifications = (messages) => {
+  return fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(messages),
+  });
+};
+
+exports.sendAddNotification = functions.database
   .ref("/infratores/{Id}")
   .onCreate((snapshot, context) => {
     const root = snapshot.ref.root;
 
     let messages = [];
+    const title = "Informações adicionadas!";
+    const body = "Um novo infrator foi adicionado!";
 
-    return root
-      .child("/users")
-      .once("value")
-      .then(function (snapshot) {
-        snapshot.forEach(function (child) {
-          let expoToken = child.val().Device;
-
-          if (expoToken) {
-            messages.push({
-              to: expoToken,
-              title: "Informações adicionadas!",
-              body: "Um novo infrator foi adicionado!",
-            });
-          }
-        });
-
-        return Promise.all(messages);
-      })
-      .then((messages) => {
-        fetch("https://exp.host/--/api/v2/push/send", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(messages),
+    getAllTokens(root.child("/users").ref).then((tokens) => {
+      let promises = tokens.map((to) => {
+        messages.push({
+          to,
+          title,
+          body,
         });
       });
+
+      Promise.all(promises).then(() => dispatchNotifications(messages));
+    });
   });
 
 exports.sendUpdateNotification = functions.database
@@ -49,45 +101,15 @@ exports.sendUpdateNotification = functions.database
 
     let messages = [];
 
-    return root
-      .child("/users")
-      .once("value")
-      .then(function (snapshot) {
-        let promisses = [];
-        snapshot.forEach(function (child) {
-          if (child.val()) {
-            promisses.push(
-              child.ref
-                .child("Infratores_favoritados")
-                .once("value", (snapshot) => {
-                  if (snapshot.val()) {
-                    if (snapshot.val().includes(id)) {
-                      let expoToken = child.val().Device;
-
-                      if (expoToken) {
-                        messages.push({
-                          to: expoToken,
-                          title: "Atualização dos dados!",
-                          body: "Um infrator favoritado foi atualizado!",
-                        });
-                      }
-                    }
-                  }
-                })
-            );
-          }
-        });
-
-        return Promise.all(promisses);
-      })
-      .then(() => {
-        fetch("https://exp.host/--/api/v2/push/send", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(messages),
+    getTokensFromFavorite(root.child("/users").ref).then((tokens) => {
+      let promises = tokens.map((to) => {
+        messages.push({
+          to,
+          title,
+          body,
         });
       });
+
+      Promise.all(promises).then(() => dispatchNotifications(messages));
+    });
   });

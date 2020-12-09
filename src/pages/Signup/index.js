@@ -23,7 +23,7 @@ function Signup({ navigation }) {
   const [confEmail, setConfEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confSenha, setConfSenha] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [categoria, setCategoria] = useState("0");
 
   const { connected, alertOffline } = Network.useNetwork();
   const { isLogged } = useContext();
@@ -99,7 +99,6 @@ function Signup({ navigation }) {
   };
 
   const pickerItems = [
-    { label: "Categoria", value: "0" },
     { label: "Professor", value: "1" },
     { label: "Conselho Tutelar", value: "2" },
     { label: "Advogado", value: "3" },
@@ -118,7 +117,7 @@ function Signup({ navigation }) {
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
         colors={[Primary, Tertiary]}
-        style={Styles.page}
+        style={[Styles.page, { alignSelf: "stretch" }]}
       >
         <Text style={[Styles.lblSubtitle, { flex: 0.75, paddingTop: 30 }]}>
           CADASTRO

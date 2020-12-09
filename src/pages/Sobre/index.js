@@ -2,10 +2,11 @@ import React from "react";
 import {
   View,
   Text,
-  TouchableHighlight,
   Image,
   SafeAreaView,
   Linking,
+  TouchableOpacity,
+  Platform,
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
@@ -21,8 +22,27 @@ function Sobre({ navigation }) {
         end={{ x: 1, y: 1.0 }}
         locations={[0, 1]}
         colors={[Colors.Primary.Normal, Colors.Terciary.Normal]}
-        style={[Styles.page, { alignSelf: "stretch" }]}
+        style={[
+          Styles.page,
+          { alignSelf: "stretch", paddingTop: 35, position: "relative" },
+        ]}
       >
+        <View
+          style={{
+            position: "absolute",
+            top: Platform.OS === "ios" ? 15 : 45,
+            left: 15,
+            height: 30,
+            width: 30,
+          }}
+        >
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require("../../assets/images/back.png")}
+              style={{ width: 30, height: 30 }}
+            />
+          </TouchableOpacity>
+        </View>
         <View
           style={{
             flex: 1,
@@ -56,9 +76,8 @@ function Sobre({ navigation }) {
           >
             CONHEÇA NOSSOS:
           </Text>
-          <TouchableHighlight
+          <TouchableOpacity
             style={[Styles.campo, { marginVertical: 10 }]}
-            underlayColor={"#00000000"}
             onPress={() => {
               Linking.openURL("https://sysgi-210bd.firebaseapp.com/");
             }}
@@ -66,10 +85,9 @@ function Sobre({ navigation }) {
             <Text style={[Styles.txtNormal, Styles.txtCenter, Styles.txtWhite]}>
               {"Termos & Condições"}
             </Text>
-          </TouchableHighlight>
-          <TouchableHighlight
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[Styles.campo, { marginVertical: 10 }]}
-            underlayColor={"#00000000"}
             onPress={() => {
               Linking.openURL(
                 "https://firebasestorage.googleapis.com/v0/b/sysgi-210bd.appspot.com/o/manual.pdf?alt=media&token=59f1a3bd-9bce-4d90-997f-6943deb2e2b9"
@@ -79,7 +97,7 @@ function Sobre({ navigation }) {
             <Text style={[Styles.txtNormal, Styles.txtCenter, Styles.txtWhite]}>
               Guia de Utilização
             </Text>
-          </TouchableHighlight>
+          </TouchableOpacity>
           <Text
             style={[
               Styles.txtBold,

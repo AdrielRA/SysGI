@@ -41,7 +41,7 @@ export default ({ value, onSelect, style, type, placeholder, data }) => {
         numberOfLines={1}
         style={[styles.item, item.label === selected && styles.itemSelected]}
       >
-        {item.label}
+        {!!item.label ? item.label : item.toString()}
       </Text>
     </TouchableOpacity>
   );
@@ -98,9 +98,9 @@ export default ({ value, onSelect, style, type, placeholder, data }) => {
               <Text style={styles.iosSelectLabel}>Selecione:</Text>
               <FlatList
                 nestedScrollEnabled={true}
-                data={data}
+                data={Object.values(data)}
                 renderItem={({ item, index }) => (
-                  <ItemList item={item.label} index={index} />
+                  <ItemList item={item} index={index} />
                 )}
               />
             </View>
@@ -113,7 +113,7 @@ export default ({ value, onSelect, style, type, placeholder, data }) => {
               <FlatList
                 style={{ width: "100%" }}
                 nestedScrollEnabled={true}
-                data={data}
+                data={Object.values(data)}
                 renderItem={({ item, index }) => (
                   <ItemList item={item} index={index} />
                 )}
