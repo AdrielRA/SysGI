@@ -17,7 +17,7 @@ export default ({ value, onSelect, style, type, placeholder, data }) => {
   const [selected, setSelected] = useState();
 
   useEffect(() => {
-    if (!!value) {
+    if (value !== undefined) {
       try {
         setSelected(data.filter((d) => d.value === value)[0].label);
       } catch {}
