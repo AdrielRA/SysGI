@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   SafeAreaView,
@@ -6,14 +6,16 @@ import {
   Text,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import Styles from "../../styles";
-import { Primary, Tertiary } from "../../styles/colors";
+import { Primary, Tertiary, Secondary } from "../../styles/colors";
 import { Button, TextInput, NewPicker } from "../../components";
 import { LinearGradient } from "expo-linear-gradient";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";
 import { useContext } from "../../context";
+import { mask } from "../../utils";
 
 function Signup({ navigation }) {
   const [nome, setNome] = useState("");
@@ -24,6 +26,17 @@ function Signup({ navigation }) {
   const [senha, setSenha] = useState("");
   const [confSenha, setConfSenha] = useState("");
   const [categoria, setCategoria] = useState("0");
+  const [loading, setLoading] = useState(false);
+
+  const [refs, setRefs] = useState({
+    Nome: useRef(),
+    Matricula: useRef(),
+    Telefone: useRef(),
+    Email: useRef(),
+    ConEmail: useRef(),
+    Senha: useRef(),
+    ConSenha: useRef(),
+  });
 
   const { connected, alertOffline } = Network.useNetwork();
   const { isLogged } = useContext();
@@ -59,8 +72,9 @@ function Signup({ navigation }) {
       alertOffline();
       return;
     }
-
     if (!validateInputs()) return;
+
+    setLoading(true);
 
     Auth.createUser(email, senha)
       .then(({ user }) => {
@@ -71,9 +85,11 @@ function Signup({ navigation }) {
               if (!user.emailVerified) {
                 Auth.sendEmailVerification(user)
                   .then(() => {
+                    setLoading(false);
                     navigation.push("Recovery", { user, Recovery });
                   })
                   .catch((err) => {
+                    setLoading(false);
                     Alert.alert(
                       "Falha:",
                       Strings["ptBr"]["signInError"][
@@ -81,10 +97,11 @@ function Signup({ navigation }) {
                       ]
                     );
                   });
-              }
+              } else setLoading(false);
             });
           });
         } else {
+          setLoading(false);
           Alert.alert(
             "Falha:",
             Strings["ptBr"]["signInError"]["auth/signup-fail"]
@@ -94,6 +111,7 @@ function Signup({ navigation }) {
       .catch((e) => {
         let msg = Strings["ptBr"]["signInError"][e.code];
         let errorMsg = !!msg ? msg : "Tente novamente mais tarde";
+        setLoading(false);
         Alert.alert("Falha:", errorMsg);
       });
   };
@@ -145,6 +163,8 @@ function Signup({ navigation }) {
               maxLength={60}
               type="light"
               onChangeText={(nome_) => setNome(nome_)}
+              Ref={refs.Nome}
+              onSubmitEditing={() => refs.Matricula.current.focus()}
             />
             <TextInput
               placeholder="Matricula/Inscrição"
@@ -153,6 +173,8 @@ function Signup({ navigation }) {
               maxLength={20}
               type="light"
               onChangeText={(inscrição_) => setInscrição(inscrição_)}
+              Ref={refs.Matricula}
+              onSubmitEditing={() => refs.Telefone.current.focus()}
             />
             <TextInput
               placeholder="Telefone"
@@ -160,12 +182,15 @@ function Signup({ navigation }) {
               keyboardType="phone-pad"
               autoCompleteType="tel"
               returnKeyType="next"
-              maxLength={11}
+              maxLength={16}
               type="light"
-              onChangeText={(telefone_) => setTelefone(telefone_)}
+              value={mask.Phone(telefone)}
+              onChangeText={(Telefone) => setTelefone(mask.Numeric(Telefone))}
+              Ref={refs.Telefone}
+              onSubmitEditing={() => refs.Email.current.focus()}
             />
             <TextInput
-              placeholder="emai@email.com"
+              placeholder="email@exemplo.com"
               autoCapitalize="none"
               textContentType="emailAddress"
               keyboardType="email-address"
@@ -174,9 +199,11 @@ function Signup({ navigation }) {
               maxLength={50}
               type="light"
               onChangeText={(email_) => setEmail(email_)}
+              Ref={refs.Email}
+              onSubmitEditing={() => refs.ConEmail.current.focus()}
             />
             <TextInput
-              placeholder="emai.confirma@email.com"
+              placeholder="email.confirma@exemplo.com"
               autoCapitalize="none"
               textContentType="emailAddress"
               keyboardType="email-address"
@@ -185,6 +212,8 @@ function Signup({ navigation }) {
               maxLength={50}
               type="light"
               onChangeText={(confEmail_) => setConfEmail(confEmail_)}
+              Ref={refs.ConEmail}
+              onSubmitEditing={() => refs.Senha.current.focus()}
             />
             <TextInput
               placeholder="Senha"
@@ -196,17 +225,20 @@ function Signup({ navigation }) {
               secureTextEntry={true}
               type="light"
               onChangeText={(senha_) => setSenha(senha_)}
+              Ref={refs.Senha}
+              onSubmitEditing={() => refs.ConSenha.current.focus()}
             />
             <TextInput
               placeholder="Confirma Senha"
               autoCapitalize="none"
               textContentType="password"
               autoCompleteType="password"
-              returnKeyType="next"
+              returnKeyType="done"
               maxLength={20}
               secureTextEntry={true}
               type="light"
               onChangeText={(confSenha_) => setConfSenha(confSenha_)}
+              Ref={refs.ConSenha}
             />
           </ScrollView>
 
@@ -229,6 +261,7 @@ function Signup({ navigation }) {
               type="light"
               style={{ minWidth: 150 }}
               onPress={() =>
+                !loading &&
                 handleSignup({
                   Nome: nome,
                   Inscrição: inscrição,
@@ -236,7 +269,14 @@ function Signup({ navigation }) {
                   Credencial: Number(categoria) * -1,
                 })
               }
-            />
+            >
+              {loading && (
+                <ActivityIndicator
+                  style={{ marginLeft: 10 }}
+                  color={Secondary}
+                />
+              )}
+            </Button>
           </View>
         </KeyboardAvoidingView>
         <Text style={Styles.lblRodape}>

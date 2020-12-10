@@ -1,4 +1,5 @@
 const RG = (rg) => {
+  if (!rg) return;
   rg = rg.replace(/\D/g, "");
   if (rg.length == 9)
     rg = rg.replace(/(\d{2})(\d{3})(\d{3})(\d{1})$/, "$1.$2.$3-$4");
@@ -9,6 +10,7 @@ const RG = (rg) => {
 };
 
 const CPF = (cpf) => {
+  if (!cpf) return;
   cpf = cpf.replace(/\D/g, "");
   if (cpf.length == 11)
     cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
@@ -17,6 +19,7 @@ const CPF = (cpf) => {
 };
 
 const Numeric = (text) => {
+  if (!text) return;
   return text.replace(/\D/g, "");
 };
 
@@ -28,4 +31,16 @@ const FileName = (fileName, ext, maxSize) => {
   return fileName + ext;
 };
 
-export { CPF, RG, Numeric, FileName };
+const Phone = (phone) => {
+  if (!phone) return;
+  phone = phone.replace(/\D/g, "");
+
+  if (phone.length === 11)
+    phone = phone.replace(/(\d{2})(\d)(\d{4})(\d{4})$/, "($1) $2 $3-$4");
+  else if (phone.length === 10)
+    phone = phone.replace(/(\d{2})(\d{4})(\d{4})$/, "($1) $2-$3");
+
+  return phone;
+};
+
+export { CPF, RG, Numeric, FileName, Phone };

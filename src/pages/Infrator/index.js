@@ -27,6 +27,7 @@ import { getCidades, getEstados } from "../../services/ibge";
 import { validator } from "../../utils";
 import { Infrator as Model } from "../../models";
 import { NavigationEvents } from "react-navigation";
+import { mask } from "../../utils";
 
 LogBox.ignoreLogs(["YellowBox"]);
 
@@ -416,10 +417,10 @@ export default ({ navigation }) => {
                 returnKeyType="next"
                 type="secondary"
                 style={{ marginEnd: 3 }}
-                value={infrator.Rg}
+                value={mask.RG(infrator.Rg)}
                 maxLength={13}
                 keyboardType="number-pad"
-                onChangeText={(Rg) => updateInfrator({ Rg })}
+                onChangeText={(Rg) => updateInfrator({ Rg: mask.Numeric(Rg) })}
                 onSubmitEditing={() => refs.Cpf.current.focus()}
                 blurOnSubmit={false}
               />
@@ -427,10 +428,12 @@ export default ({ navigation }) => {
                 placeholder="CPF"
                 returnKeyType="next"
                 type="secondary"
-                value={infrator.Cpf}
-                maxLength={11}
+                value={mask.CPF(infrator.Cpf)}
+                maxLength={14}
                 keyboardType="number-pad"
-                onChangeText={(Cpf) => updateInfrator({ Cpf })}
+                onChangeText={(Cpf) =>
+                  updateInfrator({ Cpf: mask.Numeric(Cpf) })
+                }
                 Ref={refs.Cpf}
               />
             </View>

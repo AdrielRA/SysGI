@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StackActions, NavigationActions } from "react-navigation";
 import {
   View,
@@ -35,6 +35,11 @@ function Login({ navigation }) {
   const { connected, alertOffline } = Network.useNetwork();
   const { handlePersistence, isLogged, persistence, user } = useContext();
   const [showUnifenas, setShowUnifenas] = useState(true);
+
+  const [refs, setRefs] = useState({
+    Email: useRef(),
+    Senha: useRef(),
+  });
 
   useEffect(() => {
     const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
@@ -242,11 +247,14 @@ function Login({ navigation }) {
             editable={!loading}
             autoCorrect={false}
             value={Email}
+            returnKeyType="next"
             autoCompleteType="email"
             type="light"
             onChangeText={(email) => {
               setEmail(email);
             }}
+            Ref={refs.Email}
+            onSubmitEditing={() => refs.Senha.current.focus()}
           />
           <TextInput
             placeholder="Senha"
@@ -257,9 +265,11 @@ function Login({ navigation }) {
             autoCompleteType="password"
             secureTextEntry={true}
             type="light"
+            returnKeyType="done"
             onChangeText={(senha) => {
               setSenha(senha);
             }}
+            Ref={refs.Senha}
           />
           <CheckBox
             center
