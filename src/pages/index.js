@@ -6,6 +6,7 @@ import Infracao from "./Infracao";
 import Infrator from "./Infrator";
 import Login from "./Login";
 import MENU from "./Menu";
+import Profile from "./Profile";
 import Recovery from "./Recovery";
 import Signup from "./Signup";
 import Sobre from "./Sobre";
@@ -19,8 +20,9 @@ export {
   Infrator,
   Login,
   MENU,
+  Profile,
   Recovery,
   Signup,
   Sobre,
-  Teste
+  Teste,
 };

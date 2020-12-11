@@ -5,7 +5,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Alert,
   Image,
   LogBox,
@@ -20,6 +20,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { CheckBox } from "react-native-elements";
 import { Strings } from "../../utils";
 import { useContext } from "../../context";
+import { Feather } from "@expo/vector-icons";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 LogBox.ignoreLogs(["VirtualizedList"]);
@@ -314,18 +315,12 @@ function Login({ navigation }) {
         <Text style={[Styles.lblRodape, { position: "absolute", bottom: 22 }]}>
           Todos os Direitos Reservados - {new Date().getFullYear()}
         </Text>
-        <TouchableHighlight
+        <TouchableOpacity
           style={{ position: "absolute", bottom: 20, right: 15 }}
-          underlayColor={"#00000000"}
-          onPress={() => {
-            navigation.navigate("Sobre");
-          }}
+          onPress={() => navigation.navigate("Sobre")}
         >
-          <Image
-            style={{ height: 25, width: 25 }}
-            source={require("../../assets/images/icon_info.png")}
-          ></Image>
-        </TouchableHighlight>
+          <Feather name="info" color="#fff" size={25} />
+        </TouchableOpacity>
       </LinearGradient>
     </SafeAreaView>
   );

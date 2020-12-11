@@ -10,10 +10,11 @@ import {
   Infrator,
   Login,
   MENU,
+  Profile,
   Recovery,
   Signup,
   Sobre,
-  Teste
+  Teste,
 } from "./pages";
 
 const Routes = createAppContainer(
@@ -28,9 +29,10 @@ const Routes = createAppContainer(
       Infracao,
       Consulta,
       Controle,
+      Profile,
       Detalhes,
       EditeInfracao,
-      Teste
+      Teste,
     },
     {
       defaultNavigationOptions: {

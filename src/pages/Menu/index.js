@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Image,
   Switch,
   Alert,
@@ -17,6 +17,7 @@ import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import { useContext } from "../../context";
 import * as LocalAuthentication from "expo-local-authentication";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 function MENU({ navigation }) {
   const userData = navigation.getParam("userData");
@@ -181,18 +182,19 @@ function MENU({ navigation }) {
             value={enabled}
           ></Switch>
         </View>
-        <TouchableHighlight
+        <TouchableOpacity
           style={{ position: "absolute", bottom: 25, right: 15 }}
           underlayColor={"#00000000"}
-          onPress={() => {
-            handleSignOut();
-          }}
+          onPress={handleSignOut}
         >
-          <Image
-            style={{ height: 30, width: 30 }}
-            source={require("../../assets/images/logoff.png")}
-          ></Image>
-        </TouchableHighlight>
+          <FontAwesome5 name="power-off" color="#fff" size={25} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ position: "absolute", bottom: 25, left: 15 }}
+          onPress={() => navigation.push("Profile")}
+        >
+          <FontAwesome5 name="user-cog" color="#fff" size={25} />
+        </TouchableOpacity>
       </LinearGradient>
     </SafeAreaView>
   );
