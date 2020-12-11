@@ -4,7 +4,9 @@
     "slug": "sysgi",
     "description": "Sistema de Gerenciamento de Infratores",
     "privacy": "public",
-    "platforms": ["ios", "android", "web"],
+    "platforms": ["ios", "android"],
+    "githubUrl": "https://github.com/AdrielRA/SysGI",
+    "userInterfaceStyle": "light",
     "version": "1.0.1",
     "orientation": "portrait",
     "primaryColor": "#DC143C",
@@ -20,8 +22,8 @@
     "notification": {
       "icon": "./src/assets/icon-notify.png",
       "color": "#DC143C",
-      "androidMode": "default",
-      "androidCollapsedTitle": "n/a"
+      "androidMode": "collapse",
+      "androidCollapsedTitle": "#{unread_notifications} novas notificações!"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -42,7 +44,7 @@
       },
       "icon": "./src/assets/icon.png",
       "versionCode": 2,
-      "permissions": []
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.UNIFENAS.SysGI"
     }
   }
 }
