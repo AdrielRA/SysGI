@@ -72,6 +72,18 @@ const createUser = (email, senha) => {
   return auth().createUserWithEmailAndPassword(email, senha);
 };
 
+const updatePassword = (email, senha, newSenha) => {
+  return new Promise((resolve, reject) => {
+    let credential = auth.EmailAuthProvider.credential(email, senha);
+    auth()
+      .currentUser.reauthenticateWithCredential(credential)
+      .then(() =>
+        auth().currentUser.updatePassword(newSenha).then(resolve).catch(reject)
+      )
+      .catch(reject);
+  });
+};
+
 const deleteUser = (user) => {
   return new Promise((resolve, reject) => {
     db()
@@ -88,6 +100,10 @@ const deleteUser = (user) => {
 
 const setUserData = (uid, userData) => {
   return db().ref("users").child(uid).set(userData);
+};
+
+const updateUserData = (uid, updatedData) => {
+  return db().ref("users").child(uid).update(updatedData);
 };
 
 const getUserData = (uid) => {
@@ -147,5 +163,7 @@ export {
   setUserData,
   signIn,
   signOut,
+  updateUserData,
+  updatePassword,
   validateSession,
 };

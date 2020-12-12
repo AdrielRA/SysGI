@@ -26,8 +26,14 @@ export default ({ navigation }) => {
   const { connected, alertOffline } = Network.useNetwork();
   const { credential, session, user, isLogged } = useContext();
   const [loading, setLoading] = useState(false);
+  const [loadingPass, setLoadingPass] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [userData, setUserData] = useState({});
+  const [nome, setNome] = useState();
+  const [telefone, setTelefone] = useState();
+  const [senha, setSenha] = useState();
+  const [newSenha, setNewSenha] = useState();
+  const [conSenha, setConSenha] = useState();
 
   const [refs, setRefs] = useState({
     Nome: useRef(),
@@ -38,10 +44,57 @@ export default ({ navigation }) => {
   });
 
   useEffect(() => {
-    Auth.getUserData(user.uid).then((snap) => setUserData(snap.val()));
+    handleGetUserData();
   }, [isLogged]);
 
-  const handleUpdateAccountData = () => {};
+  useEffect(() => {
+    setNome(userData.Nome);
+    setTelefone(userData.Telefone);
+  }, [userData]);
+
+  const handleGetUserData = () =>
+    Auth.getUserData(user.uid).then((snap) => setUserData(snap.val()));
+
+  const handleUpdateAccountData = () => {
+    if (!!nome && !!telefone) {
+      setLoading(true);
+      Auth.updateUserData(user.uid, { Nome: nome, Telefone: telefone })
+        .then(() => {
+          Alert.alert("Sucesso:", "Informações atualizadas!");
+          handleGetUserData();
+        })
+        .catch(() =>
+          Alert.alert("Falha:", "Não foi possível atualizar suas informações.")
+        )
+        .finally(() => setLoading(false));
+    } else
+      Alert.alert("Atenção:", "Nome e/ou telefone informado(s) inválido(s)");
+  };
+
+  const handleUpdatePassword = () => {
+    if (!senha) {
+      Alert.alert("Atenção:", "Informe sua senha antiga.");
+      return;
+    } else if (!newSenha) {
+      Alert.alert("Atenção:", "Informe sua nova senha.");
+      return;
+    }
+
+    if (newSenha === conSenha) {
+      setLoadingPass(true);
+      Auth.updatePassword(user.email, senha, newSenha)
+        .then(() => {
+          Alert.alert("Sucesso:", "Sua senha foi atualizada!");
+          setSenha("");
+          setNewSenha("");
+          setConSenha("");
+        })
+        .catch(() =>
+          Alert.alert("Falha:", "Não foi possível atualizar sua senha.")
+        )
+        .finally(() => setLoadingPass(false));
+    } else Alert.alert("Atenção:", "Confirmação e nova senha não conferem");
+  };
 
   const handleDeleteAccount = () => {};
 
@@ -57,6 +110,29 @@ export default ({ navigation }) => {
     8: "Promotor",
     9: "Juiz",
     30: "Administrador",
+  };
+
+  const InfoItem = ({ icon, title, info }) => {
+    return (
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          width: "100%",
+          paddingVertical: 3,
+        }}
+      >
+        <FontAwesome5 name={icon} color="#fff" size={20} />
+        <Text
+          style={[Styles.txtBoldWhite, { fontSize: 14, marginHorizontal: 5 }]}
+        >
+          {!!title ? title + ":" : ""}
+        </Text>
+        <Text style={[Styles.txtRegularWhite, { fontSize: 14 }]}>
+          {!!info ? info : ""}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -96,9 +172,33 @@ export default ({ navigation }) => {
               {!!userData.Nome ? userData.Nome[0].toUpperCase() : "U"}
             </Text>
 
-            <Text style={[Styles.txtBold, { color: "#fff", fontSize: 16 }]}>
-              Informações de Perfil
+            <Text
+              style={[
+                Styles.txtBold,
+                { color: "#fff", fontSize: 16, width: "100%", marginBottom: 5 },
+              ]}
+            >
+              Informações de Perfil:
             </Text>
+            <InfoItem
+              icon="id-card"
+              title="Credencial"
+              info={
+                !!credentials[userData.Credencial]
+                  ? credentials[userData.Credencial]
+                  : "Desconhecida"
+              }
+            />
+            <InfoItem
+              icon="user-check"
+              title="Inscrição"
+              info={
+                !!userData.Inscrição
+                  ? userData.Inscrição.toString()
+                  : "Não consta"
+              }
+            />
+            <InfoItem icon="envelope" info={user.email} />
             <TextInput
               placeholder="Nome de Usuário"
               autoCapitalize="words"
@@ -108,8 +208,8 @@ export default ({ navigation }) => {
               autoCompleteType="name"
               maxLength={60}
               type="light"
-              value={userData.Nome}
-              //onChangeText={(nome_) => setNome(nome_)}
+              value={nome}
+              onChangeText={(Nome) => setNome(Nome)}
               Ref={refs.Nome}
               onSubmitEditing={() => refs.Telefone.current.focus()}
             />
@@ -121,36 +221,24 @@ export default ({ navigation }) => {
               returnKeyType="next"
               maxLength={16}
               type="light"
-              value={mask.Phone(userData.Telefone)}
-              //onChangeText={(Telefone) => setTelefone(mask.Numeric(Telefone))}
+              value={mask.Phone(telefone)}
+              onChangeText={(Telefone) => setTelefone(mask.Numeric(Telefone))}
               Ref={refs.Telefone}
               onSubmitEditing={() => refs.Senha.current.focus()}
             />
-            <TextInput
-              editable={false}
-              value={"email@email.com"}
+            <Button
+              text="SALVAR"
               type="light"
-              value={user.email}
-            />
-            <TextInput
-              editable={false}
-              value={
-                !!credentials[userData.Credencial]
-                  ? "Credencial: " + credentials[userData.Credencial]
-                  : "Credencial desconhecida"
-              }
-              type="light"
-            />
-            <TextInput
-              editable={false}
-              value={"Matricula"}
-              type="light"
-              value={
-                !!userData.Inscrição
-                  ? "Inscrição: " + userData.Inscrição.toString()
-                  : ""
-              }
-            />
+              style={{ minWidth: 150 }}
+              onPress={() => !loading && handleUpdateAccountData()}
+            >
+              {loading && (
+                <ActivityIndicator
+                  style={{ marginLeft: 10 }}
+                  color={Colors.Secondary.Normal}
+                />
+              )}
+            </Button>
             <Text
               style={[
                 Styles.txtBold,
@@ -168,7 +256,7 @@ export default ({ navigation }) => {
               maxLength={20}
               secureTextEntry={true}
               type="light"
-              //onChangeText={(senha_) => setSenha(senha_)}
+              onChangeText={(Senha) => setSenha(Senha)}
               Ref={refs.Senha}
               onSubmitEditing={() => refs.NovaSenha.current.focus()}
             />
@@ -181,7 +269,7 @@ export default ({ navigation }) => {
               maxLength={20}
               secureTextEntry={true}
               type="light"
-              //onChangeText={(senha_) => setSenha(senha_)}
+              onChangeText={(NewSenha) => setNewSenha(NewSenha)}
               Ref={refs.NovaSenha}
               onSubmitEditing={() => refs.ConNovaSenha.current.focus()}
             />
@@ -194,7 +282,7 @@ export default ({ navigation }) => {
               maxLength={20}
               secureTextEntry={true}
               type="light"
-              //onChangeText={(senha_) => setSenha(senha_)}
+              onChangeText={(ConSenha) => setConSenha(ConSenha)}
               Ref={refs.ConNovaSenha}
             />
             <View
@@ -212,12 +300,12 @@ export default ({ navigation }) => {
                 onPress={() => navigation.goBack()}
               />
               <Button
-                text="SALVAR"
+                text="ATUALIZAR"
                 type="light"
                 style={{ minWidth: 150 }}
-                onPress={() => !loading && handleUpdateAccountData}
+                onPress={() => !loadingPass && handleUpdatePassword()}
               >
-                {loading && (
+                {loadingPass && (
                   <ActivityIndicator
                     style={{ marginLeft: 10 }}
                     color={Colors.Secondary.Normal}
