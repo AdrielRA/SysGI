@@ -3,6 +3,7 @@
 /* eslint-disable promise/catch-or-return */
 const functions = require("firebase-functions");
 var fetch = require("node-fetch");
+const nodemailer = require("nodemailer");
 const { Expo } = require("expo-server-sdk");
 
 const admin = require("firebase-admin");
@@ -71,6 +72,19 @@ const dispatchNotifications = (messages) => {
   });
 };
 
+const transporter = nodemailer.createTransport({
+  host: "smtp.office365.com",
+  secureConnection: false,
+  port: 587,
+  tls: {
+    ciphers: "SSLv3",
+  },
+  auth: {
+    user: "sysgi@hotmail.com",
+    pass: "@d1minL0gin1",
+  },
+});
+
 exports.sendAddNotification = functions.database
   .ref("/infratores/{Id}")
   .onCreate((snapshot, context) => {
@@ -111,5 +125,28 @@ exports.sendUpdateNotification = functions.database
       });
 
       Promise.all(promises).then(() => dispatchNotifications(messages));
+    });
+  });
+
+exports.sendAddEmail = functions.database
+  .ref("/infratores/{Id}")
+  .onCreate((snapshot, context) => {
+    const root = snapshot.ref.root;
+    const nome = snapshot.val().Nome;
+
+    const subject = "Informações adicionadas!";
+    const html = `<h4>Um novo infrator foi adicionado!</h4><br/><p><strong>Nome: </strong>${nome}</p>`;
+
+    const email = {
+      from: "sysgi@hotmail.com",
+      to: "elianelago@mpmg.mp.br",
+      subject,
+      text: "Não é necessário responder à este email.",
+      html,
+    };
+
+    transporter.sendMail(email, (err, result) => {
+      if (err) return console.log(err);
+      console.log("Mensagem enviada!!!!" + result);
     });
   });
