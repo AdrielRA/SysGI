@@ -18,7 +18,6 @@ import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import { useContext } from "../../context";
-import * as LocalAuthentication from "expo-local-authentication";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { mask } from "../../utils";
 
@@ -56,6 +55,10 @@ export default ({ navigation }) => {
     Auth.getUserData(user.uid).then((snap) => setUserData(snap.val()));
 
   const handleUpdateAccountData = () => {
+    if (!connected) {
+      alertOffline();
+      return;
+    }
     if (!!nome && !!telefone) {
       setLoading(true);
       Auth.updateUserData(user.uid, { Nome: nome, Telefone: telefone })
@@ -72,6 +75,10 @@ export default ({ navigation }) => {
   };
 
   const handleUpdatePassword = () => {
+    if (!connected) {
+      alertOffline();
+      return;
+    }
     if (!senha) {
       Alert.alert("Atenção:", "Informe sua senha antiga.");
       return;
@@ -96,7 +103,16 @@ export default ({ navigation }) => {
     } else Alert.alert("Atenção:", "Confirmação e nova senha não conferem");
   };
 
-  const handleDeleteAccount = () => {};
+  const handleDeleteAccount = () => {
+    if (!connected) {
+      alertOffline();
+      return;
+    }
+    Auth.deleteUser(user).then(() => {
+      Alert.alert("Conta excluída!", "Esperamos não tê-lo decepcionado!");
+      Auth.signOut();
+    });
+  };
 
   const credentials = {
     0: "Credencial",

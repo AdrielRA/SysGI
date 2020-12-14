@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-community/async-storage";
+import * as LocalAuthentication from "expo-local-authentication";
 import { db, auth } from "../../services/firebase";
 import Constants from "expo-constants";
 import * as Crypto from "expo-crypto";
@@ -20,6 +21,27 @@ const handleSessionChange = (uid, resolve) => {
 
 const handleAuthPersistence = (persistence, resolve) => {
   setPersistence(!persistence).then(() => getPersistence().then(resolve));
+};
+
+const handleLocalAuth = (promptMessage, cancelLabel) => {
+  return new Promise((resolve) => {
+    LocalAuthentication.hasHardwareAsync().then((hasHardware) => {
+      if (hasHardware) {
+        LocalAuthentication.isEnrolledAsync().then((isEnrolled) => {
+          if (isEnrolled) {
+            LocalAuthentication.authenticateAsync({
+              promptMessage,
+              cancelLabel,
+              fallbackLabel: "",
+              disableDeviceFallback: true,
+            })
+              .then((result) => resolve(result.success))
+              .catch(() => resolve("error"));
+          }
+        });
+      }
+    });
+  });
 };
 
 const setPersistence = async (persiste) => {
@@ -153,6 +175,7 @@ export {
   deleteUser,
   handleAuthChange,
   handleAuthPersistence,
+  handleLocalAuth,
   handleSessionChange,
   generateRecoveryCode,
   getPersistence,

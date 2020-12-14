@@ -16,7 +16,7 @@ import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import { useContext } from "../../context";
-import * as LocalAuthentication from "expo-local-authentication";
+
 import { FontAwesome5 } from "@expo/vector-icons";
 import { NavigationEvents } from "react-navigation";
 
@@ -57,34 +57,15 @@ function MENU({ navigation }) {
 
   useEffect(() => {
     if (appState === "active")
-      handleLocalAuth().then((success) => {
-        if (!success) {
-          AppState.removeEventListener("change", setAppState);
-          handleSignOut();
+      Auth.handleLocalAuth("Confirme sua identidade", "Sair").then(
+        (success) => {
+          if (!success) {
+            AppState.removeEventListener("change", setAppState);
+            handleSignOut();
+          }
         }
-      });
+      );
   }, [appState]);
-
-  handleLocalAuth = () => {
-    return new Promise((resolve) => {
-      LocalAuthentication.hasHardwareAsync().then((hasHardware) => {
-        if (hasHardware) {
-          LocalAuthentication.isEnrolledAsync().then((isEnrolled) => {
-            if (isEnrolled) {
-              LocalAuthentication.authenticateAsync({
-                promptMessage: "Confirme sua identidade",
-                cancelLabel: "Sair",
-                fallbackLabel: "",
-                disableDeviceFallback: true,
-              })
-                .then((result) => resolve(result.success))
-                .catch(() => resolve("error"));
-            }
-          });
-        }
-      });
-    });
-  };
 
   const handleSignOut = () => {
     if (!user) goOut();
@@ -123,6 +104,14 @@ function MENU({ navigation }) {
       if (accessToControl) navigation.navigate("Controle");
       else accessDeniedAlert();
     }
+  };
+
+  const handleProfile = () => {
+    Auth.handleLocalAuth("Confirme sua identidade", "Cancelar").then(
+      (success) => {
+        if (success) navigation.push("Profile");
+      }
+    );
   };
 
   const accessToControl =
@@ -197,7 +186,7 @@ function MENU({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={{ position: "absolute", bottom: 25, left: 15 }}
-          onPress={() => navigation.push("Profile")}
+          onPress={handleProfile}
         >
           <FontAwesome5 name="user-cog" color="#fff" size={25} />
         </TouchableOpacity>
