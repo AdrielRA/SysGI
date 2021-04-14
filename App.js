@@ -26,7 +26,7 @@ export default function App() {
           [
             {
               text: "Não",
-              onPress: () => {},
+              onPress: () => { },
               style: "cancel",
             },
             {
@@ -37,7 +37,7 @@ export default function App() {
           { cancelable: false }
         );
       }
-    } catch {}
+    } catch { }
   };
 
   const loadFont = async () => {

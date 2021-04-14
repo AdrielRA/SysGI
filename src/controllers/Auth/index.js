@@ -15,7 +15,7 @@ const handleSessionChange = (uid, resolve) => {
     .on("value", (snapshot) => {
       try {
         resolve(snapshot.val().SessionId);
-      } catch {}
+      } catch { }
     });
 };
 
@@ -75,10 +75,8 @@ const signIn = (email, senha) => {
   return new Promise((resolve, reject) => {
     auth()
       .signInWithEmailAndPassword(email, senha)
-      .then(({ user }) => {
-        if (user.emailVerified) {
-          resolve(getUserData(user.uid));
-        } else reject("email-verification-fail");
+      .then(() => {
+        reject("email-verification-fail");
       })
       .catch((err) => reject(err.code));
   });
@@ -128,8 +126,8 @@ const updateUserData = (uid, updatedData) => {
   return db().ref("users").child(uid).update(updatedData);
 };
 
-const getUserData = (uid) => {
-  return db().ref("users").child(uid).once("value");
+const getUserData = async (uid) => {
+  return db().ref("users").child(uid).once("value").then((snap) => snap || snap.val());
 };
 
 const sendEmailVerification = (user) => {

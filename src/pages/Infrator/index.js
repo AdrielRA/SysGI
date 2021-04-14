@@ -24,7 +24,7 @@ import {
 import { useContext } from "../../context";
 import { ScrollView } from "react-native-gesture-handler";
 import { getCidades, getEstados } from "../../services/ibge";
-import { validator } from "../../utils";
+import { validator, getComarcas } from "../../utils";
 import { Infrator as Model } from "../../models";
 import { NavigationEvents } from "react-navigation";
 import { mask } from "../../utils";
@@ -56,6 +56,7 @@ export default ({ navigation }) => {
     Num: useRef(),
     Bairro: useRef(),
   });
+  const [comarcas, setComarcas] = useState([]);
 
   useEffect(() => {
     getEstados().then(setUfs);
@@ -137,6 +138,10 @@ export default ({ navigation }) => {
       );
     }
   }, [infratorFromFirebase]);
+
+  useEffect(() => {
+    getComarcas().then(comarcas => setComarcas(comarcas))
+  }, [])
 
   const dateIsChanged = (date1, date2) => {
     const dt1 = new Date(date1);
@@ -281,7 +286,7 @@ export default ({ navigation }) => {
         [
           {
             text: "Não",
-            onPress: () => {},
+            onPress: () => { },
             style: "cancel",
           },
           {
@@ -467,12 +472,20 @@ export default ({ navigation }) => {
               maxLength={60}
               onChangeText={(Mãe) => updateInfrator({ Mãe })}
             />
-            <View style={{ flexDirection: "row", height: 40 }}>
+            <View style={{ height: 40 }}>
               <NewPicker
                 placeholder="Medida Socioeducativa"
                 data={medidaItens}
                 value={infrator.MedidaSE}
                 onSelect={(MedidaSE) => updateInfrator({ MedidaSE })}
+              />
+            </View>
+            <View style={{ height: 40, marginTop: 7.5 }}>
+              <NewPicker
+                placeholder="Comarca"
+                data={comarcas}
+                value={infrator?.Comarca}
+                onSelect={(Comarca) => updateInfrator({ Comarca })}
               />
             </View>
             <TextInput

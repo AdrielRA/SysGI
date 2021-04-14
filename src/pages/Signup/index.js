@@ -15,7 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";
 import { useContext } from "../../context";
-import { mask } from "../../utils";
+import { mask, getComarcas } from "../../utils";
 
 function Signup({ navigation }) {
   const [nome, setNome] = useState("");
@@ -27,6 +27,8 @@ function Signup({ navigation }) {
   const [confSenha, setConfSenha] = useState("");
   const [categoria, setCategoria] = useState("0");
   const [loading, setLoading] = useState(false);
+  const [comarcas, setComarcas] = useState([]);
+  const [selectedComarca, setSelectedComarca] = useState("");
 
   const [refs, setRefs] = useState({
     Nome: useRef(),
@@ -49,7 +51,12 @@ function Signup({ navigation }) {
     if (categoria === "0") {
       Alert.alert("Atenção:", "Selecione uma categoria!");
       return false;
-    } else if (!nome || nome === "") {
+    }
+    else if (selectedComarca === "") {
+      Alert.alert("Atenção:", "Selecione uma comarca!");
+      return false;
+    }
+    else if (!nome || nome === "") {
       Alert.alert("Atenção:", "Nome informado é inválido!");
       return false;
     } else if (!inscrição || inscrição === "") {
@@ -81,6 +88,7 @@ function Signup({ navigation }) {
         if (user) {
           Auth.generateRecoveryCode(userData.Inscrição).then((Recovery) => {
             userData = { ...userData, Recovery };
+        
             Auth.setUserData(user.uid, userData).then(() => {
               if (!user.emailVerified) {
                 Auth.sendEmailVerification(user)
@@ -93,7 +101,7 @@ function Signup({ navigation }) {
                     Alert.alert(
                       "Falha:",
                       Strings["ptBr"]["signInError"][
-                        "auth/verification-email-fail"
+                      "auth/verification-email-fail"
                       ]
                     );
                   });
@@ -128,6 +136,10 @@ function Signup({ navigation }) {
     { label: "Juiz", value: "9" },
   ];
 
+  useEffect(() => {
+    getComarcas().then(comarcas => setComarcas(comarcas));
+  }, [])
+
   return (
     <SafeAreaView style={Styles.page}>
       <LinearGradient
@@ -142,7 +154,7 @@ function Signup({ navigation }) {
         </Text>
         <KeyboardAvoidingView
           style={{ flex: 5, alignSelf: "stretch" }}
-          //keyboardVerticalOffset={50}
+        //keyboardVerticalOffset={50}
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <NewPicker
@@ -152,6 +164,17 @@ function Signup({ navigation }) {
               value={categoria}
               onSelect={(Categoria) => setCategoria(Categoria)}
             />
+
+            <View style={{ marginTop: 7.5 }}>
+              <NewPicker
+                type="light"
+                placeholder="Comarca"
+                data={comarcas}
+                value={selectedComarca}
+                onSelect={(comarca) => setSelectedComarca(comarca)}
+              />
+            </View>
+
 
             <TextInput
               placeholder="Nome de Usuário"
@@ -267,6 +290,7 @@ function Signup({ navigation }) {
                   Inscrição: inscrição,
                   Telefone: telefone,
                   Credencial: Number(categoria) * -1,
+                  Comarca: selectedComarca
                 })
               }
             >

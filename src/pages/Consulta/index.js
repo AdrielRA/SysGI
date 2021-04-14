@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Credential, Network, Search } from "../../controllers";
+import { Credential, Network, Search, Infrator } from "../../controllers";
 import { Itens } from "../../components";
 import { Icon } from "@ui-kitten/components";
 import { useContext } from "../../context";
@@ -23,9 +23,10 @@ import { NavigationEvents } from "react-navigation";
 export default ({ navigation }) => {
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential } = useContext();
+  const { credential, user, userData } = useContext();
   const { findAll, findAllBy, findOneBy, clearListener, useSearch } = Search;
   const [infratores, setInfratores] = useState([]);
+  const [idsInfratoresFavoritos, setIdsInfratoresFavoritos] = useState([]);
   const { search, setSearch, type, setType, filter, setFilter } = useSearch();
 
   useEffect(() => {
@@ -43,25 +44,61 @@ export default ({ navigation }) => {
     if (!!search) handleSearch();
   }, [filter]);
 
+  useEffect(() => {
+    Infrator.getFavorites(user.uid).then((favorites) => {
+      setIdsInfratoresFavoritos(favorites)
+    })
+  }, [])
+
   const handleFilter = () => {
     setFilter(
       filter === "Rg"
         ? "Cpf"
         : filter === "Cpf"
-        ? "Processo"
-        : filter === "Processo"
-        ? "Nome"
-        : filter === "Nome"
-        ? "Mãe"
-        : "Rg"
+          ? "Processo"
+          : filter === "Processo"
+            ? "Nome"
+            : filter === "Nome"
+              ? "Mãe"
+              : "Rg"
     );
   };
+
+  const sortInfratoresWithFavoriteFirst = (allInfratores) => {
+    if (!!idsInfratoresFavoritos) {
+      const favorites = allInfratores.filter(infrator => idsInfratoresFavoritos.includes(infrator.id));
+      const newArray = allInfratores.filter(infrator => !idsInfratoresFavoritos.includes(infrator.id));
+
+      favorites.map((item, index) => newArray.splice(index, 0, item));
+
+      return newArray;
+    }
+    return null;
+  }
+
+  const saveInfratores = (dataInfratores) => {
+    let orderInfratores = [];
+    
+    if (!!userData.Comarca) {
+      orderInfratores = dataInfratores.filter(infrator => infrator.Comarca === userData.Comarca)
+      if (orderInfratores.length > 0) orderInfratores = sortInfratoresWithFavoriteFirst(orderInfratores);
+    }
+    !!orderInfratores ? setInfratores(orderInfratores) : setInfratores([]);
+  }
 
   const handleSearch = () => {
     switch (type) {
       case "all":
-        if (!!search) findAllBy(filter, mask.Numeric(search), setInfratores);
-        else findAll(setInfratores);
+        if (!!search) {
+          findAllBy(filter, mask.Numeric(search), (dataInfratores) => {
+            saveInfratores(dataInfratores);
+          })
+        }
+        else {
+          findAll((dataInfratores) => {
+            saveInfratores(dataInfratores);
+          });
+        }
         break;
       case "one":
         if (!!search) findOneBy(filter, mask.Numeric(search), setInfratores);
@@ -130,8 +167,8 @@ export default ({ navigation }) => {
                   {!item.Infrações
                     ? "Sem passagem"
                     : item.Infrações.length === 1
-                    ? "Incidente"
-                    : "Reincidente"}
+                      ? "Incidente"
+                      : "Reincidente"}
                 </Text>
               </View>
             </View>
@@ -179,15 +216,15 @@ export default ({ navigation }) => {
               <Text style={Styles.txtRegularWhite}>
                 {Infrator.Infrações && Infrator.Infrações.length > 0
                   ? moment(
-                      new Date(
-                        Infrator.Infrações.sort(function (a, b) {
-                          return (
-                            new Date(b.Data_ocorrência) -
-                            new Date(a.Data_ocorrência)
-                          );
-                        })[0].Data_ocorrência
-                      )
-                    ).format("DD/MM/YYYY")
+                    new Date(
+                      Infrator.Infrações.sort(function (a, b) {
+                        return (
+                          new Date(b.Data_ocorrência) -
+                          new Date(a.Data_ocorrência)
+                        );
+                      })[0].Data_ocorrência
+                    )
+                  ).format("DD/MM/YYYY")
                   : "--/--/----"}
               </Text>
             </View>
@@ -204,8 +241,8 @@ export default ({ navigation }) => {
                 {!Infrator.Infrações
                   ? "Sem Passagens"
                   : Infrator.Infrações.length === 1
-                  ? "Incidente"
-                  : "Reincidente"}
+                    ? "Incidente"
+                    : "Reincidente"}
               </Text>
             </View>
           </View>

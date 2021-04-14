@@ -55,14 +55,17 @@ export default ({ children }) => {
 
   useEffect(() => setIsLogged(!!user), [user]);
 
-  useEffect(() => {
-    if (!!user) {
-      getUserData(user.uid).then(setUserData);
-      return handleSessionChange(user.uid, setSession);
-    } else {
-      setUserData(undefined);
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (!!user) {
+  //     getUserData(user.uid).then((data) => {
+  //       console.log(Object.keys(data))
+  //       setUserData(data)
+  //     });
+  //     return handleSessionChange(user.uid, setSession);
+  //   } else {
+  //     setUserData(undefined);
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     if (isLogged) getCredencial(user.uid, setCredential);

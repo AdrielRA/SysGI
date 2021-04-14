@@ -32,7 +32,7 @@ const findAllBy = (child, value, callback) => {
       "value",
       (snap) => {
         if (snap.exists()) {
-          parseToModel(snap).then(callback);
+          parseToModel(snap).then((infratores) => callback(infratores));
         } else callback([]);
       },
       reject
@@ -48,7 +48,9 @@ const findAll = (callback) => {
       "value",
       (snap) => {
         if (snap.exists()) {
-          parseToModel(snap).then(callback);
+          parseToModel(snap).then((infratores) => {
+            callback(infratores);
+          });
         } else callback([]);
       },
       reject

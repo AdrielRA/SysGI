@@ -42,6 +42,7 @@ function Login({ navigation }) {
     Senha: useRef(),
   });
 
+  
   useEffect(() => {
     const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
       setShowUnifenas(false)
@@ -71,7 +72,8 @@ function Login({ navigation }) {
       return;
     }
     setLoading(true);
-    Auth.signIn(Email, Senha).catch((error) => {
+    Auth.signIn(Email, Senha)
+    .catch((error) => {
       setLoading(false);
       switch (error) {
         case "email-verification-fail":

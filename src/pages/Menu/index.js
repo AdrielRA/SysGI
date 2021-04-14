@@ -22,6 +22,7 @@ import { NavigationEvents } from "react-navigation";
 
 function MENU({ navigation }) {
   const [userData, setUserData] = useState(navigation.getParam("userData"));
+  
   const { clearSession, validateSession } = Auth;
   const {
     haveAccess,
@@ -119,11 +120,11 @@ function MENU({ navigation }) {
 
   return (
     <SafeAreaView style={[Styles.page, { marginTop: 0 }]}>
-      <NavigationEvents
+      {/* <NavigationEvents
         onWillFocus={() =>
           Auth.getUserData(user.uid).then((snap) => setUserData(snap.val()))
         }
-      />
+      /> */}
       <LinearGradient
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}
