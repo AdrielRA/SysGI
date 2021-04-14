@@ -19,7 +19,7 @@ import { Auth, Network, Credential } from "../../controllers";
 import { LinearGradient } from "expo-linear-gradient";
 import { CheckBox } from "react-native-elements";
 import { Strings } from "../../utils";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 import { Feather } from "@expo/vector-icons";
 
 LogBox.ignoreLogs(["Setting a timer"]);
@@ -34,7 +34,13 @@ function Login({ navigation }) {
   const { validateSession } = Auth;
   const { blockedAccess, isValidCredential } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { handlePersistence, isLogged, persistence, user } = useContext();
+  const {
+    handlePersistence,
+    isLogged,
+    persistence,
+    user,
+    userData,
+  } = useUserContext();
   const [showUnifenas, setShowUnifenas] = useState(true);
 
   const [refs, setRefs] = useState({
@@ -42,7 +48,6 @@ function Login({ navigation }) {
     Senha: useRef(),
   });
 
-  
   useEffect(() => {
     const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
       setShowUnifenas(false)
@@ -59,12 +64,14 @@ function Login({ navigation }) {
   }, []);
 
   useEffect(() => {
-    setLoading(isLogged !== false);
-    if (isLogged) {
-      if (user.emailVerified) Auth.getUserData(user.uid).then(entrar);
-      else setLoading(false);
+    if (!!userData) {
+      setLoading(isLogged !== false);
+      if (isLogged) {
+        if (user.emailVerified) entrar();
+        else setLoading(false);
+      }
     }
-  }, [isLogged]);
+  }, [isLogged, userData]);
 
   const handleLogin = () => {
     if (!connected) {
@@ -72,8 +79,7 @@ function Login({ navigation }) {
       return;
     }
     setLoading(true);
-    Auth.signIn(Email, Senha)
-    .catch((error) => {
+    Auth.signIn(Email, Senha).catch((error) => {
       setLoading(false);
       switch (error) {
         case "email-verification-fail":
@@ -148,9 +154,9 @@ function Login({ navigation }) {
       });
   };
 
-  function entrar(snap) {
-    if (isValidCredential(snap.val().Credencial)) {
-      if (!validateSession(snap.val().SessionId, true)) {
+  const entrar = () => {
+    if (isValidCredential(userData.Credencial)) {
+      if (!validateSession(userData.SessionId, true)) {
         Alert.alert(
           "Conta em uso:",
           "Outro dispositivo conectado! Desconectar de todos?",
@@ -162,9 +168,7 @@ function Login({ navigation }) {
             },
             {
               text: "Sim",
-              onPress: () => {
-                setShowDialog(true);
-              },
+              onPress: () => setShowDialog(true),
             },
           ],
           { cancelable: false }
@@ -183,19 +187,16 @@ function Login({ navigation }) {
           actions: [
             NavigationActions.navigate({
               routeName: "MENU",
-              params: {
-                userData: snap.val(),
-              },
             }),
           ],
         })
       );
     } else {
-      if (blockedAccess(snap.val().Credencial)) handleDelete(user);
+      if (blockedAccess(userData.Credencial)) handleDelete(user);
       else Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
       setLoading(false);
     }
-  }
+  };
 
   const handleDelete = (user) => {
     Auth.deleteUser(user).then(() => {

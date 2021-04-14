@@ -14,7 +14,7 @@ import { Button, TextInput, NewPicker } from "../../components";
 import { LinearGradient } from "expo-linear-gradient";
 import { Auth, Network } from "../../controllers";
 import { Strings } from "../../utils";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 import { mask, getComarcas } from "../../utils";
 
 function Signup({ navigation }) {
@@ -41,7 +41,7 @@ function Signup({ navigation }) {
   });
 
   const { connected, alertOffline } = Network.useNetwork();
-  const { isLogged } = useContext();
+  const { isLogged } = useUserContext();
 
   useEffect(() => {
     if (isLogged) Auth.signOut();
@@ -51,12 +51,10 @@ function Signup({ navigation }) {
     if (categoria === "0") {
       Alert.alert("Atenção:", "Selecione uma categoria!");
       return false;
-    }
-    else if (selectedComarca === "") {
+    } else if (selectedComarca === "") {
       Alert.alert("Atenção:", "Selecione uma comarca!");
       return false;
-    }
-    else if (!nome || nome === "") {
+    } else if (!nome || nome === "") {
       Alert.alert("Atenção:", "Nome informado é inválido!");
       return false;
     } else if (!inscrição || inscrição === "") {
@@ -88,7 +86,7 @@ function Signup({ navigation }) {
         if (user) {
           Auth.generateRecoveryCode(userData.Inscrição).then((Recovery) => {
             userData = { ...userData, Recovery };
-        
+
             Auth.setUserData(user.uid, userData).then(() => {
               if (!user.emailVerified) {
                 Auth.sendEmailVerification(user)
@@ -101,7 +99,7 @@ function Signup({ navigation }) {
                     Alert.alert(
                       "Falha:",
                       Strings["ptBr"]["signInError"][
-                      "auth/verification-email-fail"
+                        "auth/verification-email-fail"
                       ]
                     );
                   });
@@ -137,8 +135,8 @@ function Signup({ navigation }) {
   ];
 
   useEffect(() => {
-    getComarcas().then(comarcas => setComarcas(comarcas));
-  }, [])
+    getComarcas().then((comarcas) => setComarcas(comarcas));
+  }, []);
 
   return (
     <SafeAreaView style={Styles.page}>
@@ -154,7 +152,7 @@ function Signup({ navigation }) {
         </Text>
         <KeyboardAvoidingView
           style={{ flex: 5, alignSelf: "stretch" }}
-        //keyboardVerticalOffset={50}
+          //keyboardVerticalOffset={50}
         >
           <ScrollView style={{ marginVertical: 10, paddingHorizontal: 30 }}>
             <NewPicker
@@ -174,7 +172,6 @@ function Signup({ navigation }) {
                 onSelect={(comarca) => setSelectedComarca(comarca)}
               />
             </View>
-
 
             <TextInput
               placeholder="Nome de Usuário"
@@ -290,7 +287,7 @@ function Signup({ navigation }) {
                   Inscrição: inscrição,
                   Telefone: telefone,
                   Credencial: Number(categoria) * -1,
-                  Comarca: selectedComarca
+                  Comarca: selectedComarca,
                 })
               }
             >

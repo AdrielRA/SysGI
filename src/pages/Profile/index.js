@@ -17,13 +17,13 @@ import { Button, Unifenas, TextInput } from "../../components";
 import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { mask } from "../../utils";
 
 export default ({ navigation }) => {
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential, session, user, isLogged } = useContext();
+  const { credential, session, user, isLogged } = useUserContext();
   const [loading, setLoading] = useState(false);
   const [loadingPass, setLoadingPass] = useState(false);
   const [showCode, setShowCode] = useState(false);

@@ -1,11 +1,11 @@
 import React from "react";
-import Context, { useContext } from "./context";
+import UserContext, { useUserContext } from "./userContext";
 import UploadContext, { useUploadContext } from "./uploadContext";
 
-export { useContext, useUploadContext };
+export { useUserContext, useUploadContext };
 
 export default ({ children }) => (
-  <Context>
+  <UserContext>
     <UploadContext>{children}</UploadContext>
-  </Context>
+  </UserContext>
 );

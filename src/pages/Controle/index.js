@@ -16,11 +16,11 @@ import { Button } from "../../components";
 import { Controle as Item } from "../../components/Itens";
 import { LinearGradient } from "expo-linear-gradient";
 import { SwipeListView } from "react-native-swipe-list-view";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 
 function Controle({ navigation }) {
   const { accessDeniedAlert, isAdmin } = Credential;
-  const { credential } = useContext();
+  const { credential } = useUserContext();
   const { connected, alertOffline } = Network.useNetwork();
   const [lista, setLista] = useState([]);
 

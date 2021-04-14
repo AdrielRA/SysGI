@@ -15,7 +15,7 @@ const handleSessionChange = (uid, resolve) => {
     .on("value", (snapshot) => {
       try {
         resolve(snapshot.val().SessionId);
-      } catch { }
+      } catch {}
     });
 };
 
@@ -75,18 +75,14 @@ const signIn = (email, senha) => {
   return new Promise((resolve, reject) => {
     auth()
       .signInWithEmailAndPassword(email, senha)
-      .then(() => {
-        reject("email-verification-fail");
+      .then(({ user }) => {
+        if (!user.emailVerified) reject("email-verification-fail");
       })
       .catch((err) => reject(err.code));
   });
 };
 
-const signOut = () => {
-  if (!!auth().currentUser) {
-    return auth().signOut();
-  }
-};
+const signOut = () => auth().signOut();
 
 const createUser = (email, senha) => {
   return auth().createUserWithEmailAndPassword(email, senha);
@@ -127,7 +123,17 @@ const updateUserData = (uid, updatedData) => {
 };
 
 const getUserData = async (uid) => {
-  return db().ref("users").child(uid).once("value").then((snap) => snap || snap.val());
+  return db()
+    .ref("users")
+    .child(uid)
+    .once("value")
+    .then((snap) => snap || snap.val());
+};
+
+const listenUserData = (uid, callback) => {
+  const ref = db().ref("users").child(uid);
+  ref.on("value", (snap) => callback(snap.val()));
+  return ref;
 };
 
 const sendEmailVerification = (user) => {
@@ -148,22 +154,24 @@ const generateRecoveryCode = (baseToCreate) => {
 };
 
 const disconnectDevices = (cod) => {
-  if (!auth().currentUser) return;
   return new Promise((resolve, reject) => {
-    db()
-      .ref("users")
-      .child(auth().currentUser.uid)
-      .once("value")
-      .then((snapshot) => {
-        if (snapshot.val().Recovery != undefined) {
-          if (snapshot.val().Recovery === cod) {
-            snapshot.ref
-              .child("SessionId")
-              .remove()
-              .then(() => resolve());
-          } else reject();
-        }
-      });
+    console.log(!auth().currentUser);
+    if (!auth().currentUser) reject();
+    else
+      db()
+        .ref("users")
+        .child(auth().currentUser.uid)
+        .once("value")
+        .then((snapshot) => {
+          if (snapshot.val().Recovery != undefined) {
+            if (snapshot.val().Recovery === cod) {
+              snapshot.ref
+                .child("SessionId")
+                .remove()
+                .then(() => resolve());
+            } else reject();
+          }
+        });
   });
 };
 
@@ -187,4 +195,5 @@ export {
   updateUserData,
   updatePassword,
   validateSession,
+  listenUserData,
 };

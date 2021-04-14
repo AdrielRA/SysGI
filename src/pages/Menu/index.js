@@ -15,14 +15,12 @@ import { Button, Unifenas } from "../../components";
 import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 
 import { FontAwesome5 } from "@expo/vector-icons";
 import { NavigationEvents } from "react-navigation";
 
 function MENU({ navigation }) {
-  const [userData, setUserData] = useState(navigation.getParam("userData"));
-  
   const { clearSession, validateSession } = Auth;
   const {
     haveAccess,
@@ -32,15 +30,15 @@ function MENU({ navigation }) {
   } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
   const { enabled, handleNotification } = Notifications.useNotifications();
-  const { credential, session, user, isLogged } = useContext();
+  const { user, isLogged, userData } = useUserContext();
   const [appState, setAppState] = useState();
 
   useEffect(() => {
-    if (session !== null && !validateSession(session)) {
+    if (!!userData && !validateSession(userData.SessionId)) {
       Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
       Auth.signOut();
     }
-  }, [session]);
+  }, [userData]);
 
   useEffect(() => {
     if (!isLogged) goOut();
@@ -84,7 +82,7 @@ function MENU({ navigation }) {
   const handleCadastrar = () => {
     if (!connected) alertOffline();
     else {
-      if (haveAccess(credential, "AccessToCadastro"))
+      if (haveAccess(userData.Credencial, "AccessToCadastro"))
         navigation.navigate("Infrator");
       else accessDeniedAlert();
     }
@@ -93,7 +91,7 @@ function MENU({ navigation }) {
   const handleConsultar = () => {
     if (!connected) alertOffline();
     else {
-      if (haveAccess(credential, "AccessToConsulta"))
+      if (haveAccess(userData?.Credencial, "AccessToConsulta"))
         navigation.navigate("Consulta");
       else accessDeniedAlert();
     }
@@ -116,7 +114,8 @@ function MENU({ navigation }) {
   };
 
   const accessToControl =
-    haveAccessToUserControl(credential) || isAdmin(credential);
+    haveAccessToUserControl(userData?.Credencial) ||
+    isAdmin(userData?.Credencial);
 
   return (
     <SafeAreaView style={[Styles.page, { marginTop: 0 }]}>
@@ -135,8 +134,8 @@ function MENU({ navigation }) {
         <Text style={[Styles.lblMENU, { paddingTop: 40 }]}>MENU</Text>
         <Text style={Styles.lblMsg}>
           Bem-vindo,{" "}
-          {userData.Nome.split(" ")[0]
-            ? userData.Nome.split(" ")[0]
+          {userData?.Nome.split(" ")[0]
+            ? userData?.Nome.split(" ")[0]
             : "Usuário"}
         </Text>
         <View

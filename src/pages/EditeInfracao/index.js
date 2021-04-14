@@ -19,7 +19,7 @@ import {
   Relatory,
 } from "../../controllers";
 import { Button, Itens, Picker, TextInput, Datepicker } from "../../components";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 import { FlatList } from "react-native-gesture-handler";
 import { validator } from "../../utils";
 import { Infração } from "../../models";
@@ -33,7 +33,7 @@ export default ({ navigation }) => {
   const dateState = Datepicker.useDatepickerState();
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential } = useContext();
+  const { credential } = useUserContext();
   const [refs, setRefs] = useState({
     Reds: useRef(),
   });

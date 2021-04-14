@@ -17,7 +17,7 @@ import moment from "moment";
 import { Anexo, Credential, Network, Infracao } from "../../controllers";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Itens } from "../../components";
-import { useContext, useUploadContext } from "../../context";
+import { useUserContext, useUploadContext } from "../../context";
 import { NavigationEvents } from "react-navigation";
 
 export default ({ navigation }) => {
@@ -28,7 +28,7 @@ export default ({ navigation }) => {
   const [showDialogNovoNome, setShowDiagNomeAnexo] = useState(false);
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential } = useContext();
+  const { credential } = useUserContext();
   const { uploads } = useUploadContext();
   const [lista, setLista] = useState([]);
   const [anexos, setAnexos] = useState([]);

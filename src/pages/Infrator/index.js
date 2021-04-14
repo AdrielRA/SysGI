@@ -21,7 +21,7 @@ import {
   TextInput,
   Datepicker,
 } from "../../components";
-import { useContext } from "../../context";
+import { useUserContext } from "../../context";
 import { ScrollView } from "react-native-gesture-handler";
 import { getCidades, getEstados } from "../../services/ibge";
 import { validator, getComarcas } from "../../utils";
@@ -45,7 +45,7 @@ export default ({ navigation }) => {
   const dateState = Datepicker.useDatepickerState();
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential, user } = useContext();
+  const { credential, user } = useUserContext();
   const [isFavorite, setIsFavorite] = useState();
   const [refs, setRefs] = useState({
     Nome: useRef(),
@@ -140,8 +140,8 @@ export default ({ navigation }) => {
   }, [infratorFromFirebase]);
 
   useEffect(() => {
-    getComarcas().then(comarcas => setComarcas(comarcas))
-  }, [])
+    getComarcas().then((comarcas) => setComarcas(comarcas));
+  }, []);
 
   const dateIsChanged = (date1, date2) => {
     const dt1 = new Date(date1);
@@ -286,7 +286,7 @@ export default ({ navigation }) => {
         [
           {
             text: "Não",
-            onPress: () => { },
+            onPress: () => {},
             style: "cancel",
           },
           {
