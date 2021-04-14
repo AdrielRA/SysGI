@@ -13,13 +13,13 @@ import {
 } from "react-native";
 import Styles from "../../styles";
 import Colors from "../../styles/colors";
-import { Button, Unifenas, TextInput } from "../../components";
+import { Button, Unifenas, TextInput, NewPicker } from "../../components";
 import { Auth, Credential, Network, Notifications } from "../../controllers";
 import { StackActions, NavigationActions } from "react-navigation";
 import { LinearGradient } from "expo-linear-gradient";
 import { useUserContext } from "../../context";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { mask } from "../../utils";
+import { getComarcas, mask } from "../../utils";
 
 export default ({ navigation }) => {
   const { connected, alertOffline } = Network.useNetwork();
@@ -33,7 +33,7 @@ export default ({ navigation }) => {
   const [senha, setSenha] = useState();
   const [newSenha, setNewSenha] = useState();
   const [conSenha, setConSenha] = useState();
-
+  const [comarcas, setComarcas] = useState();
   const [refs, setRefs] = useState({
     Nome: useRef(),
     Telefone: useRef(),
@@ -41,6 +41,12 @@ export default ({ navigation }) => {
     NovaSenha: useRef(),
     ConNovaSenha: useRef(),
   });
+
+  useEffect(() => {
+    getComarcas().then((comarcas_) => {
+      setComarcas(comarcas_)
+    })
+  }, [])
 
   useEffect(() => {
     handleGetUserData();
@@ -242,6 +248,21 @@ export default ({ navigation }) => {
               Ref={refs.Telefone}
               onSubmitEditing={() => refs.Senha.current.focus()}
             />
+
+            <Text style={[
+              Styles.txtBold,
+              { color: "#fff", fontSize: 16, marginBottom:3 },
+            ]}>Comarca</Text>
+            <NewPicker
+              style={{ width: "100%" }}
+              type="light"
+              placeholder="Comarca"
+              data={comarcas}
+              value={userData?.Comarca}
+              onSelect={(comarca) => setSelectedComarca(comarca)}
+            />
+
+
             <Button
               text="SALVAR"
               type="light"
@@ -403,7 +424,7 @@ export default ({ navigation }) => {
                   [
                     {
                       text: "Não",
-                      onPress: () => {},
+                      onPress: () => { },
                       style: "cancel",
                     },
                     {
