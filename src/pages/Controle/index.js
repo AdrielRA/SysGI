@@ -20,20 +20,20 @@ import { useUserContext } from "../../context";
 
 function Controle({ navigation }) {
   const { accessDeniedAlert, isAdmin } = Credential;
-  const { credential } = useUserContext();
+  const { userData } = useUserContext();
   const { connected, alertOffline } = Network.useNetwork();
   const [lista, setLista] = useState([]);
 
   useEffect(() => {
-    if (!!credential) {
+    if (!!userData.Credencial) {
       const unsubscribe = Credential.onNewUserWithCredential(
-        credential,
-        isAdmin(credential),
+        /*userData.Credencial,
+        isAdmin(userData.Credencial),*/
         handleUserList
       );
       return unsubscribe();
     }
-  }, [credential]);
+  }, [userData?.Credencial]);
 
   const handleUserList = (snap) => {
     if (!!snap) {
@@ -50,7 +50,7 @@ function Controle({ navigation }) {
       alertOffline();
       return;
     }
-    if (isAdmin(credential)) {
+    if (isAdmin(userData?.Credencial)) {
       Credential.setCredential(
         item.key,
         removed ? 99 : Math.abs(item.Credencial)

@@ -23,7 +23,7 @@ const handleAuthPersistence = (persistence, resolve) => {
   setPersistence(!persistence).then(() => getPersistence().then(resolve));
 };
 
-const handleLocalAuth = (promptMessage, cancelLabel) => {
+const handleLocalAuth = (promptMessage) => {
   return new Promise((resolve) => {
     LocalAuthentication.hasHardwareAsync().then((hasHardware) => {
       if (hasHardware) {
@@ -31,15 +31,12 @@ const handleLocalAuth = (promptMessage, cancelLabel) => {
           if (isEnrolled) {
             LocalAuthentication.authenticateAsync({
               promptMessage,
-              cancelLabel,
-              fallbackLabel: "",
-              disableDeviceFallback: true,
             })
-              .then((result) => resolve(result.success))
+              .then((auth) => resolve(auth.success))
               .catch(() => resolve("error"));
-          }
+          } else resolve("unenrolled");
         });
-      }
+      } else resolve("unsupported");
     });
   });
 };

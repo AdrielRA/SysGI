@@ -23,7 +23,7 @@ import { NavigationEvents } from "react-navigation";
 export default ({ navigation }) => {
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential, user, userData } = useUserContext();
+  const { user, userData } = useUserContext();
   const { findAll, findAllBy, findOneBy, clearListener, useSearch } = Search;
   const [infratores, setInfratores] = useState([]);
   const [idsInfratoresFavoritos, setIdsInfratoresFavoritos] = useState([]);
@@ -44,11 +44,15 @@ export default ({ navigation }) => {
     if (!!search) handleSearch();
   }, [filter]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     Infrator.getFavorites(user.uid).then((favorites) => {
       setIdsInfratoresFavoritos(favorites);
     });
-  }, []);
+  }, []);*/
+
+  useEffect(() => {
+    if (type === "all") handleInfratores(infratores);
+  }, [userData?.Infratores_favoritados]);
 
   const handleFilter = () => {
     setFilter(
@@ -64,47 +68,38 @@ export default ({ navigation }) => {
     );
   };
 
-  const sortInfratoresWithFavoriteFirst = (allInfratores) => {
-    if (!!idsInfratoresFavoritos) {
-      const favorites = allInfratores.filter((infrator) =>
-        idsInfratoresFavoritos.includes(infrator.id)
-      );
-      const newArray = allInfratores.filter(
-        (infrator) => !idsInfratoresFavoritos.includes(infrator.id)
-      );
-
-      favorites.map((item, index) => newArray.splice(index, 0, item));
-
-      return newArray;
-    }
-    return null;
+  const sortInfratoresByFavorite = (infratoresData) => {
+    const favIds = userData.Infratores_favoritados;
+    if (!favIds || !infratoresData) return infratoresData;
+    else
+      return infratoresData
+        .sort((a, b) => favIds.indexOf(a.id) < favIds.indexOf(b.id))
+        .map((i) => ({ ...i, favorite: favIds.includes(i.id) }));
   };
 
-  const saveInfratores = (dataInfratores) => {
-    let orderInfratores = [];
+  const sortInfratoresByName = (infratoresData) => {
+    if (!infratoresData) return infratoresData;
+    else return infratoresData.sort((a, b) => a.Nome < b.Nome);
+  };
 
-    if (!!userData.Comarca) {
-      orderInfratores = dataInfratores.filter(
-        (infrator) => infrator.Comarca === userData.Comarca
+  const handleInfratores = (infratoresData) => {
+    if (!userData.Comarca) setInfratores([]);
+    else {
+      let infratoresFilteredByComarca = infratoresData?.filter(
+        (infrator) => !infrator.Comarca || infrator.Comarca === userData.Comarca
       );
-      if (orderInfratores.length > 0)
-        orderInfratores = sortInfratoresWithFavoriteFirst(orderInfratores);
+      let sortedInfratores = sortInfratoresByName(infratoresFilteredByComarca);
+
+      sortedInfratores = sortInfratoresByFavorite(sortedInfratores);
+      setInfratores(sortedInfratores);
     }
-    !!orderInfratores ? setInfratores(orderInfratores) : setInfratores([]);
   };
 
   const handleSearch = () => {
     switch (type) {
       case "all":
-        if (!!search) {
-          findAllBy(filter, mask.Numeric(search), (dataInfratores) => {
-            saveInfratores(dataInfratores);
-          });
-        } else {
-          findAll((dataInfratores) => {
-            saveInfratores(dataInfratores);
-          });
-        }
+        if (!!search) findAllBy(filter, mask.Numeric(search), handleInfratores);
+        else findAll(handleInfratores);
         break;
       case "one":
         if (!!search) findOneBy(filter, mask.Numeric(search), setInfratores);
@@ -150,10 +145,27 @@ export default ({ navigation }) => {
               alignItems: "center",
             }}
           >
-            <View style={{ maxWidth: "80%" }}>
-              <View style={{ flexDirection: "row" }}>
+            {item.favorite && (
+              <View
+                style={{
+                  minHeight: 100,
+                  minWidth: 3,
+                  borderRadius: 3,
+                  marginRight: 5,
+                  backgroundColor: Colors.Secondary.Normal,
+                }}
+              ></View>
+            )}
+            <View
+              style={{
+                width: Dimensions.get("screen").width - 100,
+              }}
+            >
+              <View style={{ flexDirection: "row", maxWidth: "80%" }}>
                 <Text style={[Styles.txtBold]}>Nome: </Text>
-                <Text style={[Styles.txtNormal]}>{item.Nome}</Text>
+                <Text numberOfLines={1} style={[Styles.txtNormal]}>
+                  {item.Nome}
+                </Text>
               </View>
               <View style={{ flexDirection: "row" }}>
                 <Text style={[Styles.txtBold]}>CPF: </Text>
@@ -180,14 +192,14 @@ export default ({ navigation }) => {
             </View>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Infrator", { Infrator: item });
+                const { favorite, ...Infrator } = item;
+                navigation.navigate("Infrator", { Infrator });
               }}
             >
               <Image
                 style={{
                   width: 40,
                   height: 40,
-                  marginTop: 10,
                   borderRadius: 5,
                 }}
                 source={require("../../assets/images/icon-mais.png")}
@@ -287,7 +299,7 @@ export default ({ navigation }) => {
                   alertOffline();
                   return;
                 }
-                if (haveAccess(credential, "AccessToDetalhes"))
+                if (haveAccess(userData.Credencial, "AccessToDetalhes"))
                   navigation.navigate("Infrator", { Infrator });
                 else accessDeniedAlert();
               }}
@@ -317,7 +329,7 @@ export default ({ navigation }) => {
                   alertOffline();
                   return;
                 }
-                if (haveAccess(credential, "AccessToAnexar"))
+                if (haveAccess(userData.Credencial, "AccessToAnexar"))
                   navigation.navigate("Detalhes", {
                     idInfracao: item.id,
                     idInfrator: Infrator.id,
@@ -341,7 +353,7 @@ export default ({ navigation }) => {
         alignItems: "center",
       }}
     >
-      {!!search && (
+      {(type === "all" || !!search) && (
         <>
           <Text
             style={[

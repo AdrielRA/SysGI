@@ -38,7 +38,14 @@ function MENU({ navigation }) {
       Alert.alert("Atenção:", "Sua conta foi desconectada deste dispositivo!");
       Auth.signOut();
     }
-  }, [userData]);
+  }, [userData?.SessionId]);
+
+  useEffect(() => {
+    if (!!userData?.Credencial && userData.Credencial < 0) {
+      Alert.alert("Atenção:", "Sua conta foi desativada!");
+      Auth.signOut();
+    }
+  }, [userData?.Credencial]);
 
   useEffect(() => {
     if (!isLogged) goOut();
@@ -56,14 +63,12 @@ function MENU({ navigation }) {
 
   useEffect(() => {
     if (appState === "active")
-      Auth.handleLocalAuth("Confirme sua identidade", "Sair").then(
-        (success) => {
-          if (!success) {
-            AppState.removeEventListener("change", setAppState);
-            handleSignOut();
-          }
+      Auth.handleLocalAuth("Confirme sua identidade").then((success) => {
+        if (!success) {
+          AppState.removeEventListener("change", setAppState);
+          handleSignOut();
         }
-      );
+      });
   }, [appState]);
 
   const handleSignOut = () => {
@@ -82,7 +87,7 @@ function MENU({ navigation }) {
   const handleCadastrar = () => {
     if (!connected) alertOffline();
     else {
-      if (haveAccess(userData.Credencial, "AccessToCadastro"))
+      if (haveAccess(userData?.Credencial, "AccessToCadastro"))
         navigation.navigate("Infrator");
       else accessDeniedAlert();
     }
@@ -119,11 +124,6 @@ function MENU({ navigation }) {
 
   return (
     <SafeAreaView style={[Styles.page, { marginTop: 0 }]}>
-      {/* <NavigationEvents
-        onWillFocus={() =>
-          Auth.getUserData(user.uid).then((snap) => setUserData(snap.val()))
-        }
-      /> */}
       <LinearGradient
         start={{ x: 0.0, y: 0.25 }}
         end={{ x: 1, y: 1.0 }}

@@ -193,7 +193,10 @@ function Login({ navigation }) {
       );
     } else {
       if (blockedAccess(userData.Credencial)) handleDelete(user);
-      else Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
+      else {
+        Alert.alert("Não liberado! ", "Seu acesso ainda está sob análise!");
+        Auth.signOut();
+      }
       setLoading(false);
     }
   };

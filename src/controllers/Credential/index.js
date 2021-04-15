@@ -31,7 +31,7 @@ const haveAccess = (credential, access) => {
 };
 
 const haveAccessToUserControl = (credential) => {
-  return credential > 10 && credential < 20;
+  return credential % 10 === 8;
 };
 
 const isAdmin = (credential) => {
@@ -46,15 +46,15 @@ const accessDeniedAlert = () => {
   Alert.alert("Atenção:", "Você não tem permissão para acessar este recurso!");
 };
 
-const onNewUserWithCredential = (credential, isAdmin, callback) => {
+const onNewUserWithCredential = (/*credential, isAdmin,*/ callback) => {
   const usersRef = db().ref().child("users");
-  if (isAdmin)
-    return usersRef.orderByChild("Credencial").endAt(0).on("value", callback);
-  else
+  //if (isAdmin)
+  return usersRef.orderByChild("Credencial").endAt(0).on("value", callback);
+  /*else
     return usersRef
       .orderByChild("Credencial")
       .equalTo((credential % 10) * -1)
-      .on("value", callback);
+      .on("value", callback);*/
 };
 
 export {
