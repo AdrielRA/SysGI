@@ -9,14 +9,19 @@ const getEmptyEntries = (obj, ignoredFields) => {
 const haveChanges = (changed, original, ignore) => {
   if (!ignore) ignore = [];
   let diff = Object.keys(original).reduce((diff, key) => {
-    if (changed[key] === original[key]) return diff;
-    return {
-      ...diff,
-      [key]: original[key],
-    };
-  }, {});
+    if (Array.isArray(changed[key])) {
+      if (
+        changed[key].length !== original[key].length ||
+        !original[key].every((v, i) => v === changed[key][i])
+      )
+        return [...diff, key];
+      else return diff;
+    } else if (changed[key] === original[key]) {
+      return diff;
+    } else return [...diff, key];
+  }, []);
 
-  return Object.keys(diff).filter((key) => !ignore.includes(key));
+  return diff.filter((key) => !ignore.includes(key));
 };
 
 export { getEmptyEntries, haveChanges };

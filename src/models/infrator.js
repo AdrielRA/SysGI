@@ -7,9 +7,11 @@ export default class Infrator {
   Num_residência;
   Bairro;
   Cidade;
+  Comarca;
   Uf;
   Sexo = null;
   Data_nascimento = null;
   Data_registro;
   Infrações;
+  Processos;
 }

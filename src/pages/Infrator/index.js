@@ -41,11 +41,12 @@ export default ({ navigation }) => {
   const [loadRelatorio, setLoadRelatorio] = useState(false);
   const [cidades, setCidades] = useState([]);
   const [estado, setEstado] = useState("");
+  const [processo, setProcesso] = useState("");
   const [ufs, setUfs] = useState([]);
   const dateState = Datepicker.useDatepickerState();
   const { accessDeniedAlert, haveAccess } = Credential;
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential, user } = useUserContext();
+  const { userData, user } = useUserContext();
   const [isFavorite, setIsFavorite] = useState();
   const [refs, setRefs] = useState({
     Nome: useRef(),
@@ -153,6 +154,20 @@ export default ({ navigation }) => {
     );
   };
 
+  const handleAddProcesso = () => {
+    if (!!processo) {
+      const Processos = infrator.Processos || [];
+      if (!Processos.includes(processo)) Processos.push(processo);
+      updateInfrator({ Processos });
+      setProcesso("");
+    }
+  };
+
+  const handleRemProcesso = (index) => {
+    const Processos = infrator.Processos.filter((_, i) => i !== index);
+    updateInfrator({ Processos });
+  };
+
   const handleListener = (snap) => {
     setInfratorFromFirebase(snap);
   };
@@ -165,10 +180,21 @@ export default ({ navigation }) => {
       alertOffline();
       return;
     }
-    const emptyEntries = validator.getEmptyEntries(infrator);
+    const emptyEntries = validator.getEmptyEntries(infrator, [
+      "Rg",
+      "Cpf",
+      "Logradouro",
+      "Num_residência",
+      "Bairro",
+      "Cidade",
+      "Comarca",
+      "Uf",
+      "Processos",
+    ]);
+
     switch (status) {
       case "new":
-        if (haveAccess(credential, "AccessToCadastro")) {
+        if (haveAccess(userData.Credencial, "AccessToCadastro")) {
           if (emptyEntries.length > 0) {
             Alert.alert("Atenção:", "Existem campos sem preencher");
           } else {
@@ -181,7 +207,7 @@ export default ({ navigation }) => {
         } else accessDeniedAlert();
         break;
       case "saved":
-        if (haveAccess(credential, "AccessToEditar")) {
+        if (haveAccess(userData.Credencial, "AccessToEditar")) {
           if (emptyEntries.length > 0) {
             Alert.alert("Atenção:", "Existem campos sem preencher");
           } else {
@@ -208,7 +234,7 @@ export default ({ navigation }) => {
         setStatus("saved");
       })
       .catch(() => {
-        Alert.alert("Falha:", "Não foi possivel salvar o infrator!");
+        Alert.alert("Falha:", "Não foi possível salvar o infrator!");
       });
   };
 
@@ -222,6 +248,7 @@ export default ({ navigation }) => {
       "Infrações",
       "Data_nascimento",
     ]);
+
     if (!changedDate && changed.length === 0) {
       Alert.alert(
         "Atenção:",
@@ -279,7 +306,7 @@ export default ({ navigation }) => {
       alertOffline();
       return;
     }
-    if (haveAccess(credential, "AccessToDelete")) {
+    if (haveAccess(userData.Credencial, "AccessToDelete")) {
       Alert.alert(
         "Tem certeza?",
         "Os dados deste infrator serão perdidos para sempre!",
@@ -373,6 +400,7 @@ export default ({ navigation }) => {
             marginBottom: 15,
             borderRadius: 10,
             padding: 10,
+            paddingTop: 5,
           }}
         >
           <ScrollView>
@@ -399,19 +427,6 @@ export default ({ navigation }) => {
               autoFocus={true}
               maxLength={60}
               onChangeText={(Nome) => updateInfrator({ Nome })}
-              onSubmitEditing={() => refs.Processo.current.focus()}
-              blurOnSubmit={false}
-            />
-            <TextInput
-              Ref={refs.Processo}
-              style={{ marginBottom: 0 }}
-              placeholder="Nº Processo"
-              keyboardType="number-pad"
-              returnKeyType="next"
-              autoCompleteType="name"
-              type="secondary"
-              value={infrator.Processo}
-              onChangeText={(Processo) => updateInfrator({ Processo })}
               onSubmitEditing={() => refs.Rg.current.focus()}
               blurOnSubmit={false}
             />
@@ -467,27 +482,12 @@ export default ({ navigation }) => {
               autoCapitalize="words"
               autoCompleteType="name"
               type="secondary"
-              style={{ marginTop: 8, marginEnd: 3.5 }}
+              style={{ marginTop: 8, marginBottom: 0 }}
               value={infrator.Mãe}
               maxLength={60}
+              onSubmitEditing={() => refs.Logradouro.current.focus()}
               onChangeText={(Mãe) => updateInfrator({ Mãe })}
             />
-            <View style={{ height: 40 }}>
-              <NewPicker
-                placeholder="Medida Socioeducativa"
-                data={medidaItens}
-                value={infrator.MedidaSE}
-                onSelect={(MedidaSE) => updateInfrator({ MedidaSE })}
-              />
-            </View>
-            <View style={{ height: 40, marginTop: 7.5 }}>
-              <NewPicker
-                placeholder="Comarca"
-                data={comarcas}
-                value={infrator?.Comarca}
-                onSelect={(Comarca) => updateInfrator({ Comarca })}
-              />
-            </View>
             <TextInput
               style={{
                 marginBottom: 0,
@@ -560,13 +560,129 @@ export default ({ navigation }) => {
                 onSelect={(Cidade) => updateInfrator({ Cidade })}
               />
             </View>
-            <Button
-              style={{ marginTop: 15 }}
-              text="SALVAR"
-              type="normal"
-              onPress={handleSave}
+            <NewPicker
+              placeholder="Medida Socioeducativa"
+              style={{ marginTop: 7.5 }}
+              data={medidaItens}
+              value={infrator.MedidaSE}
+              onSelect={(MedidaSE) => updateInfrator({ MedidaSE })}
             />
-            {status === "saved" ? (
+            <NewPicker
+              placeholder="Comarca"
+              style={{ marginTop: 7.5 }}
+              data={comarcas}
+              value={infrator?.Comarca}
+              onSelect={(Comarca) => updateInfrator({ Comarca })}
+            />
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "CenturyGothicBold",
+                color: Colors.Secondary.Normal,
+              }}
+            >
+              Processos:
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <TextInput
+                Ref={refs.Processo}
+                placeholder="Nº Processo"
+                keyboardType="number-pad"
+                returnKeyType="next"
+                autoCompleteType="name"
+                type="secondary"
+                value={processo}
+                onChangeText={(processo) => setProcesso(processo)}
+                blurOnSubmit={false}
+              />
+              <TouchableOpacity
+                style={{
+                  width: 40,
+                  height: 40,
+                  backgroundColor: Colors.Secondary.Normal,
+                  borderRadius: 20,
+                  marginHorizontal: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingBottom: 3,
+                }}
+                underlayColor={Colors.Primary.Normal}
+                onPress={handleAddProcesso}
+              >
+                <Text
+                  style={{
+                    fontSize: 30,
+                    fontFamily: "CenturyGothicBold",
+                    color: "#fff",
+                    textAlign: "center",
+                  }}
+                >
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {infrator.Processos &&
+              infrator.Processos.map((proc, i) => (
+                <View
+                  key={i}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    borderStyle: "solid",
+                    borderBottomColor: "#f1f1f1",
+                    borderBottomWidth: 1,
+                    justifyContent: "space-between",
+                    paddingLeft: 15,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontFamily: "CenturyGothic",
+                      color: Colors.Secondary.Normal,
+                      maxWidth: "80%",
+                    }}
+                    numberOfLines={1}
+                  >
+                    {proc}
+                  </Text>
+                  <TouchableOpacity
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      marginHorizontal: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    onPress={() => handleRemProcesso(i)}
+                  >
+                    <Image
+                      style={{ height: 15, width: 15 }}
+                      source={require("../../assets/images/icon_lixeira_cor.png")}
+                    ></Image>
+                  </TouchableOpacity>
+                </View>
+              ))}
+          </ScrollView>
+          <View
+            style={{
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: 5,
+              paddingTop: 5,
+              backgroundColor: "#fff",
+              justifyContent: "center",
+            }}
+          >
+            <Button text="SALVAR" type="normal" onPress={handleSave} />
+            {status === "saved" && (
               <View style={{ flexDirection: "row" }}>
                 <Button
                   style={{ width: status === "saved" ? "46%" : "100%" }}
@@ -644,10 +760,8 @@ export default ({ navigation }) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : (
-              <View style={{ height: 78 }}></View>
             )}
-          </ScrollView>
+          </View>
         </View>
       </LinearGradient>
     </SafeAreaView>

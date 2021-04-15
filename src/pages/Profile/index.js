@@ -23,17 +23,16 @@ import { getComarcas, mask } from "../../utils";
 
 export default ({ navigation }) => {
   const { connected, alertOffline } = Network.useNetwork();
-  const { credential, session, user, isLogged } = useUserContext();
+  const { user, isLogged, userData } = useUserContext();
   const [loading, setLoading] = useState(false);
   const [loadingPass, setLoadingPass] = useState(false);
   const [showCode, setShowCode] = useState(false);
-  const [userData, setUserData] = useState({});
-  const [nome, setNome] = useState();
-  const [telefone, setTelefone] = useState();
-  const [senha, setSenha] = useState();
-  const [newSenha, setNewSenha] = useState();
-  const [conSenha, setConSenha] = useState();
-  const [comarcas, setComarcas] = useState();
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [senha, setSenha] = useState("");
+  const [newSenha, setNewSenha] = useState("");
+  const [conSenha, setConSenha] = useState("");
+  const [comarcas, setComarcas] = useState("");
   const [refs, setRefs] = useState({
     Nome: useRef(),
     Telefone: useRef(),
@@ -44,21 +43,16 @@ export default ({ navigation }) => {
 
   useEffect(() => {
     getComarcas().then((comarcas_) => {
-      setComarcas(comarcas_)
-    })
-  }, [])
+      setComarcas(comarcas_);
+    });
+  }, []);
 
   useEffect(() => {
-    handleGetUserData();
-  }, [isLogged]);
-
-  useEffect(() => {
-    setNome(userData.Nome);
-    setTelefone(userData.Telefone);
+    if (!!userData) {
+      setNome(userData.Nome);
+      setTelefone(userData.Telefone);
+    }
   }, [userData]);
-
-  const handleGetUserData = () =>
-    Auth.getUserData(user.uid).then((snap) => setUserData(snap.val()));
 
   const handleUpdateAccountData = () => {
     if (!connected) {
@@ -173,26 +167,30 @@ export default ({ navigation }) => {
               padding: 15,
             }}
           >
-            <Text
-              style={[
-                Styles.txtBold,
-                {
-                  color: Colors.Primary.Normal,
-                  borderRadius: 80,
-                  backgroundColor: "#fff",
-                  width: 80,
-                  height: 80,
-                  textAlign: "center",
-                  textAlignVertical: "center",
-                  lineHeight: 52,
-                  fontSize: 50,
-                  marginTop: 15,
-                  marginBottom: 30,
-                },
-              ]}
+            <View
+              style={{
+                backgroundColor: "#fff",
+                width: 80,
+                height: 80,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 40,
+                marginBottom: 15,
+              }}
             >
-              {!!userData.Nome ? userData.Nome[0].toUpperCase() : "U"}
-            </Text>
+              <Text
+                style={[
+                  Styles.txtBold,
+                  {
+                    color: Colors.Primary.Normal,
+                    lineHeight: 52,
+                    fontSize: 50,
+                  },
+                ]}
+              >
+                {!!userData.Nome ? userData.Nome[0].toUpperCase() : "U"}
+              </Text>
+            </View>
 
             <Text
               style={[
@@ -249,10 +247,14 @@ export default ({ navigation }) => {
               onSubmitEditing={() => refs.Senha.current.focus()}
             />
 
-            <Text style={[
-              Styles.txtBold,
-              { color: "#fff", fontSize: 16, marginBottom:3 },
-            ]}>Comarca</Text>
+            <Text
+              style={[
+                Styles.txtBold,
+                { color: "#fff", fontSize: 16, marginBottom: 3 },
+              ]}
+            >
+              Comarca
+            </Text>
             <NewPicker
               style={{ width: "100%" }}
               type="light"
@@ -261,7 +263,6 @@ export default ({ navigation }) => {
               value={userData?.Comarca}
               onSelect={(comarca) => setSelectedComarca(comarca)}
             />
-
 
             <Button
               text="SALVAR"
@@ -424,7 +425,7 @@ export default ({ navigation }) => {
                   [
                     {
                       text: "Não",
-                      onPress: () => { },
+                      onPress: () => {},
                       style: "cancel",
                     },
                     {
