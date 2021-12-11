@@ -1,3 +1,4 @@
+import "react-native-get-random-values";
 import React, { useEffect, useState } from "react";
 import { StatusBar, ActivityIndicator, Alert, Platform } from "react-native";
 import { AppearanceProvider } from "react-native-appearance";
@@ -26,7 +27,7 @@ export default function App() {
           [
             {
               text: "Não",
-              onPress: () => { },
+              onPress: () => {},
               style: "cancel",
             },
             {
@@ -37,7 +38,7 @@ export default function App() {
           { cancelable: false }
         );
       }
-    } catch { }
+    } catch {}
   };
 
   const loadFont = async () => {
