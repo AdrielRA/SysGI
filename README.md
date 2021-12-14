@@ -67,4 +67,4 @@ Para as mensagens de commit, siga o [padrão](https://gist.github.com/crissilvae
 
 ## Observação
 
-Em data dessa última atualização, o aplicativo ainda não se encontra totalmente funcional no sistema iOS, contentando alguns erros em sua execução, estamos na procura de uma solução o mais breve possível.
+Em data dessa última atualização, o aplicativo se encontra totalmente funcional. Entretanto, muito em breve será necessária a atualização das bibliotecas utilizadas.
